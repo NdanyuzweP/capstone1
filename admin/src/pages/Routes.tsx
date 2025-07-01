@@ -135,22 +135,27 @@ export default function Routes() {
 
   if (loading && routes.length === 0) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="spinner"></div>
+      <div className="admin-page-container">
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="spinner mx-auto mb-4"></div>
+            <p className="text-muted">Loading routes...</p>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 bg-content p-4 min-h-screen">
+    <div className="admin-page-container">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <div className="section-title">Routes Management</div>
-          <div className="section-subtitle">Manage bus routes and their configurations</div>
+      <div className="admin-page-header">
+        <div className="admin-page-title-section">
+          <h1 className="admin-page-title">Routes Management</h1>
+          <p className="admin-page-subtitle">Manage bus routes and their configurations</p>
         </div>
         <button 
-          className="btn btn-primary text-base px-4 py-2 rounded-xl shadow-md"
+          className="admin-btn admin-btn-primary"
           onClick={() => {
             setSelectedRoute(null);
             setFormData({
@@ -168,9 +173,9 @@ export default function Routes() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="card">
-          <div className="card-body">
+      <div className="admin-grid admin-grid-4 admin-mb-6">
+        <div className="admin-card">
+          <div className="admin-card-body">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium" style={{ color: theme.textSecondary }}>
@@ -190,8 +195,8 @@ export default function Routes() {
           </div>
         </div>
 
-        <div className="card">
-          <div className="card-body">
+        <div className="admin-card">
+          <div className="admin-card-body">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium" style={{ color: theme.textSecondary }}>
@@ -211,8 +216,8 @@ export default function Routes() {
           </div>
         </div>
 
-        <div className="card">
-          <div className="card-body">
+        <div className="admin-card">
+          <div className="admin-card-body">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium" style={{ color: theme.textSecondary }}>
@@ -232,8 +237,8 @@ export default function Routes() {
           </div>
         </div>
 
-        <div className="card">
-          <div className="card-body">
+        <div className="admin-card">
+          <div className="admin-card-body">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium" style={{ color: theme.textSecondary }}>
@@ -258,67 +263,56 @@ export default function Routes() {
       </div>
 
       {/* Filters */}
-      <div className="card mb-6">
-        <div className="card-body">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div className="relative">
-              <Search 
-                size={16} 
-                className="absolute left-3 top-1/2 transform -translate-y-1/2"
-                style={{ color: theme.textSecondary }}
-              />
-              <input
-                type="text"
-                placeholder="Search routes..."
-                className="form-input pl-10"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                style={{
-                  backgroundColor: theme.background,
-                  borderColor: theme.border,
-                  color: theme.text,
-                }}
-              />
-            </div>
-            <button
-              onClick={fetchRoutes}
-              className="btn btn-outline text-xs px-3 py-1 rounded-lg"
-              disabled={loading}
-            >
-              {loading ? <div className="spinner" /> : <Filter size={14} />}
-              {loading ? 'Loading...' : 'Refresh'}
-            </button>
+      <div className="admin-filters">
+        <div className="admin-filters-grid">
+          <div className="admin-input-with-icon">
+            <Search size={16} className="admin-input-icon" />
+            <input
+              type="text"
+              placeholder="Search routes..."
+              className="admin-input"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
+          <button
+            onClick={fetchRoutes}
+            className="admin-btn admin-btn-secondary"
+            disabled={loading}
+          >
+            {loading ? <div className="spinner" /> : <Filter size={16} />}
+            {loading ? 'Loading...' : 'Refresh'}
+          </button>
         </div>
       </div>
 
       {/* Routes Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="admin-grid admin-grid-3">
         {error ? (
-          <div className="col-span-full flex items-center justify-center p-8">
-            <div className="text-center">
+          <div className="col-span-full flex items-center justify-center py-12">
+            <div className="text-center max-w-md">
               <AlertCircle size={48} style={{ color: theme.error }} className="mx-auto mb-4" />
-              <p style={{ color: theme.error }} className="text-lg font-semibold mb-2">
+              <h3 style={{ color: theme.error }} className="text-lg font-semibold mb-2">
                 Error Loading Routes
-              </p>
+              </h3>
               <p style={{ color: theme.textSecondary }} className="mb-4">
                 {error}
               </p>
               <button
                 onClick={fetchRoutes}
-                className="btn btn-primary"
+                className="admin-btn admin-btn-primary"
               >
-                Retry
+                Try Again
               </button>
             </div>
           </div>
         ) : filteredRoutes.length === 0 ? (
-          <div className="col-span-full flex items-center justify-center p-8">
+          <div className="col-span-full flex items-center justify-center py-12">
             <div className="text-center">
               <RouteIcon size={48} style={{ color: theme.textSecondary }} className="mx-auto mb-4" />
-              <p style={{ color: theme.text }} className="text-lg font-semibold mb-2">
+              <h3 style={{ color: theme.text }} className="text-lg font-semibold mb-2">
                 No Routes Found
-              </p>
+              </h3>
               <p style={{ color: theme.textSecondary }}>
                 {searchTerm 
                   ? 'Try adjusting your search' 
@@ -329,12 +323,12 @@ export default function Routes() {
           </div>
         ) : (
           filteredRoutes.map((route) => (
-            <div key={route._id} className="card">
-              <div className="card-body">
+            <div key={route._id} className="admin-card">
+              <div className="admin-card-body">
                 <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center">
+                  <div className="flex items-center gap-3">
                     <div 
-                      className="w-10 h-10 rounded-lg flex items-center justify-center mr-3"
+                      className="w-10 h-10 rounded-lg flex items-center justify-center"
                       style={{ backgroundColor: theme.primary + '20' }}
                     >
                       <RouteIcon size={20} style={{ color: theme.primary }} />
@@ -348,57 +342,57 @@ export default function Routes() {
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleEditRoute(route)}
-                      className="p-1 rounded hover:bg-opacity-10"
-                      style={{ color: theme.primary }}
+                      className="admin-btn admin-btn-secondary p-2"
+                      title="Edit Route"
                     >
-                      <Edit size={16} />
+                      <Edit size={14} />
                     </button>
                     <button
                       onClick={() => handleDeleteRoute(route)}
-                      className="p-1 rounded hover:bg-opacity-10"
-                      style={{ color: theme.error }}
+                      className="admin-btn admin-btn-danger p-2"
+                      title="Delete Route"
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={14} />
                     </button>
                   </div>
                 </div>
 
-                <div className="space-y-3">
+                <div className="admin-space-y-3">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <MapPin size={16} className="mr-2" style={{ color: theme.textSecondary }} />
+                    <div className="flex items-center gap-2">
+                      <MapPin size={14} style={{ color: theme.textSecondary }} />
                       <span className="text-sm" style={{ color: theme.textSecondary }}>
                         Pickup Points
                       </span>
                     </div>
-                    <span className="font-medium" style={{ color: theme.text }}>
+                    <span className="font-medium text-sm" style={{ color: theme.text }}>
                       {route.pickupPoints.length}
                     </span>
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <Clock size={16} className="mr-2" style={{ color: theme.textSecondary }} />
+                    <div className="flex items-center gap-2">
+                      <Clock size={14} style={{ color: theme.textSecondary }} />
                       <span className="text-sm" style={{ color: theme.textSecondary }}>
                         Duration
                       </span>
                     </div>
-                    <span className="font-medium" style={{ color: theme.text }}>
+                    <span className="font-medium text-sm" style={{ color: theme.text }}>
                       {route.estimatedDuration} min
                     </span>
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <DollarSign size={16} className="mr-2" style={{ color: theme.textSecondary }} />
+                    <div className="flex items-center gap-2">
+                      <DollarSign size={14} style={{ color: theme.textSecondary }} />
                       <span className="text-sm" style={{ color: theme.textSecondary }}>
                         Fare
                       </span>
                     </div>
-                    <span className="font-medium" style={{ color: theme.success }}>
+                    <span className="font-medium text-sm" style={{ color: theme.success }}>
                       {route.fare} RWF
                     </span>
                   </div>
@@ -407,9 +401,9 @@ export default function Routes() {
                     <span className="text-sm" style={{ color: theme.textSecondary }}>
                       Status
                     </span>
-                    <div className={`badge ${route.isActive ? 'badge-success' : 'badge-error'}`}>
+                    <span className={`admin-badge ${route.isActive ? 'admin-badge-success' : 'admin-badge-danger'}`}>
                       {route.isActive ? 'Active' : 'Inactive'}
-                    </div>
+                    </span>
                   </div>
                 </div>
               </div>
@@ -420,98 +414,81 @@ export default function Routes() {
 
       {/* Route Modal */}
       {showRouteModal && (
-        <div className="modal-overlay" onClick={() => setShowRouteModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="card-header">
-              <h3 className="text-lg font-semibold" style={{ color: theme.text }}>
-                {selectedRoute ? 'Edit Route' : 'Add New Route'}
-              </h3>
-            </div>
-            <form onSubmit={handleCreateRoute}>
-              <div className="card-body space-y-4">
-                <div className="form-group">
-                  <label className="form-label">Route Name *</label>
+        <div className="modal-overlay">
+          <div className="modal-content max-w-2xl">
+            <h2 className="text-xl font-bold mb-4" style={{ color: theme.text }}>
+              {selectedRoute ? 'Edit Route' : 'Add New Route'}
+            </h2>
+            <form onSubmit={handleCreateRoute} className="admin-space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: theme.text }}>
+                  Route Name
+                </label>
+                <input
+                  type="text"
+                  className="admin-input"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="e.g., Route 302"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: theme.text }}>
+                  Description
+                </label>
+                <textarea
+                  className="admin-input"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="e.g., Kimironko - Downtown/CBD"
+                  rows={3}
+                />
+              </div>
+
+              <div className="admin-grid admin-grid-2">
+                <div>
+                  <label className="block text-sm font-medium mb-1" style={{ color: theme.text }}>
+                    Duration (minutes)
+                  </label>
                   <input
-                    type="text"
-                    className="form-input"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="e.g., Route 302"
+                    type="number"
+                    className="admin-input"
+                    value={formData.estimatedDuration}
+                    onChange={(e) => setFormData({ ...formData, estimatedDuration: e.target.value })}
+                    placeholder="e.g., 45"
+                    min="1"
                     required
-                    style={{
-                      backgroundColor: theme.background,
-                      borderColor: theme.border,
-                      color: theme.text,
-                    }}
                   />
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">Description</label>
-                  <textarea
-                    className="form-textarea"
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="e.g., Kimironko - Downtown/CBD"
-                    rows={3}
-                    style={{
-                      backgroundColor: theme.background,
-                      borderColor: theme.border,
-                      color: theme.text,
-                    }}
+                <div>
+                  <label className="block text-sm font-medium mb-1" style={{ color: theme.text }}>
+                    Fare (RWF)
+                  </label>
+                  <input
+                    type="number"
+                    className="admin-input"
+                    value={formData.fare}
+                    onChange={(e) => setFormData({ ...formData, fare: e.target.value })}
+                    placeholder="e.g., 400"
+                    min="0"
                   />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="form-group">
-                    <label className="form-label">Duration (minutes) *</label>
-                    <input
-                      type="number"
-                      className="form-input"
-                      value={formData.estimatedDuration}
-                      onChange={(e) => setFormData({ ...formData, estimatedDuration: e.target.value })}
-                      placeholder="e.g., 45"
-                      min="1"
-                      required
-                      style={{
-                        backgroundColor: theme.background,
-                        borderColor: theme.border,
-                        color: theme.text,
-                      }}
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Fare (RWF)</label>
-                    <input
-                      type="number"
-                      className="form-input"
-                      value={formData.fare}
-                      onChange={(e) => setFormData({ ...formData, fare: e.target.value })}
-                      placeholder="e.g., 400"
-                      min="0"
-                      style={{
-                        backgroundColor: theme.background,
-                        borderColor: theme.border,
-                        color: theme.text,
-                      }}
-                    />
-                  </div>
                 </div>
               </div>
-              <div className="card-footer">
-                <div className="flex justify-end space-x-3">
-                  <button
-                    type="button"
-                    onClick={() => setShowRouteModal(false)}
-                    className="btn btn-ghost"
-                  >
-                    Cancel
-                  </button>
-                  <button type="submit" className="btn btn-primary">
-                    {selectedRoute ? 'Update Route' : 'Create Route'}
-                  </button>
-                </div>
+
+              <div className="flex items-center gap-3 pt-4">
+                <button type="submit" className="admin-btn admin-btn-primary flex-1">
+                  {selectedRoute ? 'Update Route' : 'Create Route'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowRouteModal(false)}
+                  className="admin-btn admin-btn-secondary flex-1"
+                >
+                  Cancel
+                </button>
               </div>
             </form>
           </div>

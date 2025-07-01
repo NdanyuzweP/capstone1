@@ -99,28 +99,31 @@ export default function Analytics() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="spinner"></div>
+      <div className="admin-page-container">
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="spinner mx-auto mb-4"></div>
+            <p className="text-muted">Loading analytics...</p>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="admin-page-container">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold" style={{ color: theme.text }}>
-          Analytics Dashboard
-        </h1>
-        <p style={{ color: theme.textSecondary }}>
-          Comprehensive insights into your bus tracking platform performance
-        </p>
+      <div className="admin-page-header">
+        <div className="admin-page-title-section">
+          <h1 className="admin-page-title">Analytics Dashboard</h1>
+          <p className="admin-page-subtitle">Comprehensive insights into your bus tracking platform performance</p>
+        </div>
       </div>
 
       {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="card">
-          <div className="card-body">
+      <div className="admin-grid admin-grid-4 admin-mb-6">
+        <div className="admin-card">
+          <div className="admin-card-body">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium" style={{ color: theme.textSecondary }}>
@@ -146,8 +149,8 @@ export default function Analytics() {
           </div>
         </div>
 
-        <div className="card">
-          <div className="card-body">
+        <div className="admin-card">
+          <div className="admin-card-body">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium" style={{ color: theme.textSecondary }}>
@@ -173,8 +176,8 @@ export default function Analytics() {
           </div>
         </div>
 
-        <div className="card">
-          <div className="card-body">
+        <div className="admin-card">
+          <div className="admin-card-body">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium" style={{ color: theme.textSecondary }}>
@@ -199,8 +202,8 @@ export default function Analytics() {
           </div>
         </div>
 
-        <div className="card">
-          <div className="card-body">
+        <div className="admin-card">
+          <div className="admin-card-body">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium" style={{ color: theme.textSecondary }}>
@@ -228,18 +231,14 @@ export default function Analytics() {
       </div>
 
       {/* Charts Row 1 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="admin-grid admin-grid-2 admin-mb-6">
         {/* Monthly Growth */}
-        <div className="card">
-          <div className="card-header">
-            <h3 className="text-lg font-semibold" style={{ color: theme.text }}>
-              Monthly Growth
-            </h3>
-            <p style={{ color: theme.textSecondary }}>
-              Users, trips, and revenue trends
-            </p>
+        <div className="admin-card">
+          <div className="admin-card-header">
+            <h3 className="admin-card-title">Monthly Growth</h3>
+            <p className="admin-card-subtitle">Users, trips, and revenue trends</p>
           </div>
-          <div className="card-body">
+          <div className="admin-card-body">
             <ResponsiveContainer width="100%" height={300}>
               <AreaChart data={monthlyData}>
                 <CartesianGrid strokeDasharray="3 3" stroke={theme.border} />
@@ -275,16 +274,12 @@ export default function Analytics() {
         </div>
 
         {/* Bus Utilization */}
-        <div className="card">
-          <div className="card-header">
-            <h3 className="text-lg font-semibold" style={{ color: theme.text }}>
-              Bus Utilization
-            </h3>
-            <p style={{ color: theme.textSecondary }}>
-              Fleet utilization breakdown
-            </p>
+        <div className="admin-card">
+          <div className="admin-card-header">
+            <h3 className="admin-card-title">Bus Utilization</h3>
+            <p className="admin-card-subtitle">Fleet utilization breakdown</p>
           </div>
-          <div className="card-body">
+          <div className="admin-card-body">
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
@@ -328,18 +323,14 @@ export default function Analytics() {
       </div>
 
       {/* Charts Row 2 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="admin-grid admin-grid-2">
         {/* Route Performance */}
-        <div className="card">
-          <div className="card-header">
-            <h3 className="text-lg font-semibold" style={{ color: theme.text }}>
-              Route Performance
-            </h3>
-            <p style={{ color: theme.textSecondary }}>
-              Top performing routes by revenue
-            </p>
+        <div className="admin-card">
+          <div className="admin-card-header">
+            <h3 className="admin-card-title">Route Performance</h3>
+            <p className="admin-card-subtitle">Top performing routes by revenue</p>
           </div>
-          <div className="card-body">
+          <div className="admin-card-body">
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={routePerformance} layout="horizontal">
                 <CartesianGrid strokeDasharray="3 3" stroke={theme.border} />
@@ -352,28 +343,20 @@ export default function Analytics() {
                     borderRadius: '8px',
                     color: theme.text,
                   }}
-                  formatter={(value, name) => [
-                    name === 'revenue' ? `${value.toLocaleString()} RWF` : value,
-                    name === 'revenue' ? 'Revenue' : name === 'trips' ? 'Trips' : 'Passengers'
-                  ]}
                 />
-                <Bar dataKey="revenue" fill={theme.primary} name="revenue" />
+                <Bar dataKey="revenue" fill={theme.primary} radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Peak Hours */}
-        <div className="card">
-          <div className="card-header">
-            <h3 className="text-lg font-semibold" style={{ color: theme.text }}>
-              Peak Hours Analysis
-            </h3>
-            <p style={{ color: theme.textSecondary }}>
-              Trip distribution throughout the day
-            </p>
+        {/* Time Distribution */}
+        <div className="admin-card">
+          <div className="admin-card-header">
+            <h3 className="admin-card-title">Trip Time Distribution</h3>
+            <p className="admin-card-subtitle">Peak hours analysis</p>
           </div>
-          <div className="card-body">
+          <div className="admin-card-body">
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={timeDistribution}>
                 <CartesianGrid strokeDasharray="3 3" stroke={theme.border} />
@@ -393,127 +376,10 @@ export default function Analytics() {
                   stroke={theme.warning} 
                   strokeWidth={3}
                   dot={{ fill: theme.warning, strokeWidth: 2, r: 4 }}
-                  name="Trips"
+                  activeDot={{ r: 6, stroke: theme.warning, strokeWidth: 2 }}
                 />
               </LineChart>
             </ResponsiveContainer>
-          </div>
-        </div>
-      </div>
-
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="card">
-          <div className="card-header">
-            <h3 className="text-lg font-semibold" style={{ color: theme.text }}>
-              Platform Overview
-            </h3>
-          </div>
-          <div className="card-body space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <Bus size={16} className="mr-2" style={{ color: theme.primary }} />
-                <span style={{ color: theme.textSecondary }}>Total Buses</span>
-              </div>
-              <span className="font-semibold" style={{ color: theme.text }}>
-                {stats?.buses || 0}
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <Navigation size={16} className="mr-2" style={{ color: theme.secondary }} />
-                <span style={{ color: theme.textSecondary }}>Active Routes</span>
-              </div>
-              <span className="font-semibold" style={{ color: theme.text }}>
-                {stats?.routes || 0}
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <MapPin size={16} className="mr-2" style={{ color: theme.warning }} />
-                <span style={{ color: theme.textSecondary }}>Pickup Points</span>
-              </div>
-              <span className="font-semibold" style={{ color: theme.text }}>
-                {stats?.pickupPoints || 0}
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <Calendar size={16} className="mr-2" style={{ color: theme.success }} />
-                <span style={{ color: theme.textSecondary }}>Total Schedules</span>
-              </div>
-              <span className="font-semibold" style={{ color: theme.text }}>
-                {stats?.schedules || 0}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="card">
-          <div className="card-header">
-            <h3 className="text-lg font-semibold" style={{ color: theme.text }}>
-              User Engagement
-            </h3>
-          </div>
-          <div className="card-body space-y-4">
-            <div className="flex items-center justify-between">
-              <span style={{ color: theme.textSecondary }}>Total Users</span>
-              <span className="font-semibold" style={{ color: theme.text }}>
-                {userStats?.totalUsers || 0}
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span style={{ color: theme.textSecondary }}>Active Users</span>
-              <span className="font-semibold" style={{ color: theme.success }}>
-                {userStats?.activeUsers || 0}
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span style={{ color: theme.textSecondary }}>User Interests</span>
-              <span className="font-semibold" style={{ color: theme.primary }}>
-                {stats?.userInterests || 0}
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span style={{ color: theme.textSecondary }}>Engagement Rate</span>
-              <span className="font-semibold" style={{ color: theme.warning }}>
-                73.2%
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="card">
-          <div className="card-header">
-            <h3 className="text-lg font-semibold" style={{ color: theme.text }}>
-              Performance Metrics
-            </h3>
-          </div>
-          <div className="card-body space-y-4">
-            <div className="flex items-center justify-between">
-              <span style={{ color: theme.textSecondary }}>On-time Performance</span>
-              <span className="font-semibold" style={{ color: theme.success }}>
-                87.3%
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span style={{ color: theme.textSecondary }}>Fleet Utilization</span>
-              <span className="font-semibold" style={{ color: theme.primary }}>
-                78.5%
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span style={{ color: theme.textSecondary }}>Avg Load Factor</span>
-              <span className="font-semibold" style={{ color: theme.warning }}>
-                65.2%
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span style={{ color: theme.textSecondary }}>Revenue per Trip</span>
-              <span className="font-semibold" style={{ color: theme.success }}>
-                556 RWF
-              </span>
-            </div>
           </div>
         </div>
       </div>

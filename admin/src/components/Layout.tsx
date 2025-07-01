@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { useTheme } from '../contexts/ThemeContext';
 import {
   LayoutDashboard,
   Users,
@@ -15,10 +14,6 @@ import {
   LogOut,
   Menu,
   X,
-  Moon,
-  Sun,
-  Bell,
-  Search,
 } from 'lucide-react';
 
 const navigation = [
@@ -35,7 +30,6 @@ const navigation = [
 
 export default function Layout() {
   const { user, logout } = useAuth();
-  const { theme, isDark, toggleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -52,9 +46,6 @@ export default function Layout() {
         {/* Logo */}
         <div className="flex items-center justify-between h-16 px-6 border-b border-light">
           <div className="flex items-center">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center mr-3 bg-primary shadow">
-              <Bus size={20} color="white" />
-            </div>
             <h1 className="text-2xl font-bold text-primary tracking-tight">Ridra Admin</h1>
           </div>
         </div>
@@ -104,9 +95,6 @@ export default function Layout() {
             {/* Logo */}
             <div className="flex items-center justify-between h-16 px-6 border-b border-light">
               <div className="flex items-center">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center mr-3 bg-primary shadow">
-                  <Bus size={20} color="white" />
-                </div>
                 <h1 className="text-2xl font-bold text-primary tracking-tight">Ridra Admin</h1>
               </div>
               <button onClick={() => setSidebarOpen(false)} className="p-1 text-muted">
@@ -157,33 +145,16 @@ export default function Layout() {
       {/* Main content area */}
       <div className="flex-1 flex flex-col min-h-screen lg:ml-64">
         {/* Topbar */}
-        <header className="h-14 flex items-center justify-between px-8 bg-white border-b border-light shadow sticky top-0 z-30">
+        <header className="h-16 flex items-center px-8 bg-white border-b border-light shadow-sm sticky top-0 z-30">
           <div className="flex items-center gap-4">
-            <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 rounded-lg text-muted hover:bg-primary/10">
-              <Menu size={22} />
+            <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2.5 rounded-xl text-muted hover:bg-primary/10 hover:text-primary transition-all duration-200">
+              <Menu size={20} />
             </button>
-            <div className="relative">
-              <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted" />
-              <input type="text" placeholder="Search..." className="pl-10 pr-4 py-2 rounded-full border border-light focus:ring-2 focus:ring-primary focus:outline-none bg-surface text-base min-w-[260px] shadow-sm" />
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <button onClick={toggleTheme} className="p-2 rounded-lg bg-surface border border-light text-muted hover:bg-primary/10">
-              {isDark ? <Sun size={20} /> : <Moon size={20} />}
-            </button>
-            <button className="p-2 rounded-lg bg-surface border border-light text-muted hover:bg-primary/10">
-              <Bell size={20} />
-            </button>
-            <div className="w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center font-semibold shadow text-lg">
-              {user?.name?.charAt(0) || 'A'}
-            </div>
           </div>
         </header>
         {/* Main content */}
-        <main className="p-8 md:p-12 fade-in">
-          <div className="card shadow-lg p-8 md:p-12 bg-white rounded-2xl min-h-[80vh] space-y-8">
-            <Outlet />
-          </div>
+        <main className="flex-1 fade-in">
+          <Outlet />
         </main>
       </div>
     </div>

@@ -134,28 +134,31 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="spinner"></div>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center">
+          <div className="spinner mx-auto mb-4"></div>
+          <p className="text-muted">Loading dashboard...</p>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <AlertCircle size={48} style={{ color: theme.error }} className="mx-auto mb-4" />
-          <p style={{ color: theme.error }} className="text-lg font-semibold mb-2">
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center max-w-md">
+          <AlertCircle size={64} style={{ color: theme.error }} className="mx-auto mb-6" />
+          <h3 style={{ color: theme.error }} className="text-xl font-semibold mb-3">
             Error Loading Dashboard
-          </p>
-          <p style={{ color: theme.textSecondary }} className="mb-4">
+          </h3>
+          <p style={{ color: theme.textSecondary }} className="mb-6 text-base leading-relaxed">
             {error}
           </p>
           <button
             onClick={fetchDashboardData}
-            className="btn btn-primary"
+            className="btn btn-primary px-6 py-3"
           >
-            Retry
+            Try Again
           </button>
         </div>
       </div>
@@ -163,35 +166,37 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-6 bg-content p-4 min-h-screen">
-      {/* Header */}
-      <div className="mb-4">
-        <div className="section-title">Dashboard Overview</div>
-        <div className="section-subtitle">Welcome to your Ridra admin dashboard. Here's what's happening today.</div>
+    <div className="dashboard-container">
+      {/* Header Section */}
+      <div className="dashboard-header">
+        <div className="dashboard-title">Dashboard Overview</div>
+        <div className="dashboard-subtitle">
+          Welcome to your Ridra admin dashboard. Here's what's happening today.
+        </div>
       </div>
 
       {/* Stats Grid */}
-      <div className="stats-row">
+      <div className="dashboard-stats-grid">
         {statCards.map((stat, index) => {
           const Icon = stat.icon;
           return (
-            <div key={index} className="card card-compact fade-in">
-              <div className="card-body flex items-center gap-3">
-                <div>
-                  <div className="text-xs text-muted font-medium">{stat.title}</div>
-                  <div className="text-lg font-bold mt-0.5">{stat.value.toLocaleString()}</div>
-                  <div className="flex items-center mt-1">
-                    <span className={`text-xs font-medium ${
-                      stat.changeType === 'positive' ? 'text-success' : 
-                      stat.changeType === 'neutral' ? 'text-muted' : 'text-error'
-                    }`}>{stat.change}</span>
-                    <span className="text-xs ml-1" style={{ color: theme.textSecondary }}>
-                      from last week
+            <div key={index} className="dashboard-stat-card fade-in">
+              <div className="dashboard-stat-content">
+                <div className="dashboard-stat-info">
+                  <div className="dashboard-stat-label">{stat.title}</div>
+                  <div className="dashboard-stat-value">{stat.value.toLocaleString()}</div>
+                  <div className="dashboard-stat-change">
+                    <span className={`dashboard-stat-percentage ${
+                      stat.changeType === 'positive' ? 'positive' : 
+                      stat.changeType === 'neutral' ? 'neutral' : 'negative'
+                    }`}>
+                      {stat.change}
                     </span>
+                    <span className="dashboard-stat-period">from last week</span>
                   </div>
                 </div>
-                <div className="stats-icon-sm" style={{ backgroundColor: stat.color + '15' }}>
-                  <Icon size={18} style={{ color: stat.color }} />
+                <div className="dashboard-stat-icon" style={{ backgroundColor: stat.color + '15' }}>
+                  <Icon size={20} style={{ color: stat.color }} />
                 </div>
               </div>
             </div>
@@ -199,21 +204,21 @@ export default function Dashboard() {
         })}
       </div>
 
-      {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Charts Section */}
+      <div className="dashboard-charts-grid">
         {/* Weekly Activity Chart */}
-        <div className="card">
-          <div className="card-header">
-            <h3 className="text-lg font-semibold" style={{ color: theme.text }}>
+        <div className="dashboard-chart-card">
+          <div className="dashboard-chart-header">
+            <h3 className="dashboard-chart-title" style={{ color: theme.text }}>
               Weekly Activity
             </h3>
-            <p style={{ color: theme.textSecondary }}>
+            <p className="dashboard-chart-subtitle" style={{ color: theme.textSecondary }}>
               User activity and trips over the past week
             </p>
           </div>
-          <div className="card-body">
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={weeklyData}>
+          <div className="dashboard-chart-body">
+            <ResponsiveContainer width="100%" height={320}>
+              <BarChart data={weeklyData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={theme.border} />
                 <XAxis dataKey="name" stroke={theme.textSecondary} />
                 <YAxis stroke={theme.textSecondary} />
@@ -221,36 +226,37 @@ export default function Dashboard() {
                   contentStyle={{
                     backgroundColor: theme.surface,
                     border: `1px solid ${theme.border}`,
-                    borderRadius: '8px',
+                    borderRadius: '12px',
                     color: theme.text,
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
                   }}
                 />
-                <Bar dataKey="users" fill={theme.primary} name="Users" />
-                <Bar dataKey="trips" fill={theme.success} name="Trips" />
+                <Bar dataKey="users" fill={theme.primary} name="Users" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="trips" fill={theme.success} name="Trips" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* User Distribution Chart */}
-        <div className="card">
-          <div className="card-header">
-            <h3 className="text-lg font-semibold" style={{ color: theme.text }}>
+        <div className="dashboard-chart-card">
+          <div className="dashboard-chart-header">
+            <h3 className="dashboard-chart-title" style={{ color: theme.text }}>
               User Distribution
             </h3>
-            <p style={{ color: theme.textSecondary }}>
+            <p className="dashboard-chart-subtitle" style={{ color: theme.textSecondary }}>
               Breakdown of users by role and status
             </p>
           </div>
-          <div className="card-body">
-            <ResponsiveContainer width="100%" height={300}>
+          <div className="dashboard-chart-body">
+            <ResponsiveContainer width="100%" height={320}>
               <PieChart>
                 <Pie
                   data={userDistribution}
                   cx="50%"
                   cy="50%"
-                  innerRadius={60}
-                  outerRadius={100}
+                  innerRadius={70}
+                  outerRadius={120}
                   paddingAngle={5}
                   dataKey="value"
                 >
@@ -262,21 +268,22 @@ export default function Dashboard() {
                   contentStyle={{
                     backgroundColor: theme.surface,
                     border: `1px solid ${theme.border}`,
-                    borderRadius: '8px',
+                    borderRadius: '12px',
                     color: theme.text,
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
                   }}
                 />
               </PieChart>
             </ResponsiveContainer>
-            <div className="mt-4 grid grid-cols-2 gap-4">
+            <div className="dashboard-legend">
               {userDistribution.map((item, index) => (
-                <div key={index} className="flex items-center">
+                <div key={index} className="dashboard-legend-item">
                   <div 
-                    className="w-3 h-3 rounded-full mr-2"
+                    className="dashboard-legend-color"
                     style={{ backgroundColor: item.color }}
                   />
-                  <span className="text-sm" style={{ color: theme.textSecondary }}>
-                    {item.name}: {item.value}
+                  <span className="dashboard-legend-text" style={{ color: theme.textSecondary }}>
+                    {item.name}: <strong>{item.value}</strong>
                   </span>
                 </div>
               ))}
@@ -285,18 +292,18 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Recent Activity */}
-      <div className="card">
-        <div className="card-header">
-          <h3 className="text-lg font-semibold" style={{ color: theme.text }}>
+      {/* Recent Activity Section */}
+      <div className="dashboard-activity-card">
+        <div className="dashboard-activity-header">
+          <h3 className="dashboard-activity-title" style={{ color: theme.text }}>
             Recent Activity
           </h3>
-          <p style={{ color: theme.textSecondary }}>
+          <p className="dashboard-activity-subtitle" style={{ color: theme.textSecondary }}>
             Latest system activities and updates
           </p>
         </div>
-        <div className="card-body">
-          <div className="space-y-4">
+        <div className="dashboard-activity-body">
+          <div className="dashboard-activity-list">
             {[
               { icon: Users, text: 'New user registered: John Doe', time: '2 minutes ago', type: 'user' },
               { icon: Bus, text: 'Bus RAD 123 A went online', time: '5 minutes ago', type: 'bus' },
@@ -306,18 +313,18 @@ export default function Dashboard() {
             ].map((activity, index) => {
               const Icon = activity.icon;
               return (
-                <div key={index} className="flex items-center p-3 rounded-lg" style={{ backgroundColor: theme.surface }}>
+                <div key={index} className="dashboard-activity-item" style={{ backgroundColor: theme.surface }}>
                   <div 
-                    className="w-8 h-8 rounded-full flex items-center justify-center mr-3"
+                    className="dashboard-activity-icon"
                     style={{ backgroundColor: theme.primary + '20' }}
                   >
                     <Icon size={16} style={{ color: theme.primary }} />
                   </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium" style={{ color: theme.text }}>
+                  <div className="dashboard-activity-content">
+                    <p className="dashboard-activity-text" style={{ color: theme.text }}>
                       {activity.text}
                     </p>
-                    <p className="text-xs" style={{ color: theme.textSecondary }}>
+                    <p className="dashboard-activity-time" style={{ color: theme.textSecondary }}>
                       {activity.time}
                     </p>
                   </div>

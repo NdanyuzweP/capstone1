@@ -164,22 +164,27 @@ export default function PickupPoints() {
 
   if (loading && pickupPoints.length === 0) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="spinner"></div>
+      <div className="admin-page-container">
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="spinner mx-auto mb-4"></div>
+            <p className="text-muted">Loading pickup points...</p>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 bg-content p-4 min-h-screen">
+    <div className="admin-page-container">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <div className="section-title">Pickup Points Management</div>
-          <div className="section-subtitle">Manage pickup points along bus routes</div>
+      <div className="admin-page-header">
+        <div className="admin-page-title-section">
+          <h1 className="admin-page-title">Pickup Points Management</h1>
+          <p className="admin-page-subtitle">Manage pickup points along bus routes</p>
         </div>
         <button 
-          className="btn btn-primary text-base px-4 py-2 rounded-xl shadow-md"
+          className="admin-btn admin-btn-primary"
           onClick={() => {
             setSelectedPickup(null);
             setFormData({
@@ -199,9 +204,9 @@ export default function PickupPoints() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="card">
-          <div className="card-body">
+      <div className="admin-grid admin-grid-4 admin-mb-6">
+        <div className="admin-card">
+          <div className="admin-card-body">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium" style={{ color: theme.textSecondary }}>
@@ -221,8 +226,8 @@ export default function PickupPoints() {
           </div>
         </div>
 
-        <div className="card">
-          <div className="card-body">
+        <div className="admin-card">
+          <div className="admin-card-body">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium" style={{ color: theme.textSecondary }}>
@@ -242,8 +247,8 @@ export default function PickupPoints() {
           </div>
         </div>
 
-        <div className="card">
-          <div className="card-body">
+        <div className="admin-card">
+          <div className="admin-card-body">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium" style={{ color: theme.textSecondary }}>
@@ -263,8 +268,8 @@ export default function PickupPoints() {
           </div>
         </div>
 
-        <div className="card">
-          <div className="card-body">
+        <div className="admin-card">
+          <div className="admin-card-body">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium" style={{ color: theme.textSecondary }}>
@@ -289,90 +294,75 @@ export default function PickupPoints() {
       </div>
 
       {/* Filters */}
-      <div className="card mb-6">
-        <div className="card-body">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div className="relative">
-              <Search 
-                size={16} 
-                className="absolute left-3 top-1/2 transform -translate-y-1/2"
-                style={{ color: theme.textSecondary }}
-              />
-              <input
-                type="text"
-                placeholder="Search pickup points..."
-                className="form-input pl-10"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                style={{
-                  backgroundColor: theme.background,
-                  borderColor: theme.border,
-                  color: theme.text,
-                }}
-              />
-            </div>
-            <select
-              className="form-select"
-              value={routeFilter}
-              onChange={(e) => setRouteFilter(e.target.value)}
-              style={{
-                backgroundColor: theme.background,
-                borderColor: theme.border,
-                color: theme.text,
-              }}
-            >
-              <option value="">All Routes</option>
-              {routes.map((route) => (
-                <option key={route._id} value={route._id}>
-                  {route.name}
-                </option>
-              ))}
-            </select>
-            <button
-              onClick={fetchPickupPoints}
-              className="btn btn-outline text-xs px-3 py-1 rounded-lg"
-              disabled={loading}
-            >
-              {loading ? <div className="spinner" /> : <Filter size={14} />}
-              {loading ? 'Loading...' : 'Refresh'}
-            </button>
+      <div className="admin-filters">
+        <div className="admin-filters-grid">
+          <div className="admin-input-with-icon">
+            <Search size={16} className="admin-input-icon" />
+            <input
+              type="text"
+              placeholder="Search pickup points..."
+              className="admin-input"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
+          <select
+            className="admin-select"
+            value={routeFilter}
+            onChange={(e) => setRouteFilter(e.target.value)}
+          >
+            <option value="">All Routes</option>
+            {routes.map((route) => (
+              <option key={route._id} value={route._id}>
+                {route.name}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={fetchPickupPoints}
+            className="admin-btn admin-btn-secondary"
+            disabled={loading}
+          >
+            {loading ? <div className="spinner" /> : <Filter size={16} />}
+            {loading ? 'Loading...' : 'Refresh'}
+          </button>
         </div>
       </div>
 
       {/* Pickup Points Table */}
-      <div className="card">
-        <div className="card-header">
-          <h3 className="text-lg font-semibold" style={{ color: theme.text }}>
+      <div className="admin-card">
+        <div className="admin-card-header">
+          <h3 className="admin-card-title">
             Pickup Points ({filteredPickupPoints.length})
           </h3>
+          <p className="admin-card-subtitle">All pickup points along bus routes</p>
         </div>
-        <div className="card-body p-0">
+        <div className="admin-card-body">
           {error ? (
-            <div className="flex items-center justify-center p-8">
-              <div className="text-center">
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center max-w-md">
                 <AlertCircle size={48} style={{ color: theme.error }} className="mx-auto mb-4" />
-                <p style={{ color: theme.error }} className="text-lg font-semibold mb-2">
+                <h3 style={{ color: theme.error }} className="text-lg font-semibold mb-2">
                   Error Loading Pickup Points
-                </p>
+                </h3>
                 <p style={{ color: theme.textSecondary }} className="mb-4">
                   {error}
                 </p>
                 <button
                   onClick={fetchPickupPoints}
-                  className="btn btn-primary"
+                  className="admin-btn admin-btn-primary"
                 >
-                  Retry
+                  Try Again
                 </button>
               </div>
             </div>
           ) : filteredPickupPoints.length === 0 ? (
-            <div className="flex items-center justify-center p-8">
+            <div className="flex items-center justify-center py-12">
               <div className="text-center">
                 <MapPin size={48} style={{ color: theme.textSecondary }} className="mx-auto mb-4" />
-                <p style={{ color: theme.text }} className="text-lg font-semibold mb-2">
+                <h3 style={{ color: theme.text }} className="text-lg font-semibold mb-2">
                   No Pickup Points Found
-                </p>
+                </h3>
                 <p style={{ color: theme.textSecondary }}>
                   {searchTerm || routeFilter 
                     ? 'Try adjusting your filters' 
@@ -382,25 +372,25 @@ export default function PickupPoints() {
               </div>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="table">
+            <div className="admin-table-container">
+              <table className="admin-table">
                 <thead>
                   <tr>
-                    <th style={{ color: theme.textSecondary }}>Pickup Point</th>
-                    <th style={{ color: theme.textSecondary }}>Route</th>
-                    <th style={{ color: theme.textSecondary }}>Location</th>
-                    <th style={{ color: theme.textSecondary }}>Order</th>
-                    <th style={{ color: theme.textSecondary }}>Status</th>
-                    <th style={{ color: theme.textSecondary }}>Actions</th>
+                    <th>Pickup Point</th>
+                    <th>Route</th>
+                    <th>Location</th>
+                    <th>Order</th>
+                    <th>Status</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredPickupPoints.map((pickup) => (
                     <tr key={pickup._id}>
                       <td>
-                        <div className="flex items-center">
+                        <div className="flex items-center gap-3">
                           <div 
-                            className="w-10 h-10 rounded-lg flex items-center justify-center mr-3"
+                            className="w-10 h-10 rounded-lg flex items-center justify-center"
                             style={{ backgroundColor: theme.primary + '20' }}
                           >
                             <MapPin size={20} style={{ color: theme.primary }} />
@@ -409,21 +399,21 @@ export default function PickupPoints() {
                             <p className="font-medium" style={{ color: theme.text }}>
                               {pickup.name}
                             </p>
-                            <p className="text-sm" style={{ color: theme.textSecondary }}>
+                            <p className="text-xs" style={{ color: theme.textSecondary }}>
                               {pickup.description}
                             </p>
                           </div>
                         </div>
                       </td>
                       <td>
-                        <div className="flex items-center">
+                        <div className="flex items-center gap-2">
                           <div 
-                            className="w-8 h-8 rounded-lg flex items-center justify-center mr-3"
+                            className="w-8 h-8 rounded-lg flex items-center justify-center"
                             style={{ backgroundColor: theme.secondary + '20' }}
                           >
-                            <RouteIcon size={16} style={{ color: theme.secondary }} />
+                            <RouteIcon size={14} style={{ color: theme.secondary }} />
                           </div>
-                          <span style={{ color: theme.text }}>
+                          <span className="text-sm" style={{ color: theme.text }}>
                             {getRouteName(pickup.routeId)}
                           </span>
                         </div>
@@ -433,7 +423,7 @@ export default function PickupPoints() {
                           <p style={{ color: theme.text }}>
                             {pickup.latitude.toFixed(6)}, {pickup.longitude.toFixed(6)}
                           </p>
-                          <p style={{ color: theme.textSecondary }}>
+                          <p className="text-xs" style={{ color: theme.textSecondary }}>
                             Lat/Lng coordinates
                           </p>
                         </div>
@@ -450,25 +440,25 @@ export default function PickupPoints() {
                         </div>
                       </td>
                       <td>
-                        <div className={`badge ${pickup.isActive ? 'badge-success' : 'badge-error'}`}>
+                        <span className={`admin-badge ${pickup.isActive ? 'admin-badge-success' : 'admin-badge-danger'}`}>
                           {pickup.isActive ? 'Active' : 'Inactive'}
-                        </div>
+                        </span>
                       </td>
                       <td>
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center gap-2">
                           <button
                             onClick={() => handleEditPickupPoint(pickup)}
-                            className="p-1 rounded hover:bg-opacity-10"
-                            style={{ color: theme.primary }}
+                            className="admin-btn admin-btn-secondary p-2"
+                            title="Edit Pickup Point"
                           >
-                            <Edit size={16} />
+                            <Edit size={14} />
                           </button>
                           <button
                             onClick={() => handleDeletePickupPoint(pickup)}
-                            className="p-1 rounded hover:bg-opacity-10"
-                            style={{ color: theme.error }}
+                            className="admin-btn admin-btn-danger p-2"
+                            title="Delete Pickup Point"
                           >
-                            <Trash2 size={16} />
+                            <Trash2 size={14} />
                           </button>
                         </div>
                       </td>
@@ -483,141 +473,118 @@ export default function PickupPoints() {
 
       {/* Pickup Point Modal */}
       {showPickupModal && (
-        <div className="modal-overlay" onClick={() => setShowPickupModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="card-header">
-              <h3 className="text-lg font-semibold" style={{ color: theme.text }}>
-                {selectedPickup ? 'Edit Pickup Point' : 'Add New Pickup Point'}
-              </h3>
-            </div>
-            <form onSubmit={handleCreatePickupPoint}>
-              <div className="card-body space-y-4">
-                <div className="form-group">
-                  <label className="form-label">Name *</label>
+        <div className="modal-overlay">
+          <div className="modal-content max-w-2xl">
+            <h2 className="text-xl font-bold mb-4" style={{ color: theme.text }}>
+              {selectedPickup ? 'Edit Pickup Point' : 'Add New Pickup Point'}
+            </h2>
+            <form onSubmit={handleCreatePickupPoint} className="admin-space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: theme.text }}>
+                  Name
+                </label>
+                <input
+                  type="text"
+                  className="admin-input"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="e.g., Kimironko Market"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: theme.text }}>
+                  Description
+                </label>
+                <textarea
+                  className="admin-input"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Additional details about this pickup point"
+                  rows={3}
+                />
+              </div>
+
+              <div className="admin-grid admin-grid-2">
+                <div>
+                  <label className="block text-sm font-medium mb-1" style={{ color: theme.text }}>
+                    Latitude
+                  </label>
                   <input
-                    type="text"
-                    className="form-input"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="e.g., Kimironko Market"
+                    type="number"
+                    step="any"
+                    className="admin-input"
+                    value={formData.latitude}
+                    onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
+                    placeholder="e.g., -1.9441"
                     required
-                    style={{
-                      backgroundColor: theme.background,
-                      borderColor: theme.border,
-                      color: theme.text,
-                    }}
                   />
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">Description</label>
-                  <textarea
-                    className="form-textarea"
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Additional details about this pickup point"
-                    rows={3}
-                    style={{
-                      backgroundColor: theme.background,
-                      borderColor: theme.border,
-                      color: theme.text,
-                    }}
+                <div>
+                  <label className="block text-sm font-medium mb-1" style={{ color: theme.text }}>
+                    Longitude
+                  </label>
+                  <input
+                    type="number"
+                    step="any"
+                    className="admin-input"
+                    value={formData.longitude}
+                    onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
+                    placeholder="e.g., 30.1056"
+                    required
                   />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="form-group">
-                    <label className="form-label">Latitude *</label>
-                    <input
-                      type="number"
-                      step="any"
-                      className="form-input"
-                      value={formData.latitude}
-                      onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
-                      placeholder="e.g., -1.9441"
-                      required
-                      style={{
-                        backgroundColor: theme.background,
-                        borderColor: theme.border,
-                        color: theme.text,
-                      }}
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Longitude *</label>
-                    <input
-                      type="number"
-                      step="any"
-                      className="form-input"
-                      value={formData.longitude}
-                      onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
-                      placeholder="e.g., 30.1056"
-                      required
-                      style={{
-                        backgroundColor: theme.background,
-                        borderColor: theme.border,
-                        color: theme.text,
-                      }}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="form-group">
-                    <label className="form-label">Route *</label>
-                    <select
-                      className="form-select"
-                      value={formData.routeId}
-                      onChange={(e) => setFormData({ ...formData, routeId: e.target.value })}
-                      required
-                      style={{
-                        backgroundColor: theme.background,
-                        borderColor: theme.border,
-                        color: theme.text,
-                      }}
-                    >
-                      <option value="">Select a route</option>
-                      {routes.map((route) => (
-                        <option key={route._id} value={route._id}>
-                          {route.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Order *</label>
-                    <input
-                      type="number"
-                      className="form-input"
-                      value={formData.order}
-                      onChange={(e) => setFormData({ ...formData, order: e.target.value })}
-                      placeholder="e.g., 1"
-                      min="1"
-                      required
-                      style={{
-                        backgroundColor: theme.background,
-                        borderColor: theme.border,
-                        color: theme.text,
-                      }}
-                    />
-                  </div>
                 </div>
               </div>
-              <div className="card-footer">
-                <div className="flex justify-end space-x-3">
-                  <button
-                    type="button"
-                    onClick={() => setShowPickupModal(false)}
-                    className="btn btn-ghost"
+
+              <div className="admin-grid admin-grid-2">
+                <div>
+                  <label className="block text-sm font-medium mb-1" style={{ color: theme.text }}>
+                    Route
+                  </label>
+                  <select
+                    className="admin-select"
+                    value={formData.routeId}
+                    onChange={(e) => setFormData({ ...formData, routeId: e.target.value })}
+                    required
                   >
-                    Cancel
-                  </button>
-                  <button type="submit" className="btn btn-primary">
-                    {selectedPickup ? 'Update Pickup Point' : 'Create Pickup Point'}
-                  </button>
+                    <option value="">Select a route</option>
+                    {routes.map((route) => (
+                      <option key={route._id} value={route._id}>
+                        {route.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1" style={{ color: theme.text }}>
+                    Order
+                  </label>
+                  <input
+                    type="number"
+                    className="admin-input"
+                    value={formData.order}
+                    onChange={(e) => setFormData({ ...formData, order: e.target.value })}
+                    placeholder="e.g., 1"
+                    min="1"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 pt-4">
+                <button type="submit" className="admin-btn admin-btn-primary flex-1">
+                  {selectedPickup ? 'Update Pickup Point' : 'Create Pickup Point'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowPickupModal(false)}
+                  className="admin-btn admin-btn-secondary flex-1"
+                >
+                  Cancel
+                </button>
               </div>
             </form>
           </div>

@@ -124,133 +124,118 @@ export default function Users() {
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
       case 'admin':
-        return theme.error;
+        return 'admin-badge-danger';
       case 'driver':
-        return theme.warning;
+        return 'admin-badge-warning';
       default:
-        return theme.primary;
+        return 'admin-badge-primary';
     }
   };
 
   if (loading && users.length === 0) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="spinner"></div>
+      <div className="admin-page-container">
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="spinner mx-auto mb-4"></div>
+            <p className="text-muted">Loading users...</p>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 bg-content p-4 min-h-screen">
+    <div className="admin-page-container">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <div className="section-title">Users Management</div>
-          <div className="section-subtitle">Manage all users, drivers, and administrators</div>
+      <div className="admin-page-header">
+        <div className="admin-page-title-section">
+          <h1 className="admin-page-title">Users Management</h1>
+          <p className="admin-page-subtitle">Manage all users, drivers, and administrators</p>
         </div>
-        <button className="btn btn-primary text-base px-4 py-2 rounded-xl shadow-md">
+        <button className="admin-btn admin-btn-primary">
           <Plus size={18} />
           Add User
         </button>
       </div>
 
       {/* Filters */}
-      <div className="card mb-6">
-        <div className="card-body">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-            <div className="relative">
-              <Search 
-                size={16} 
-                className="absolute left-3 top-1/2 transform -translate-y-1/2"
-                style={{ color: theme.textSecondary }}
-              />
-              <input
-                type="text"
-                placeholder="Search users..."
-                className="form-input pl-10"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                style={{
-                  backgroundColor: theme.background,
-                  borderColor: theme.border,
-                  color: theme.text,
-                }}
-              />
-            </div>
-            <select
-              className="form-select"
-              value={roleFilter}
-              onChange={(e) => setRoleFilter(e.target.value)}
-              style={{
-                backgroundColor: theme.background,
-                borderColor: theme.border,
-                color: theme.text,
-              }}
-            >
-              <option value="">All Roles</option>
-              <option value="user">Users</option>
-              <option value="driver">Drivers</option>
-              <option value="admin">Admins</option>
-            </select>
-            <select
-              className="form-select"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              style={{
-                backgroundColor: theme.background,
-                borderColor: theme.border,
-                color: theme.text,
-              }}
-            >
-              <option value="">All Status</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
-            <button
-              onClick={fetchUsers}
-              className="btn btn-outline text-xs px-3 py-1 rounded-lg"
-              disabled={loading}
-            >
-              {loading ? <div className="spinner" /> : <Filter size={14} />}
-              {loading ? 'Loading...' : 'Refresh'}
-            </button>
+      <div className="admin-filters">
+        <div className="admin-filters-grid">
+          <div className="admin-input-with-icon">
+            <Search size={16} className="admin-input-icon" />
+            <input
+              type="text"
+              placeholder="Search users..."
+              className="admin-input"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
+          <select
+            className="admin-select"
+            value={roleFilter}
+            onChange={(e) => setRoleFilter(e.target.value)}
+          >
+            <option value="">All Roles</option>
+            <option value="user">Users</option>
+            <option value="driver">Drivers</option>
+            <option value="admin">Admins</option>
+          </select>
+          <select
+            className="admin-select"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <option value="">All Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+          <button
+            onClick={fetchUsers}
+            className="admin-btn admin-btn-secondary"
+            disabled={loading}
+          >
+            {loading ? <div className="spinner" /> : <Filter size={16} />}
+            {loading ? 'Loading...' : 'Refresh'}
+          </button>
         </div>
       </div>
 
       {/* Users Table */}
-      <div className="card">
-        <div className="card-header">
-          <h3 className="text-lg font-semibold" style={{ color: theme.text }}>
+      <div className="admin-card">
+        <div className="admin-card-header">
+          <h3 className="admin-card-title">
             Users ({pagination?.totalUsers || filteredUsers.length})
           </h3>
+          <p className="admin-card-subtitle">Complete list of all system users</p>
         </div>
-        <div className="card-body p-0">
+        <div className="admin-card-body">
           {error ? (
-            <div className="flex items-center justify-center p-8">
-              <div className="text-center">
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center max-w-md">
                 <AlertCircle size={48} style={{ color: theme.error }} className="mx-auto mb-4" />
-                <p style={{ color: theme.error }} className="text-lg font-semibold mb-2">
+                <h3 style={{ color: theme.error }} className="text-lg font-semibold mb-2">
                   Error Loading Users
-                </p>
+                </h3>
                 <p style={{ color: theme.textSecondary }} className="mb-4">
                   {error}
                 </p>
                 <button
                   onClick={fetchUsers}
-                  className="btn btn-primary"
+                  className="admin-btn admin-btn-primary"
                 >
-                  Retry
+                  Try Again
                 </button>
               </div>
             </div>
           ) : filteredUsers.length === 0 ? (
-            <div className="flex items-center justify-center p-8">
+            <div className="flex items-center justify-center py-12">
               <div className="text-center">
                 <UsersIcon size={48} style={{ color: theme.textSecondary }} className="mx-auto mb-4" />
-                <p style={{ color: theme.text }} className="text-lg font-semibold mb-2">
+                <h3 style={{ color: theme.text }} className="text-lg font-semibold mb-2">
                   No Users Found
-                </p>
+                </h3>
                 <p style={{ color: theme.textSecondary }}>
                   {searchTerm || roleFilter || statusFilter 
                     ? 'Try adjusting your filters' 
@@ -260,28 +245,28 @@ export default function Users() {
               </div>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="table">
+            <div className="admin-table-container">
+              <table className="admin-table">
                 <thead>
                   <tr>
-                    <th style={{ color: theme.textSecondary }}>User</th>
-                    <th style={{ color: theme.textSecondary }}>Contact</th>
-                    <th style={{ color: theme.textSecondary }}>Role</th>
-                    <th style={{ color: theme.textSecondary }}>Status</th>
-                    <th style={{ color: theme.textSecondary }}>Joined</th>
-                    <th style={{ color: theme.textSecondary }}>Actions</th>
+                    <th>User</th>
+                    <th>Contact</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Joined</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredUsers.map((user) => (
                     <tr key={user._id}>
                       <td>
-                        <div className="flex items-center">
+                        <div className="flex items-center gap-3">
                           <div 
-                            className="w-10 h-10 rounded-full flex items-center justify-center mr-3"
+                            className="w-10 h-10 rounded-full flex items-center justify-center"
                             style={{ backgroundColor: theme.primary + '20' }}
                           >
-                            <span className="font-semibold" style={{ color: theme.primary }}>
+                            <span className="font-semibold text-sm" style={{ color: theme.primary }}>
                               {user.name.charAt(0).toUpperCase()}
                             </span>
                           </div>
@@ -289,7 +274,7 @@ export default function Users() {
                             <p className="font-medium" style={{ color: theme.text }}>
                               {user.name}
                             </p>
-                            <p className="text-sm" style={{ color: theme.textSecondary }}>
+                            <p className="text-xs" style={{ color: theme.textSecondary }}>
                               ID: {user._id.slice(-8)}
                             </p>
                           </div>
@@ -297,35 +282,29 @@ export default function Users() {
                       </td>
                       <td>
                         <div className="space-y-1">
-                          <div className="flex items-center text-sm">
-                            <Mail size={14} className="mr-2" style={{ color: theme.textSecondary }} />
-                            <span style={{ color: theme.text }}>{user.email}</span>
+                          <div className="flex items-center gap-2">
+                            <Mail size={14} style={{ color: theme.textSecondary }} />
+                            <span className="text-sm" style={{ color: theme.text }}>
+                              {user.email}
+                            </span>
                           </div>
-                          <div className="flex items-center text-sm">
-                            <Phone size={14} className="mr-2" style={{ color: theme.textSecondary }} />
-                            <span style={{ color: theme.text }}>{user.phone}</span>
+                          <div className="flex items-center gap-2">
+                            <Phone size={14} style={{ color: theme.textSecondary }} />
+                            <span className="text-sm" style={{ color: theme.text }}>
+                              {user.phone}
+                            </span>
                           </div>
                         </div>
                       </td>
                       <td>
-                        <select
-                          value={user.role}
-                          onChange={(e) => handleRoleChange(user, e.target.value)}
-                          className="text-xs px-2 py-1 rounded border-0"
-                          style={{
-                            backgroundColor: getRoleBadgeColor(user.role) + '20',
-                            color: getRoleBadgeColor(user.role),
-                          }}
-                        >
-                          <option value="user">User</option>
-                          <option value="driver">Driver</option>
-                          <option value="admin">Admin</option>
-                        </select>
+                        <span className={`admin-badge ${getRoleBadgeColor(user.role)}`}>
+                          {user.role}
+                        </span>
                       </td>
                       <td>
                         <button
                           onClick={() => handleStatusToggle(user)}
-                          className={`badge ${user.isActive ? 'badge-success' : 'badge-error'}`}
+                          className={`admin-badge ${user.isActive ? 'admin-badge-success' : 'admin-badge-danger'}`}
                         >
                           {user.isActive ? (
                             <>
@@ -341,31 +320,28 @@ export default function Users() {
                         </button>
                       </td>
                       <td>
-                        <div className="flex items-center text-sm">
-                          <Calendar size={14} className="mr-2" style={{ color: theme.textSecondary }} />
-                          <span style={{ color: theme.text }}>
+                        <div className="flex items-center gap-2">
+                          <Calendar size={14} style={{ color: theme.textSecondary }} />
+                          <span className="text-sm" style={{ color: theme.text }}>
                             {new Date(user.createdAt).toLocaleDateString()}
                           </span>
                         </div>
                       </td>
                       <td>
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center gap-2">
                           <button
-                            onClick={() => {
-                              setSelectedUser(user);
-                              setShowUserModal(true);
-                            }}
-                            className="p-1 rounded hover:bg-opacity-10"
-                            style={{ color: theme.primary }}
+                            onClick={() => handleStatusToggle(user)}
+                            className="admin-btn admin-btn-secondary p-2"
+                            title={user.isActive ? 'Deactivate' : 'Activate'}
                           >
-                            <Edit size={16} />
+                            {user.isActive ? <UserX size={14} /> : <UserCheck size={14} />}
                           </button>
                           <button
                             onClick={() => handleDeleteUser(user)}
-                            className="p-1 rounded hover:bg-opacity-10"
-                            style={{ color: theme.error }}
+                            className="admin-btn admin-btn-danger p-2"
+                            title="Delete User"
                           >
-                            <Trash2 size={16} />
+                            <Trash2 size={14} />
                           </button>
                         </div>
                       </td>
@@ -376,37 +352,40 @@ export default function Users() {
             </div>
           )}
         </div>
-        
-        {/* Pagination */}
-        {pagination && pagination.totalPages > 1 && (
-          <div className="card-footer">
+      </div>
+
+      {/* Pagination */}
+      {pagination && pagination.totalPages > 1 && (
+        <div className="admin-card">
+          <div className="admin-card-body">
             <div className="flex items-center justify-between">
               <p className="text-sm" style={{ color: theme.textSecondary }}>
-                Showing {((pagination.currentPage - 1) * 10) + 1} to {Math.min(pagination.currentPage * 10, pagination.totalUsers)} of {pagination.totalUsers} users
+                Showing page {pagination.currentPage} of {pagination.totalPages} 
+                ({pagination.totalUsers} total users)
               </p>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center gap-2">
                 <button
                   onClick={() => setCurrentPage(currentPage - 1)}
                   disabled={!pagination.hasPrev}
-                  className="btn btn-outline btn-sm"
+                  className="admin-btn admin-btn-secondary"
                 >
                   Previous
                 </button>
-                <span className="px-3 py-1 text-sm" style={{ color: theme.text }}>
-                  Page {pagination.currentPage} of {pagination.totalPages}
+                <span className="text-sm font-medium px-3 py-1">
+                  {currentPage}
                 </span>
                 <button
                   onClick={() => setCurrentPage(currentPage + 1)}
                   disabled={!pagination.hasNext}
-                  className="btn btn-outline btn-sm"
+                  className="admin-btn admin-btn-secondary"
                 >
                   Next
                 </button>
               </div>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

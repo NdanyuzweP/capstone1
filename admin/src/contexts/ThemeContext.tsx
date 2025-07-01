@@ -23,7 +23,7 @@ const lightTheme: Theme = {
   border: '#e9ecef',
   success: '#28a745',
   warning: '#ffc107',
-  error: '#dc3545',
+  error: '#e74c3c',
 };
 
 const darkTheme: Theme = {
@@ -36,7 +36,7 @@ const darkTheme: Theme = {
   border: '#404040',
   success: '#28a745',
   warning: '#ffc107',
-  error: '#dc3545',
+  error: '#e74c3c',
 };
 
 interface ThemeContextType {
@@ -80,6 +80,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // Apply theme to document root
   useEffect(() => {
     const root = document.documentElement;
+    
+    // Set data-theme attribute for CSS selectors
+    root.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    
+    // Set CSS custom properties
     root.style.setProperty('--color-primary', theme.primary);
     root.style.setProperty('--color-secondary', theme.secondary);
     root.style.setProperty('--color-background', theme.background);
@@ -91,9 +96,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     root.style.setProperty('--color-warning', theme.warning);
     root.style.setProperty('--color-error', theme.error);
     
+    // Apply to body
     document.body.style.backgroundColor = theme.background;
     document.body.style.color = theme.text;
-  }, [theme]);
+  }, [theme, isDark]);
 
   return (
     <ThemeContext.Provider value={{ theme, isDark, toggleTheme }}>

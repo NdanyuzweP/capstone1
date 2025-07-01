@@ -2,7 +2,7 @@ class ApiService {
   private baseURL: string;
 
   constructor() {
-    this.baseURL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+    this.baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
     console.log('Admin API Service initialized with URL:', this.baseURL);
   }
 

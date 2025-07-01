@@ -13,7 +13,11 @@ import {
   Mail,
   Phone,
   Save,
-  RefreshCw
+  RefreshCw,
+  AlertCircle,
+  CheckCircle,
+  Key,
+  Server
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -79,416 +83,467 @@ export default function Settings() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="admin-page-container">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold" style={{ color: theme.text }}>
-          Settings
-        </h1>
-        <p style={{ color: theme.textSecondary }}>
-          Manage your account and system preferences
-        </p>
+      <div className="admin-page-header">
+        <div className="admin-page-title-section">
+          <h1 className="admin-page-title">Settings</h1>
+          <p className="admin-page-subtitle">Manage your account and system preferences</p>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="admin-grid admin-grid-2 admin-mb-8">
         {/* Profile Settings */}
-        <div className="card">
-          <div className="card-header">
-            <div className="flex items-center">
-              <User size={20} style={{ color: theme.primary }} className="mr-2" />
-              <h3 className="text-lg font-semibold" style={{ color: theme.text }}>
-                Profile Settings
-              </h3>
+        <div className="admin-card">
+          <div className="admin-card-header">
+            <div className="flex items-center gap-3">
+              <div 
+                className="w-10 h-10 rounded-lg flex items-center justify-center"
+                style={{ backgroundColor: theme.primary + '20' }}
+              >
+                <User size={20} style={{ color: theme.primary }} />
+              </div>
+              <div>
+                <h3 className="admin-card-title">Profile Settings</h3>
+                <p className="admin-card-subtitle">Update your personal information</p>
+              </div>
             </div>
           </div>
-          <div className="card-body space-y-4">
-            <div className="form-group">
-              <label className="form-label">Full Name</label>
-              <input
-                type="text"
-                className="form-input"
-                value={profileData.name}
-                onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
-                style={{
-                  backgroundColor: theme.background,
-                  borderColor: theme.border,
-                  color: theme.text,
-                }}
-              />
-            </div>
+          <div className="admin-card-body">
+            <div className="admin-space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2" style={{ color: theme.text }}>
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  className="admin-input"
+                  value={profileData.name}
+                  onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
+                  placeholder="Enter your full name"
+                />
+              </div>
 
-            <div className="form-group">
-              <label className="form-label">Email Address</label>
-              <input
-                type="email"
-                className="form-input"
-                value={profileData.email}
-                onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
-                style={{
-                  backgroundColor: theme.background,
-                  borderColor: theme.border,
-                  color: theme.text,
-                }}
-              />
-            </div>
+              <div>
+                <label className="block text-sm font-medium mb-2" style={{ color: theme.text }}>
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  className="admin-input"
+                  value={profileData.email}
+                  onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
+                  placeholder="Enter your email address"
+                />
+              </div>
 
-            <div className="form-group">
-              <label className="form-label">Phone Number</label>
-              <input
-                type="tel"
-                className="form-input"
-                value={profileData.phone}
-                onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
-                style={{
-                  backgroundColor: theme.background,
-                  borderColor: theme.border,
-                  color: theme.text,
-                }}
-              />
-            </div>
+              <div>
+                <label className="block text-sm font-medium mb-2" style={{ color: theme.text }}>
+                  Phone Number
+                </label>
+                <input
+                  type="tel"
+                  className="admin-input"
+                  value={profileData.phone}
+                  onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
+                  placeholder="Enter your phone number"
+                />
+              </div>
 
-            <button
-              onClick={handleProfileSave}
-              disabled={loading}
-              className="btn btn-primary w-full"
-            >
-              {loading ? (
-                <div className="flex items-center">
-                  <div className="spinner mr-2"></div>
-                  Saving...
-                </div>
-              ) : (
-                <div className="flex items-center">
-                  <Save size={16} className="mr-2" />
-                  Save Profile
-                </div>
-              )}
-            </button>
+              <button
+                onClick={handleProfileSave}
+                disabled={loading}
+                className="admin-btn admin-btn-primary w-full"
+              >
+                {loading ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="spinner"></div>
+                    Saving...
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center gap-2">
+                    <Save size={16} />
+                    Save Profile
+                  </div>
+                )}
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Appearance Settings */}
-        <div className="card">
-          <div className="card-header">
-            <div className="flex items-center">
-              {isDark ? (
-                <Moon size={20} style={{ color: theme.primary }} className="mr-2" />
-              ) : (
-                <Sun size={20} style={{ color: theme.primary }} className="mr-2" />
-              )}
-              <h3 className="text-lg font-semibold" style={{ color: theme.text }}>
-                Appearance
-              </h3>
+        <div className="admin-card">
+          <div className="admin-card-header">
+            <div className="flex items-center gap-3">
+              <div 
+                className="w-10 h-10 rounded-lg flex items-center justify-center"
+                style={{ backgroundColor: theme.secondary + '20' }}
+              >
+                {isDark ? (
+                  <Moon size={20} style={{ color: theme.secondary }} />
+                ) : (
+                  <Sun size={20} style={{ color: theme.secondary }} />
+                )}
+              </div>
+              <div>
+                <h3 className="admin-card-title">Appearance</h3>
+                <p className="admin-card-subtitle">Customize your interface preferences</p>
+              </div>
             </div>
           </div>
-          <div className="card-body space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium" style={{ color: theme.text }}>
-                  Dark Mode
-                </p>
-                <p className="text-sm" style={{ color: theme.textSecondary }}>
-                  Switch between light and dark themes
-                </p>
-              </div>
-              <button
-                onClick={toggleTheme}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  isDark ? 'bg-primary' : 'bg-gray-300'
-                }`}
-                style={{ backgroundColor: isDark ? theme.primary : '#d1d5db' }}
-              >
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                    isDark ? 'translate-x-6' : 'translate-x-1'
+          <div className="admin-card-body">
+            <div className="admin-space-y-4">
+              <div className="flex items-center justify-between p-4 rounded-lg" style={{ backgroundColor: theme.background }}>
+                <div>
+                  <p className="font-medium" style={{ color: theme.text }}>
+                    Dark Mode
+                  </p>
+                  <p className="text-sm" style={{ color: theme.textSecondary }}>
+                    Switch between light and dark themes
+                  </p>
+                </div>
+                <button
+                  onClick={toggleTheme}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    isDark ? 'bg-primary' : 'bg-gray-300'
                   }`}
-                />
-              </button>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium" style={{ color: theme.text }}>
-                  Compact Mode
-                </p>
-                <p className="text-sm" style={{ color: theme.textSecondary }}>
-                  Reduce spacing for more content
-                </p>
+                  style={{ backgroundColor: isDark ? theme.primary : '#d1d5db' }}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      isDark ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
               </div>
-              <button
-                className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-300"
-              >
-                <span className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-1" />
-              </button>
+
+              <div className="flex items-center justify-between p-4 rounded-lg" style={{ backgroundColor: theme.background }}>
+                <div>
+                  <p className="font-medium" style={{ color: theme.text }}>
+                    Compact Mode
+                  </p>
+                  <p className="text-sm" style={{ color: theme.textSecondary }}>
+                    Reduce spacing for more content
+                  </p>
+                </div>
+                <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-300">
+                  <span className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-1" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Notification Settings */}
-        <div className="card">
-          <div className="card-header">
-            <div className="flex items-center">
-              <Bell size={20} style={{ color: theme.primary }} className="mr-2" />
-              <h3 className="text-lg font-semibold" style={{ color: theme.text }}>
-                Notifications
-              </h3>
+        <div className="admin-card">
+          <div className="admin-card-header">
+            <div className="flex items-center gap-3">
+              <div 
+                className="w-10 h-10 rounded-lg flex items-center justify-center"
+                style={{ backgroundColor: theme.warning + '20' }}
+              >
+                <Bell size={20} style={{ color: theme.warning }} />
+              </div>
+              <div>
+                <h3 className="admin-card-title">Notifications</h3>
+                <p className="admin-card-subtitle">Configure notification preferences</p>
+              </div>
             </div>
           </div>
-          <div className="card-body space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium" style={{ color: theme.text }}>
-                  Email Notifications
-                </p>
-                <p className="text-sm" style={{ color: theme.textSecondary }}>
-                  Receive updates via email
-                </p>
+          <div className="admin-card-body">
+            <div className="admin-space-y-4">
+              <div className="flex items-center justify-between p-4 rounded-lg" style={{ backgroundColor: theme.background }}>
+                <div>
+                  <p className="font-medium" style={{ color: theme.text }}>
+                    Email Notifications
+                  </p>
+                  <p className="text-sm" style={{ color: theme.textSecondary }}>
+                    Receive updates via email
+                  </p>
+                </div>
+                <button
+                  onClick={() => setSystemSettings({
+                    ...systemSettings,
+                    emailNotifications: !systemSettings.emailNotifications
+                  })}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
+                  style={{ 
+                    backgroundColor: systemSettings.emailNotifications ? theme.primary : '#d1d5db' 
+                  }}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      systemSettings.emailNotifications ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
               </div>
-              <button
-                onClick={() => setSystemSettings({
-                  ...systemSettings,
-                  emailNotifications: !systemSettings.emailNotifications
-                })}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
-                style={{ 
-                  backgroundColor: systemSettings.emailNotifications ? theme.primary : '#d1d5db' 
-                }}
-              >
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                    systemSettings.emailNotifications ? 'translate-x-6' : 'translate-x-1'
-                  }`}
-                />
-              </button>
-            </div>
 
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium" style={{ color: theme.text }}>
-                  SMS Notifications
-                </p>
-                <p className="text-sm" style={{ color: theme.textSecondary }}>
-                  Receive updates via SMS
-                </p>
+              <div className="flex items-center justify-between p-4 rounded-lg" style={{ backgroundColor: theme.background }}>
+                <div>
+                  <p className="font-medium" style={{ color: theme.text }}>
+                    SMS Notifications
+                  </p>
+                  <p className="text-sm" style={{ color: theme.textSecondary }}>
+                    Receive updates via SMS
+                  </p>
+                </div>
+                <button
+                  onClick={() => setSystemSettings({
+                    ...systemSettings,
+                    smsNotifications: !systemSettings.smsNotifications
+                  })}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
+                  style={{ 
+                    backgroundColor: systemSettings.smsNotifications ? theme.primary : '#d1d5db' 
+                  }}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      systemSettings.smsNotifications ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
               </div>
-              <button
-                onClick={() => setSystemSettings({
-                  ...systemSettings,
-                  smsNotifications: !systemSettings.smsNotifications
-                })}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
-                style={{ 
-                  backgroundColor: systemSettings.smsNotifications ? theme.primary : '#d1d5db' 
-                }}
-              >
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                    systemSettings.smsNotifications ? 'translate-x-6' : 'translate-x-1'
-                  }`}
-                />
-              </button>
-            </div>
 
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium" style={{ color: theme.text }}>
-                  Real-time Tracking
-                </p>
-                <p className="text-sm" style={{ color: theme.textSecondary }}>
-                  Enable live bus tracking
-                </p>
+              <div className="flex items-center justify-between p-4 rounded-lg" style={{ backgroundColor: theme.background }}>
+                <div>
+                  <p className="font-medium" style={{ color: theme.text }}>
+                    Real-time Tracking
+                  </p>
+                  <p className="text-sm" style={{ color: theme.textSecondary }}>
+                    Enable live bus tracking
+                  </p>
+                </div>
+                <button
+                  onClick={() => setSystemSettings({
+                    ...systemSettings,
+                    realTimeTracking: !systemSettings.realTimeTracking
+                  })}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
+                  style={{ 
+                    backgroundColor: systemSettings.realTimeTracking ? theme.primary : '#d1d5db' 
+                  }}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      systemSettings.realTimeTracking ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
               </div>
-              <button
-                onClick={() => setSystemSettings({
-                  ...systemSettings,
-                  realTimeTracking: !systemSettings.realTimeTracking
-                })}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
-                style={{ 
-                  backgroundColor: systemSettings.realTimeTracking ? theme.primary : '#d1d5db' 
-                }}
-              >
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                    systemSettings.realTimeTracking ? 'translate-x-6' : 'translate-x-1'
-                  }`}
-                />
-              </button>
             </div>
           </div>
         </div>
 
         {/* System Settings */}
-        <div className="card">
-          <div className="card-header">
-            <div className="flex items-center">
-              <SettingsIcon size={20} style={{ color: theme.primary }} className="mr-2" />
-              <h3 className="text-lg font-semibold" style={{ color: theme.text }}>
-                System Settings
-              </h3>
+        <div className="admin-card">
+          <div className="admin-card-header">
+            <div className="flex items-center gap-3">
+              <div 
+                className="w-10 h-10 rounded-lg flex items-center justify-center"
+                style={{ backgroundColor: theme.success + '20' }}
+              >
+                <SettingsIcon size={20} style={{ color: theme.success }} />
+              </div>
+              <div>
+                <h3 className="admin-card-title">System Settings</h3>
+                <p className="admin-card-subtitle">Configure system-wide preferences</p>
+              </div>
             </div>
           </div>
-          <div className="card-body space-y-4">
-            <div className="form-group">
-              <label className="form-label">Site Name</label>
-              <input
-                type="text"
-                className="form-input"
-                value={systemSettings.siteName}
-                onChange={(e) => setSystemSettings({ ...systemSettings, siteName: e.target.value })}
-                style={{
-                  backgroundColor: theme.background,
-                  borderColor: theme.border,
-                  color: theme.text,
-                }}
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Support Email</label>
-              <input
-                type="email"
-                className="form-input"
-                value={systemSettings.supportEmail}
-                onChange={(e) => setSystemSettings({ ...systemSettings, supportEmail: e.target.value })}
-                style={{
-                  backgroundColor: theme.background,
-                  borderColor: theme.border,
-                  color: theme.text,
-                }}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="form-group">
-                <label className="form-label">Max Bus Capacity</label>
-                <input
-                  type="number"
-                  className="form-input"
-                  value={systemSettings.maxBusCapacity}
-                  onChange={(e) => setSystemSettings({ ...systemSettings, maxBusCapacity: parseInt(e.target.value) })}
-                  style={{
-                    backgroundColor: theme.background,
-                    borderColor: theme.border,
-                    color: theme.text,
-                  }}
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Default Fare (RWF)</label>
-                <input
-                  type="number"
-                  className="form-input"
-                  value={systemSettings.defaultFare}
-                  onChange={(e) => setSystemSettings({ ...systemSettings, defaultFare: parseInt(e.target.value) })}
-                  style={{
-                    backgroundColor: theme.background,
-                    borderColor: theme.border,
-                    color: theme.text,
-                  }}
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between">
+          <div className="admin-card-body">
+            <div className="admin-space-y-4">
               <div>
-                <p className="font-medium" style={{ color: theme.text }}>
-                  Maintenance Mode
-                </p>
-                <p className="text-sm" style={{ color: theme.textSecondary }}>
-                  Temporarily disable the platform
-                </p>
-              </div>
-              <button
-                onClick={() => setSystemSettings({
-                  ...systemSettings,
-                  maintenanceMode: !systemSettings.maintenanceMode
-                })}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
-                style={{ 
-                  backgroundColor: systemSettings.maintenanceMode ? theme.error : '#d1d5db' 
-                }}
-              >
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                    systemSettings.maintenanceMode ? 'translate-x-6' : 'translate-x-1'
-                  }`}
+                <label className="block text-sm font-medium mb-2" style={{ color: theme.text }}>
+                  Site Name
+                </label>
+                <input
+                  type="text"
+                  className="admin-input"
+                  value={systemSettings.siteName}
+                  onChange={(e) => setSystemSettings({ ...systemSettings, siteName: e.target.value })}
+                  placeholder="Enter site name"
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2" style={{ color: theme.text }}>
+                  Support Email
+                </label>
+                <input
+                  type="email"
+                  className="admin-input"
+                  value={systemSettings.supportEmail}
+                  onChange={(e) => setSystemSettings({ ...systemSettings, supportEmail: e.target.value })}
+                  placeholder="Enter support email"
+                />
+              </div>
+
+              <div className="admin-grid admin-grid-2">
+                <div>
+                  <label className="block text-sm font-medium mb-2" style={{ color: theme.text }}>
+                    Max Bus Capacity
+                  </label>
+                  <input
+                    type="number"
+                    className="admin-input"
+                    value={systemSettings.maxBusCapacity}
+                    onChange={(e) => setSystemSettings({ ...systemSettings, maxBusCapacity: parseInt(e.target.value) })}
+                    placeholder="Max capacity"
+                    min="1"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2" style={{ color: theme.text }}>
+                    Default Fare (RWF)
+                  </label>
+                  <input
+                    type="number"
+                    className="admin-input"
+                    value={systemSettings.defaultFare}
+                    onChange={(e) => setSystemSettings({ ...systemSettings, defaultFare: parseInt(e.target.value) })}
+                    placeholder="Default fare"
+                    min="0"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between p-4 rounded-lg" style={{ backgroundColor: theme.background }}>
+                <div>
+                  <p className="font-medium flex items-center gap-2" style={{ color: theme.text }}>
+                    <AlertCircle size={16} style={{ color: theme.error }} />
+                    Maintenance Mode
+                  </p>
+                  <p className="text-sm" style={{ color: theme.textSecondary }}>
+                    Temporarily disable the platform
+                  </p>
+                </div>
+                <button
+                  onClick={() => setSystemSettings({
+                    ...systemSettings,
+                    maintenanceMode: !systemSettings.maintenanceMode
+                  })}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
+                  style={{ 
+                    backgroundColor: systemSettings.maintenanceMode ? theme.error : '#d1d5db' 
+                  }}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      systemSettings.maintenanceMode ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+
+              <button
+                onClick={handleSystemSave}
+                disabled={loading}
+                className="admin-btn admin-btn-primary w-full"
+              >
+                {loading ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="spinner"></div>
+                    Saving...
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center gap-2">
+                    <Save size={16} />
+                    Save System Settings
+                  </div>
+                )}
               </button>
             </div>
-
-            <button
-              onClick={handleSystemSave}
-              disabled={loading}
-              className="btn btn-primary w-full"
-            >
-              {loading ? (
-                <div className="flex items-center">
-                  <div className="spinner mr-2"></div>
-                  Saving...
-                </div>
-              ) : (
-                <div className="flex items-center">
-                  <Save size={16} className="mr-2" />
-                  Save System Settings
-                </div>
-              )}
-            </button>
           </div>
         </div>
       </div>
 
       {/* Database Management */}
-      <div className="card">
-        <div className="card-header">
-          <div className="flex items-center">
-            <Database size={20} style={{ color: theme.primary }} className="mr-2" />
-            <h3 className="text-lg font-semibold" style={{ color: theme.text }}>
-              Database Management
-            </h3>
+      <div className="admin-card">
+        <div className="admin-card-header">
+          <div className="flex items-center gap-3">
+            <div 
+              className="w-10 h-10 rounded-lg flex items-center justify-center"
+              style={{ backgroundColor: theme.primary + '20' }}
+            >
+              <Database size={20} style={{ color: theme.primary }} />
+            </div>
+            <div>
+              <h3 className="admin-card-title">Database Management</h3>
+              <p className="admin-card-subtitle">Backup and maintain your database</p>
+            </div>
           </div>
         </div>
-        <div className="card-body">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <button
-              onClick={handleDatabaseBackup}
-              disabled={loading}
-              className="btn btn-outline"
-            >
-              <Database size={16} className="mr-2" />
-              Backup Database
-            </button>
-
-            <button
-              className="btn btn-outline"
-              disabled={loading}
-            >
-              <RefreshCw size={16} className="mr-2" />
-              Clear Cache
-            </button>
-
-            <button
-              className="btn btn-outline"
-              disabled={loading}
-            >
-              <Shield size={16} className="mr-2" />
-              Security Scan
-            </button>
-          </div>
-
-          <div className="mt-6 p-4 rounded-lg" style={{ backgroundColor: theme.warning + '20' }}>
-            <div className="flex items-start">
-              <Shield size={20} style={{ color: theme.warning }} className="mr-2 mt-0.5" />
-              <div>
-                <p className="font-medium" style={{ color: theme.warning }}>
-                  Database Security
-                </p>
-                <p className="text-sm mt-1" style={{ color: theme.textSecondary }}>
-                  Regular backups are automatically created every 24 hours. 
-                  Manual backups can be created using the button above.
-                </p>
+        <div className="admin-card-body">
+          <div className="admin-grid admin-grid-3">
+            <div className="flex flex-col items-center p-6 text-center rounded-lg" style={{ backgroundColor: theme.background }}>
+              <div 
+                className="w-12 h-12 rounded-lg flex items-center justify-center mb-3"
+                style={{ backgroundColor: theme.primary + '20' }}
+              >
+                <Database size={24} style={{ color: theme.primary }} />
               </div>
+              <h4 className="font-semibold mb-2" style={{ color: theme.text }}>
+                Database Backup
+              </h4>
+              <p className="text-sm mb-4" style={{ color: theme.textSecondary }}>
+                Create a full backup of your database
+              </p>
+              <button
+                onClick={handleDatabaseBackup}
+                disabled={loading}
+                className="admin-btn admin-btn-secondary"
+              >
+                {loading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="spinner"></div>
+                    Backing up...
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <RefreshCw size={14} />
+                    Start Backup
+                  </div>
+                )}
+              </button>
+            </div>
+
+            <div className="flex flex-col items-center p-6 text-center rounded-lg" style={{ backgroundColor: theme.background }}>
+              <div 
+                className="w-12 h-12 rounded-lg flex items-center justify-center mb-3"
+                style={{ backgroundColor: theme.success + '20' }}
+              >
+                <CheckCircle size={24} style={{ color: theme.success }} />
+              </div>
+              <h4 className="font-semibold mb-2" style={{ color: theme.text }}>
+                System Health
+              </h4>
+              <p className="text-sm mb-4" style={{ color: theme.textSecondary }}>
+                All systems are running normally
+              </p>
+              <span className="admin-badge admin-badge-success">
+                Healthy
+              </span>
+            </div>
+
+            <div className="flex flex-col items-center p-6 text-center rounded-lg" style={{ backgroundColor: theme.background }}>
+              <div 
+                className="w-12 h-12 rounded-lg flex items-center justify-center mb-3"
+                style={{ backgroundColor: theme.warning + '20' }}
+              >
+                <Server size={24} style={{ color: theme.warning }} />
+              </div>
+              <h4 className="font-semibold mb-2" style={{ color: theme.text }}>
+                Server Status
+              </h4>
+              <p className="text-sm mb-4" style={{ color: theme.textSecondary }}>
+                Server uptime: 99.9%
+              </p>
+              <span className="admin-badge admin-badge-success">
+                Online
+              </span>
             </div>
           </div>
         </div>

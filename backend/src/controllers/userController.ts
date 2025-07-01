@@ -1,8 +1,7 @@
 import { Request, Response } from 'express';
 import User from '../models/User';
-import { AuthRequest } from '../types';
 
-export const getAllUsers = async (req: AuthRequest, res: Response) => {
+export const getAllUsers = async (req: Request, res: Response) => {
   try {
     const { role, isActive, page = 1, limit = 10 } = req.query;
     
@@ -39,7 +38,7 @@ export const getAllUsers = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getUserById = async (req: AuthRequest, res: Response) => {
+export const getUserById = async (req: Request, res: Response) => {
   try {
     const user = await User.findById(req.params.id).select('-password');
 
@@ -53,13 +52,13 @@ export const getUserById = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const updateUserStatus = async (req: AuthRequest, res: Response) => {
+export const updateUserStatus = async (req: Request, res: Response) => {
   try {
     const { isActive } = req.body;
     const userId = req.params.id;
 
     // Prevent admin from deactivating themselves
-    const currentUserId = req.user?.id;
+    const currentUserId = (req as any).user.id;
     if (userId === currentUserId && isActive === false) {
       return res.status(400).json({ error: 'Cannot deactivate your own account' });
     }
@@ -83,13 +82,13 @@ export const updateUserStatus = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const updateUserRole = async (req: AuthRequest, res: Response) => {
+export const updateUserRole = async (req: Request, res: Response) => {
   try {
     const { role } = req.body;
     const userId = req.params.id;
 
     // Prevent admin from changing their own role
-    const currentUserId = req.user?.id;
+    const currentUserId = (req as any).user.id;
     if (userId === currentUserId) {
       return res.status(400).json({ error: 'Cannot change your own role' });
     }
@@ -113,10 +112,10 @@ export const updateUserRole = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const deleteUser = async (req: AuthRequest, res: Response) => {
+export const deleteUser = async (req: Request, res: Response) => {
   try {
     const userId = req.params.id;
-    const currentUserId = req.user?.id;
+    const currentUserId = (req as any).user.id;
 
     // Prevent admin from deleting themselves
     if (userId === currentUserId) {
@@ -139,7 +138,7 @@ export const deleteUser = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getUserStats = async (req: AuthRequest, res: Response) => {
+export const getUserStats = async (req: Request, res: Response) => {
   try {
     const stats = await Promise.all([
       User.countDocuments({ role: 'user', isActive: true }),
@@ -163,7 +162,7 @@ export const getUserStats = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getDrivers = async (req: AuthRequest, res: Response) => {
+export const getDrivers = async (req: Request, res: Response) => {
   try {
     const { isActive = true, page = 1, limit = 10 } = req.query;
     
@@ -199,7 +198,7 @@ export const getDrivers = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getRegularUsers = async (req: AuthRequest, res: Response) => {
+export const getRegularUsers = async (req: Request, res: Response) => {
   try {
     const { isActive = true, page = 1, limit = 10 } = req.query;
     
@@ -235,7 +234,7 @@ export const getRegularUsers = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const createUser = async (req: AuthRequest, res: Response) => {
+export const createUser = async (req: Request, res: Response) => {
   try {
     const { name, email, phone, password, role } = req.body;
     const user = new User({ name, email, phone, password, role });

@@ -150,32 +150,43 @@ export default function Drivers() {
     }
   };
 
+  const activeDrivers = drivers.filter(d => d.isActive).length;
+  const assignedDrivers = drivers.filter(d => getDriverBus(d._id)).length;
+
   if (loading && drivers.length === 0) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="spinner"></div>
+      <div className="admin-page-container">
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="spinner mx-auto mb-4"></div>
+            <p className="text-muted">Loading drivers...</p>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 bg-content p-4 min-h-screen">
+    <div className="admin-page-container">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <div className="section-title">Drivers Management</div>
-          <div className="section-subtitle">Manage bus drivers and their assignments</div>
+      <div className="admin-page-header">
+        <div className="admin-page-title-section">
+          <h1 className="admin-page-title">Drivers Management</h1>
+          <p className="admin-page-subtitle">Manage bus drivers and their assignments</p>
         </div>
-        <button className="btn btn-primary text-base px-4 py-2 rounded-xl shadow-md" onClick={() => setShowCreateModal(true)}>
+        <button 
+          className="admin-btn admin-btn-primary"
+          onClick={() => setShowCreateModal(true)}
+        >
           <Plus size={18} />
           Add Driver
         </button>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="card">
-          <div className="card-body">
+      <div className="admin-grid admin-grid-4 admin-mb-6">
+        <div className="admin-card">
+          <div className="admin-card-body">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium" style={{ color: theme.textSecondary }}>
@@ -195,15 +206,15 @@ export default function Drivers() {
           </div>
         </div>
 
-        <div className="card">
-          <div className="card-body">
+        <div className="admin-card">
+          <div className="admin-card-body">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium" style={{ color: theme.textSecondary }}>
                   Active Drivers
                 </p>
                 <p className="text-2xl font-bold mt-1" style={{ color: theme.text }}>
-                  {drivers.filter(d => d.isActive).length}
+                  {activeDrivers}
                 </p>
               </div>
               <div 
@@ -216,15 +227,15 @@ export default function Drivers() {
           </div>
         </div>
 
-        <div className="card">
-          <div className="card-body">
+        <div className="admin-card">
+          <div className="admin-card-body">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium" style={{ color: theme.textSecondary }}>
-                  Assigned Buses
+                  Assigned to Bus
                 </p>
                 <p className="text-2xl font-bold mt-1" style={{ color: theme.text }}>
-                  {buses.filter(bus => bus.driverId && bus.isActive).length}
+                  {assignedDrivers}
                 </p>
               </div>
               <div 
@@ -237,22 +248,22 @@ export default function Drivers() {
           </div>
         </div>
 
-        <div className="card">
-          <div className="card-body">
+        <div className="admin-card">
+          <div className="admin-card-body">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium" style={{ color: theme.textSecondary }}>
-                  Online Now
+                  Available
                 </p>
                 <p className="text-2xl font-bold mt-1" style={{ color: theme.text }}>
-                  {buses.filter(bus => bus.isOnline && bus.isActive).length}
+                  {activeDrivers - assignedDrivers}
                 </p>
               </div>
               <div 
                 className="w-12 h-12 rounded-lg flex items-center justify-center"
-                style={{ backgroundColor: theme.success + '20' }}
+                style={{ backgroundColor: theme.secondary + '20' }}
               >
-                <MapPin size={24} style={{ color: theme.success }} />
+                <Clock size={24} style={{ color: theme.secondary }} />
               </div>
             </div>
           </div>
@@ -260,87 +271,72 @@ export default function Drivers() {
       </div>
 
       {/* Filters */}
-      <div className="card mb-6">
-        <div className="card-body">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div className="relative">
-              <Search 
-                size={16} 
-                className="absolute left-3 top-1/2 transform -translate-y-1/2"
-                style={{ color: theme.textSecondary }}
-              />
-              <input
-                type="text"
-                placeholder="Search drivers..."
-                className="form-input pl-10"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                style={{
-                  backgroundColor: theme.background,
-                  borderColor: theme.border,
-                  color: theme.text,
-                }}
-              />
-            </div>
-            <select
-              className="form-select"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              style={{
-                backgroundColor: theme.background,
-                borderColor: theme.border,
-                color: theme.text,
-              }}
-            >
-              <option value="">All Status</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
-            <button
-              onClick={fetchDrivers}
-              className="btn btn-outline text-xs px-3 py-1 rounded-lg"
-              disabled={loading}
-            >
-              {loading ? <div className="spinner" /> : <Filter size={14} />}
-              {loading ? 'Loading...' : 'Refresh'}
-            </button>
+      <div className="admin-filters">
+        <div className="admin-filters-grid">
+          <div className="admin-input-with-icon">
+            <Search size={16} className="admin-input-icon" />
+            <input
+              type="text"
+              placeholder="Search drivers..."
+              className="admin-input"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
+          <select
+            className="admin-select"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <option value="">All Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+          <button
+            onClick={fetchDrivers}
+            className="admin-btn admin-btn-secondary"
+            disabled={loading}
+          >
+            {loading ? <div className="spinner" /> : <Filter size={16} />}
+            {loading ? 'Loading...' : 'Refresh'}
+          </button>
         </div>
       </div>
 
       {/* Drivers Table */}
-      <div className="card">
-        <div className="card-header">
-          <h3 className="text-lg font-semibold" style={{ color: theme.text }}>
+      <div className="admin-card">
+        <div className="admin-card-header">
+          <h3 className="admin-card-title">
             Drivers ({pagination?.totalDrivers || filteredDrivers.length})
           </h3>
+          <p className="admin-card-subtitle">All registered drivers in the system</p>
         </div>
-        <div className="card-body p-0">
+        <div className="admin-card-body">
           {error ? (
-            <div className="flex items-center justify-center p-8">
-              <div className="text-center">
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center max-w-md">
                 <AlertCircle size={48} style={{ color: theme.error }} className="mx-auto mb-4" />
-                <p style={{ color: theme.error }} className="text-lg font-semibold mb-2">
+                <h3 style={{ color: theme.error }} className="text-lg font-semibold mb-2">
                   Error Loading Drivers
-                </p>
+                </h3>
                 <p style={{ color: theme.textSecondary }} className="mb-4">
                   {error}
                 </p>
                 <button
                   onClick={fetchDrivers}
-                  className="btn btn-primary"
+                  className="admin-btn admin-btn-primary"
                 >
-                  Retry
+                  Try Again
                 </button>
               </div>
             </div>
           ) : filteredDrivers.length === 0 ? (
-            <div className="flex items-center justify-center p-8">
+            <div className="flex items-center justify-center py-12">
               <div className="text-center">
                 <UserCheck size={48} style={{ color: theme.textSecondary }} className="mx-auto mb-4" />
-                <p style={{ color: theme.text }} className="text-lg font-semibold mb-2">
+                <h3 style={{ color: theme.text }} className="text-lg font-semibold mb-2">
                   No Drivers Found
-                </p>
+                </h3>
                 <p style={{ color: theme.textSecondary }}>
                   {searchTerm || statusFilter 
                     ? 'Try adjusting your filters' 
@@ -350,31 +346,30 @@ export default function Drivers() {
               </div>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="table">
+            <div className="admin-table-container">
+              <table className="admin-table">
                 <thead>
                   <tr>
-                    <th style={{ color: theme.textSecondary }}>Driver</th>
-                    <th style={{ color: theme.textSecondary }}>Contact</th>
-                    <th style={{ color: theme.textSecondary }}>Assigned Bus</th>
-                    <th style={{ color: theme.textSecondary }}>Status</th>
-                    <th style={{ color: theme.textSecondary }}>Joined</th>
-                    <th style={{ color: theme.textSecondary }}>Actions</th>
+                    <th>Driver</th>
+                    <th>Contact</th>
+                    <th>Assigned Bus</th>
+                    <th>Status</th>
+                    <th>Joined</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredDrivers.map((driver) => {
                     const assignedBus = getDriverBus(driver._id);
-                    
                     return (
                       <tr key={driver._id}>
                         <td>
-                          <div className="flex items-center">
+                          <div className="flex items-center gap-3">
                             <div 
-                              className="w-10 h-10 rounded-full flex items-center justify-center mr-3"
+                              className="w-10 h-10 rounded-full flex items-center justify-center"
                               style={{ backgroundColor: theme.primary + '20' }}
                             >
-                              <span className="font-semibold" style={{ color: theme.primary }}>
+                              <span className="font-semibold text-sm" style={{ color: theme.primary }}>
                                 {driver.name.charAt(0).toUpperCase()}
                               </span>
                             </div>
@@ -382,84 +377,71 @@ export default function Drivers() {
                               <p className="font-medium" style={{ color: theme.text }}>
                                 {driver.name}
                               </p>
-                              <p className="text-sm" style={{ color: theme.textSecondary }}>
-                                Driver ID: {driver._id.slice(-8)}
+                              <p className="text-xs" style={{ color: theme.textSecondary }}>
+                                ID: {driver._id.slice(-8)}
                               </p>
                             </div>
                           </div>
                         </td>
                         <td>
                           <div className="space-y-1">
-                            <div className="flex items-center text-sm">
-                              <Mail size={14} className="mr-2" style={{ color: theme.textSecondary }} />
-                              <span style={{ color: theme.text }}>{driver.email}</span>
+                            <div className="flex items-center gap-2">
+                              <Mail size={14} style={{ color: theme.textSecondary }} />
+                              <span className="text-sm" style={{ color: theme.text }}>
+                                {driver.email}
+                              </span>
                             </div>
-                            <div className="flex items-center text-sm">
-                              <Phone size={14} className="mr-2" style={{ color: theme.textSecondary }} />
-                              <span style={{ color: theme.text }}>{driver.phone}</span>
+                            <div className="flex items-center gap-2">
+                              <Phone size={14} style={{ color: theme.textSecondary }} />
+                              <span className="text-sm" style={{ color: theme.text }}>
+                                {driver.phone}
+                              </span>
                             </div>
                           </div>
                         </td>
                         <td>
                           {assignedBus ? (
-                            <div className="flex items-center">
-                              <div 
-                                className="w-8 h-8 rounded-lg flex items-center justify-center mr-3"
-                                style={{ backgroundColor: assignedBus.isOnline ? theme.success + '20' : theme.textSecondary + '20' }}
-                              >
-                                <Bus size={16} style={{ color: assignedBus.isOnline ? theme.success : theme.textSecondary }} />
-                              </div>
+                            <div className="flex items-center gap-2">
+                              <Bus size={14} style={{ color: theme.warning }} />
                               <div>
-                                <p className="font-medium text-sm" style={{ color: theme.text }}>
+                                <span className="text-sm font-medium" style={{ color: theme.text }}>
                                   {assignedBus.plateNumber}
-                                </p>
+                                </span>
                                 <p className="text-xs" style={{ color: theme.textSecondary }}>
-                                  {assignedBus.routeId?.name || 'No Route'}
+                                  {assignedBus.routeId?.name || 'No route assigned'}
                                 </p>
                               </div>
                             </div>
                           ) : (
-                            <span className="text-sm" style={{ color: theme.textSecondary }}>
-                              No bus assigned
+                            <span className="admin-badge admin-badge-secondary">
+                              Unassigned
                             </span>
                           )}
                         </td>
                         <td>
-                          <div className="space-y-1">
-                            <button
-                              onClick={() => handleStatusToggle(driver)}
-                              className={`badge ${driver.isActive ? 'badge-success' : 'badge-error'}`}
-                            >
-                              {driver.isActive ? 'Active' : 'Inactive'}
-                            </button>
-                            {assignedBus && (
-                              <div className={`badge ${assignedBus.isOnline ? 'badge-success' : 'badge-secondary'}`}>
-                                {assignedBus.isOnline ? 'Online' : 'Offline'}
-                              </div>
-                            )}
-                          </div>
+                          <button
+                            onClick={() => handleStatusToggle(driver)}
+                            className={`admin-badge ${driver.isActive ? 'admin-badge-success' : 'admin-badge-danger'}`}
+                          >
+                            {driver.isActive ? 'Active' : 'Inactive'}
+                          </button>
                         </td>
                         <td>
-                          <div className="flex items-center text-sm">
-                            <Calendar size={14} className="mr-2" style={{ color: theme.textSecondary }} />
-                            <span style={{ color: theme.text }}>
+                          <div className="flex items-center gap-2">
+                            <Calendar size={14} style={{ color: theme.textSecondary }} />
+                            <span className="text-sm" style={{ color: theme.text }}>
                               {new Date(driver.createdAt).toLocaleDateString()}
                             </span>
                           </div>
                         </td>
                         <td>
-                          <div className="flex items-center space-x-2">
+                          <div className="flex items-center gap-2">
                             <button
-                              className="p-1 rounded hover:bg-opacity-10"
-                              style={{ color: theme.primary }}
+                              onClick={() => handleStatusToggle(driver)}
+                              className="admin-btn admin-btn-secondary p-2"
+                              title={driver.isActive ? 'Deactivate' : 'Activate'}
                             >
-                              <Edit size={16} />
-                            </button>
-                            <button
-                              className="p-1 rounded hover:bg-opacity-10"
-                              style={{ color: theme.error }}
-                            >
-                              <Trash2 size={16} />
+                              <Activity size={14} />
                             </button>
                           </div>
                         </td>
@@ -471,94 +453,120 @@ export default function Drivers() {
             </div>
           )}
         </div>
-        
-        {/* Pagination */}
-        {pagination && pagination.totalPages > 1 && (
-          <div className="card-footer">
+      </div>
+
+      {/* Pagination */}
+      {pagination && pagination.totalPages > 1 && (
+        <div className="admin-card">
+          <div className="admin-card-body">
             <div className="flex items-center justify-between">
               <p className="text-sm" style={{ color: theme.textSecondary }}>
-                Showing {((pagination.currentPage - 1) * 10) + 1} to {Math.min(pagination.currentPage * 10, pagination.totalDrivers)} of {pagination.totalDrivers} drivers
+                Showing page {pagination.currentPage} of {pagination.totalPages} 
+                ({pagination.totalDrivers} total drivers)
               </p>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center gap-2">
                 <button
                   onClick={() => setCurrentPage(currentPage - 1)}
                   disabled={!pagination.hasPrev}
-                  className="btn btn-outline btn-sm"
+                  className="admin-btn admin-btn-secondary"
                 >
                   Previous
                 </button>
-                <span className="px-3 py-1 text-sm" style={{ color: theme.text }}>
-                  Page {pagination.currentPage} of {pagination.totalPages}
+                <span className="text-sm font-medium px-3 py-1">
+                  {currentPage}
                 </span>
                 <button
                   onClick={() => setCurrentPage(currentPage + 1)}
                   disabled={!pagination.hasNext}
-                  className="btn btn-outline btn-sm"
+                  className="admin-btn admin-btn-secondary"
                 >
                   Next
                 </button>
               </div>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Create Driver Modal */}
       {showCreateModal && (
-        <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <div className="card-header">
-              <h3 className="text-lg font-semibold">Add New Driver</h3>
-            </div>
-            <form onSubmit={handleCreateDriver}>
-              <div className="card-body space-y-4">
-                <div className="form-group">
-                  <label className="form-label">Name *</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    value={createForm.name}
-                    onChange={e => setCreateForm({ ...createForm, name: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Email *</label>
-                  <input
-                    type="email"
-                    className="form-input"
-                    value={createForm.email}
-                    onChange={e => setCreateForm({ ...createForm, email: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Phone *</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    value={createForm.phone}
-                    onChange={e => setCreateForm({ ...createForm, phone: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Password *</label>
-                  <input
-                    type="password"
-                    className="form-input"
-                    value={createForm.password}
-                    onChange={e => setCreateForm({ ...createForm, password: e.target.value })}
-                    required
-                  />
-                </div>
+        <div className="modal-overlay">
+          <div className="modal-content max-w-md">
+            <h2 className="text-xl font-bold mb-4" style={{ color: theme.text }}>
+              Add New Driver
+            </h2>
+            <form onSubmit={handleCreateDriver} className="admin-space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: theme.text }}>
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  className="admin-input"
+                  value={createForm.name}
+                  onChange={(e) => setCreateForm({...createForm, name: e.target.value})}
+                  placeholder="Enter driver's full name"
+                  required
+                />
               </div>
-              <div className="card-footer flex justify-end space-x-3">
-                <button type="button" className="btn btn-ghost" onClick={() => setShowCreateModal(false)}>
-                  Cancel
-                </button>
-                <button type="submit" className="btn btn-primary" disabled={createLoading}>
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: theme.text }}>
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  className="admin-input"
+                  value={createForm.email}
+                  onChange={(e) => setCreateForm({...createForm, email: e.target.value})}
+                  placeholder="Enter email address"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: theme.text }}>
+                  Phone Number
+                </label>
+                <input
+                  type="tel"
+                  className="admin-input"
+                  value={createForm.phone}
+                  onChange={(e) => setCreateForm({...createForm, phone: e.target.value})}
+                  placeholder="Enter phone number"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: theme.text }}>
+                  Password
+                </label>
+                <input
+                  type="password"
+                  className="admin-input"
+                  value={createForm.password}
+                  onChange={(e) => setCreateForm({...createForm, password: e.target.value})}
+                  placeholder="Enter password (min 6 characters)"
+                  required
+                  minLength={6}
+                />
+              </div>
+              <div className="flex items-center gap-3 pt-4">
+                <button
+                  type="submit"
+                  disabled={createLoading}
+                  className="admin-btn admin-btn-primary flex-1"
+                >
+                  {createLoading ? <div className="spinner" /> : null}
                   {createLoading ? 'Creating...' : 'Create Driver'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowCreateModal(false);
+                    setCreateForm({ name: '', email: '', phone: '', password: '' });
+                  }}
+                  className="admin-btn admin-btn-secondary flex-1"
+                >
+                  Cancel
                 </button>
               </div>
             </form>

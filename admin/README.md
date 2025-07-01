@@ -1,6 +1,6 @@
 # Ridra Admin Dashboard
 
-A comprehensive React web dashboard for managing the Ridra bus tracking platform. Built with React, TypeScript, and modern web technologies.
+A comprehensive React web dashboard for managing the Ridra bus tracking platform. Built with React, TypeScript, Vite, and modern web technologies.
 
 ## Features
 
@@ -48,6 +48,7 @@ A comprehensive React web dashboard for managing the Ridra bus tracking platform
 ### **Frontend**
 - **React 18**: Modern React with hooks and functional components
 - **TypeScript**: Type-safe development with full IntelliSense
+- **Vite**: Lightning-fast development server and build tool
 - **React Router**: Client-side routing and navigation
 - **Recharts**: Beautiful and responsive data visualization
 - **React Hot Toast**: Elegant notification system
@@ -96,7 +97,7 @@ A comprehensive React web dashboard for managing the Ridra bus tracking platform
 
 4. **Start development server**
    ```bash
-   npm start
+   npm run dev
    ```
 
 5. **Access the dashboard**
@@ -106,6 +107,11 @@ A comprehensive React web dashboard for managing the Ridra bus tracking platform
 ### **Production Build**
 ```bash
 npm run build
+```
+
+### **Preview Production Build**
+```bash
+npm run preview
 ```
 
 ## Project Structure
