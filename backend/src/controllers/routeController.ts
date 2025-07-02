@@ -4,12 +4,13 @@ import PickupPoint from '../models/PickupPoint';
 
 export const createRoute = async (req: Request, res: Response) => {
   try {
-    const { name, description, estimatedDuration } = req.body;
+    const { name, description, estimatedDuration, fare } = req.body;
 
     const route = new Route({
       name,
       description,
       estimatedDuration,
+      fare,
     });
 
     await route.save();
@@ -51,11 +52,16 @@ export const getRouteById = async (req: Request, res: Response) => {
 
 export const updateRoute = async (req: Request, res: Response) => {
   try {
-    const { name, description, estimatedDuration } = req.body;
+    const { name, description, estimatedDuration, fare } = req.body;
+
+    const updateData: any = { name, description, estimatedDuration };
+    if (fare !== undefined) {
+      updateData.fare = fare;
+    }
 
     const route = await Route.findByIdAndUpdate(
       req.params.id,
-      { name, description, estimatedDuration },
+      updateData,
       { new: true }
     ).populate('pickupPoints');
 

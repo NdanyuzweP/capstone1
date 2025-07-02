@@ -44,7 +44,7 @@ export default function Signup() {
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={styles.header}>
         <Pressable
-          style={styles.backButton}
+          style={[styles.backButton, { backgroundColor: 'rgba(255, 255, 255, 0.1)' }]}
           onPress={() => router.back()}
         >
           <ArrowLeft color={theme.text} size={24} />
@@ -55,6 +55,15 @@ export default function Signup() {
       </View>
 
       <View style={styles.form}>
+        <View style={styles.welcomeContainer}>
+          <Text style={[styles.welcomeTitle, { color: theme.text }]}>
+            Create Account
+          </Text>
+          <Text style={[styles.welcomeSubtitle, { color: theme.textSecondary }]}>
+            Join thousands of users tracking buses across Rwanda
+          </Text>
+        </View>
+
         <View style={styles.inputContainer}>
           <Text style={[styles.label, { color: theme.text }]}>
             {t('name')}
@@ -185,19 +194,39 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 24,
-    paddingTop: 20,
-    paddingBottom: 40,
+    paddingTop: 12,
+    paddingBottom: 32,
   },
   backButton: {
     marginRight: 16,
+    padding: 8,
+    borderRadius: 20,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontFamily: 'Inter-Bold',
+    letterSpacing: -0.5,
   },
   form: {
     flex: 1,
     paddingHorizontal: 24,
+  },
+  welcomeContainer: {
+    alignItems: 'center',
+    marginBottom: 32,
+    paddingHorizontal: 20,
+  },
+  welcomeTitle: {
+    fontSize: 24,
+    fontFamily: 'Inter-Bold',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  welcomeSubtitle: {
+    fontSize: 16,
+    fontFamily: 'Inter-Regular',
+    textAlign: 'center',
+    opacity: 0.7,
   },
   inputContainer: {
     marginBottom: 20,
@@ -205,56 +234,85 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontFamily: 'Inter-SemiBold',
-    marginBottom: 8,
+    marginBottom: 12,
+    letterSpacing: -0.2,
   },
   input: {
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderRadius: 12,
-    borderWidth: 1,
+    paddingHorizontal: 20,
+    paddingVertical: 18,
+    borderRadius: 16,
+    borderWidth: 2,
     fontSize: 16,
     fontFamily: 'Inter-Regular',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
   passwordContainer: {
     position: 'relative',
   },
   passwordInput: {
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    paddingRight: 50,
-    borderRadius: 12,
-    borderWidth: 1,
+    paddingHorizontal: 20,
+    paddingVertical: 18,
+    paddingRight: 55,
+    borderRadius: 16,
+    borderWidth: 2,
     fontSize: 16,
     fontFamily: 'Inter-Regular',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
   eyeButton: {
     position: 'absolute',
-    right: 16,
-    top: 14,
-    padding: 4,
+    right: 18,
+    top: 18,
+    padding: 6,
+    borderRadius: 12,
   },
   signupButton: {
-    paddingVertical: 16,
-    borderRadius: 12,
+    paddingVertical: 18,
+    borderRadius: 16,
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 32,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 4,
   },
   signupButtonText: {
-    fontSize: 16,
-    fontFamily: 'Inter-SemiBold',
+    fontSize: 18,
+    fontFamily: 'Inter-Bold',
+    letterSpacing: -0.3,
   },
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 30,
+    marginTop: 32,
+    paddingVertical: 20,
   },
   footerText: {
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: 'Inter-Regular',
   },
   linkText: {
-    fontSize: 14,
-    fontFamily: 'Inter-SemiBold',
+    fontSize: 15,
+    fontFamily: 'Inter-Bold',
+    textDecorationLine: 'underline',
   },
 });

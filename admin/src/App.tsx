@@ -8,7 +8,6 @@ import Layout from './components/Layout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Users from './pages/Users';
-import Drivers from './pages/Drivers';
 import Buses from './pages/Buses';
 import RoutesPage from './pages/Routes';
 import PickupPoints from './pages/PickupPoints';
@@ -32,7 +31,6 @@ function App() {
                 <Route index element={<Navigate to="/dashboard" replace />} />
                 <Route path="dashboard" element={<Dashboard />} />
                 <Route path="users" element={<Users />} />
-                <Route path="drivers" element={<Drivers />} />
                 <Route path="buses" element={<Buses />} />
                 <Route path="routes" element={<RoutesPage />} />
                 <Route path="pickup-points" element={<PickupPoints />} />

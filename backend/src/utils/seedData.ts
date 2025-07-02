@@ -157,7 +157,6 @@ export const seedDatabase = async () => {
           capacity,
           driverId: driver._id,
           routeId: route._id,
-          fare: route.fare, // Use route's fare
           currentLocation: {
             latitude: currentLat + (Math.random() - 0.5) * 0.01,
             longitude: currentLng + (Math.random() - 0.5) * 0.01,

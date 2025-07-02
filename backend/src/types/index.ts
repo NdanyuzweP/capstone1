@@ -1,4 +1,5 @@
 import { Document } from 'mongoose';
+import { Request } from 'express';
 
 export interface IUser extends Document {
   name: string;
@@ -9,6 +10,7 @@ export interface IUser extends Document {
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
+  comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
 export interface IBus extends Document {
@@ -23,7 +25,6 @@ export interface IBus extends Document {
     speed: number;
     heading: number;
   };
-  fare: number; // Added fare field
   isActive: boolean;
   isOnline: boolean;
   createdAt: Date;

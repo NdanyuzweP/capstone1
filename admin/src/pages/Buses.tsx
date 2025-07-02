@@ -10,11 +10,11 @@ import {
   Trash2, 
   MapPin,
   Users,
-  DollarSign,
   Activity,
   AlertCircle,
   UserCheck,
-  Navigation as RouteIcon
+  Navigation as RouteIcon,
+  User,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -51,7 +51,6 @@ export default function Buses() {
   const [formData, setFormData] = useState({
     plateNumber: '',
     capacity: '',
-    fare: '',
     driverId: '',
     routeId: '',
   });
@@ -110,7 +109,6 @@ export default function Buses() {
         capacity: parseInt(formData.capacity),
         driverId: formData.driverId,
         routeId: formData.routeId,
-        ...(formData.fare && { fare: parseInt(formData.fare) }),
       };
 
       if (selectedBus) {
@@ -126,7 +124,6 @@ export default function Buses() {
       setFormData({
         plateNumber: '',
         capacity: '',
-        fare: '',
         driverId: '',
         routeId: '',
       });
@@ -142,7 +139,6 @@ export default function Buses() {
     setFormData({
       plateNumber: bus.plateNumber,
       capacity: bus.capacity.toString(),
-      fare: bus.fare.toString(),
       driverId: typeof bus.driverId === 'string' ? bus.driverId : bus.driverId?._id || '',
       routeId: typeof bus.routeId === 'string' ? bus.routeId : bus.routeId?._id || '',
     });
@@ -207,7 +203,6 @@ export default function Buses() {
             setFormData({
               plateNumber: '',
               capacity: '',
-              fare: '',
               driverId: '',
               routeId: '',
             });
@@ -474,8 +469,9 @@ export default function Buses() {
                       </td>
                       <td>
                         <div className="flex items-center gap-1">
-                          <DollarSign size={14} style={{ color: theme.success }} />
-                          <span className="text-sm" style={{ color: theme.text }}>{bus.fare} RWF</span>
+                          <span className="text-sm" style={{ color: theme.text }}>
+                            {bus.routeId?.fare || 400} RWF
+                          </span>
                         </div>
                       </td>
                       <td>
@@ -555,16 +551,18 @@ export default function Buses() {
 
                 <div>
                   <label className="block text-sm font-medium mb-1" style={{ color: theme.text }}>
-                    Fare (RWF)
+                    Fare
                   </label>
-                  <input
-                    type="number"
-                    className="admin-input"
-                    value={formData.fare}
-                    onChange={(e) => setFormData({ ...formData, fare: e.target.value })}
-                    placeholder="e.g., 400"
-                    min="0"
-                  />
+                  <div className="admin-input" style={{ 
+                    backgroundColor: theme.surface + '50',
+                    border: `1px solid ${theme.border}`,
+                    color: theme.textSecondary,
+                    display: 'flex',
+                    alignItems: 'center',
+                    cursor: 'not-allowed'
+                  }}>
+                    Inherited from selected route
+                  </div>
                 </div>
               </div>
 

@@ -5,7 +5,7 @@ import Route from '../models/Route';
 
 export const createBus = async (req: Request, res: Response) => {
   try {
-    const { plateNumber, capacity, driverId, routeId, fare } = req.body;
+    const { plateNumber, capacity, driverId, routeId } = req.body;
 
     // Verify driver exists and has driver role
     const driver = await User.findById(driverId);
@@ -24,7 +24,6 @@ export const createBus = async (req: Request, res: Response) => {
       capacity,
       driverId,
       routeId,
-      fare: fare || route.fare || 400, // Use provided fare, route fare, or default
     });
 
     await bus.save();
@@ -93,7 +92,7 @@ export const getDriverBus = async (req: Request, res: Response) => {
 
 export const updateBus = async (req: Request, res: Response) => {
   try {
-    const { plateNumber, capacity, driverId, routeId, fare } = req.body;
+    const { plateNumber, capacity, driverId, routeId } = req.body;
 
     // Verify driver if provided
     if (driverId) {
@@ -112,9 +111,6 @@ export const updateBus = async (req: Request, res: Response) => {
     }
 
     const updateData: any = { plateNumber, capacity, driverId, routeId };
-    if (fare !== undefined) {
-      updateData.fare = fare;
-    }
 
     const bus = await Bus.findByIdAndUpdate(
       req.params.id,

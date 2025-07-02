@@ -4,19 +4,11 @@ import { useAuth } from '../contexts/AuthContext';
 import { 
   Settings as SettingsIcon, 
   User, 
-  Moon, 
-  Sun, 
-  Bell, 
-  Shield, 
   Database,
-  Globe,
-  Mail,
-  Phone,
   Save,
   RefreshCw,
   AlertCircle,
   CheckCircle,
-  Key,
   Server
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -35,12 +27,7 @@ export default function Settings() {
   const [systemSettings, setSystemSettings] = useState({
     siteName: 'Ridra Bus Tracking',
     supportEmail: 'support@ridra.rw',
-    maxBusCapacity: 50,
-    defaultFare: 400,
     maintenanceMode: false,
-    emailNotifications: true,
-    smsNotifications: false,
-    realTimeTracking: true,
   });
 
   const handleProfileSave = async () => {
@@ -171,170 +158,7 @@ export default function Settings() {
           </div>
         </div>
 
-        {/* Appearance Settings */}
-        <div className="admin-card">
-          <div className="admin-card-header">
-            <div className="flex items-center gap-3">
-              <div 
-                className="w-10 h-10 rounded-lg flex items-center justify-center"
-                style={{ backgroundColor: theme.secondary + '20' }}
-              >
-                {isDark ? (
-                  <Moon size={20} style={{ color: theme.secondary }} />
-                ) : (
-                  <Sun size={20} style={{ color: theme.secondary }} />
-                )}
-              </div>
-              <div>
-                <h3 className="admin-card-title">Appearance</h3>
-                <p className="admin-card-subtitle">Customize your interface preferences</p>
-              </div>
-            </div>
-          </div>
-          <div className="admin-card-body">
-            <div className="admin-space-y-4">
-              <div className="flex items-center justify-between p-4 rounded-lg" style={{ backgroundColor: theme.background }}>
-                <div>
-                  <p className="font-medium" style={{ color: theme.text }}>
-                    Dark Mode
-                  </p>
-                  <p className="text-sm" style={{ color: theme.textSecondary }}>
-                    Switch between light and dark themes
-                  </p>
-                </div>
-                <button
-                  onClick={toggleTheme}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                    isDark ? 'bg-primary' : 'bg-gray-300'
-                  }`}
-                  style={{ backgroundColor: isDark ? theme.primary : '#d1d5db' }}
-                >
-                  <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      isDark ? 'translate-x-6' : 'translate-x-1'
-                    }`}
-                  />
-                </button>
-              </div>
 
-              <div className="flex items-center justify-between p-4 rounded-lg" style={{ backgroundColor: theme.background }}>
-                <div>
-                  <p className="font-medium" style={{ color: theme.text }}>
-                    Compact Mode
-                  </p>
-                  <p className="text-sm" style={{ color: theme.textSecondary }}>
-                    Reduce spacing for more content
-                  </p>
-                </div>
-                <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-300">
-                  <span className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-1" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Notification Settings */}
-        <div className="admin-card">
-          <div className="admin-card-header">
-            <div className="flex items-center gap-3">
-              <div 
-                className="w-10 h-10 rounded-lg flex items-center justify-center"
-                style={{ backgroundColor: theme.warning + '20' }}
-              >
-                <Bell size={20} style={{ color: theme.warning }} />
-              </div>
-              <div>
-                <h3 className="admin-card-title">Notifications</h3>
-                <p className="admin-card-subtitle">Configure notification preferences</p>
-              </div>
-            </div>
-          </div>
-          <div className="admin-card-body">
-            <div className="admin-space-y-4">
-              <div className="flex items-center justify-between p-4 rounded-lg" style={{ backgroundColor: theme.background }}>
-                <div>
-                  <p className="font-medium" style={{ color: theme.text }}>
-                    Email Notifications
-                  </p>
-                  <p className="text-sm" style={{ color: theme.textSecondary }}>
-                    Receive updates via email
-                  </p>
-                </div>
-                <button
-                  onClick={() => setSystemSettings({
-                    ...systemSettings,
-                    emailNotifications: !systemSettings.emailNotifications
-                  })}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
-                  style={{ 
-                    backgroundColor: systemSettings.emailNotifications ? theme.primary : '#d1d5db' 
-                  }}
-                >
-                  <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      systemSettings.emailNotifications ? 'translate-x-6' : 'translate-x-1'
-                    }`}
-                  />
-                </button>
-              </div>
-
-              <div className="flex items-center justify-between p-4 rounded-lg" style={{ backgroundColor: theme.background }}>
-                <div>
-                  <p className="font-medium" style={{ color: theme.text }}>
-                    SMS Notifications
-                  </p>
-                  <p className="text-sm" style={{ color: theme.textSecondary }}>
-                    Receive updates via SMS
-                  </p>
-                </div>
-                <button
-                  onClick={() => setSystemSettings({
-                    ...systemSettings,
-                    smsNotifications: !systemSettings.smsNotifications
-                  })}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
-                  style={{ 
-                    backgroundColor: systemSettings.smsNotifications ? theme.primary : '#d1d5db' 
-                  }}
-                >
-                  <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      systemSettings.smsNotifications ? 'translate-x-6' : 'translate-x-1'
-                    }`}
-                  />
-                </button>
-              </div>
-
-              <div className="flex items-center justify-between p-4 rounded-lg" style={{ backgroundColor: theme.background }}>
-                <div>
-                  <p className="font-medium" style={{ color: theme.text }}>
-                    Real-time Tracking
-                  </p>
-                  <p className="text-sm" style={{ color: theme.textSecondary }}>
-                    Enable live bus tracking
-                  </p>
-                </div>
-                <button
-                  onClick={() => setSystemSettings({
-                    ...systemSettings,
-                    realTimeTracking: !systemSettings.realTimeTracking
-                  })}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
-                  style={{ 
-                    backgroundColor: systemSettings.realTimeTracking ? theme.primary : '#d1d5db' 
-                  }}
-                >
-                  <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      systemSettings.realTimeTracking ? 'translate-x-6' : 'translate-x-1'
-                    }`}
-                  />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* System Settings */}
         <div className="admin-card">
@@ -380,35 +204,7 @@ export default function Settings() {
                 />
               </div>
 
-              <div className="admin-grid admin-grid-2">
-                <div>
-                  <label className="block text-sm font-medium mb-2" style={{ color: theme.text }}>
-                    Max Bus Capacity
-                  </label>
-                  <input
-                    type="number"
-                    className="admin-input"
-                    value={systemSettings.maxBusCapacity}
-                    onChange={(e) => setSystemSettings({ ...systemSettings, maxBusCapacity: parseInt(e.target.value) })}
-                    placeholder="Max capacity"
-                    min="1"
-                  />
-                </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-2" style={{ color: theme.text }}>
-                    Default Fare (RWF)
-                  </label>
-                  <input
-                    type="number"
-                    className="admin-input"
-                    value={systemSettings.defaultFare}
-                    onChange={(e) => setSystemSettings({ ...systemSettings, defaultFare: parseInt(e.target.value) })}
-                    placeholder="Default fare"
-                    min="0"
-                  />
-                </div>
-              </div>
 
               <div className="flex items-center justify-between p-4 rounded-lg" style={{ backgroundColor: theme.background }}>
                 <div>

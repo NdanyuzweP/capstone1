@@ -36,7 +36,6 @@ export const validateBus = (req: Request, res: Response, next: NextFunction) => 
     capacity: Joi.number().required().min(1),
     driverId: Joi.string().required(),
     routeId: Joi.string().required(),
-    fare: Joi.number().optional().min(0), // Added fare validation
   });
 
   const { error } = schema.validate(req.body);
@@ -51,7 +50,7 @@ export const validateRoute = (req: Request, res: Response, next: NextFunction) =
     name: Joi.string().required(),
     description: Joi.string().optional(),
     estimatedDuration: Joi.number().required().min(1),
-    fare: Joi.number().optional().min(0), // Added fare validation
+    fare: Joi.number().optional().min(0),
   });
 
   const { error } = schema.validate(req.body);

@@ -1,3 +1,4 @@
+import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -19,6 +20,9 @@ export default function Home() {
   const { buses, loading: busesLoading, error: busesError, refetch } = useBuses(location || undefined, true); // true = nearby only
   const { interests, showInterest, removeInterest } = useUserInterests();
   const [showLocationModal, setShowLocationModal] = useState(false);
+
+  console.log(buses.length)
+
 
   useEffect(() => {
     if (!hasPermission && !location) {
@@ -52,6 +56,10 @@ export default function Home() {
     const mockScheduleId = `schedule_${busId}`;
     return interests.some(interest => interest.busScheduleId === mockScheduleId);
   };
+
+  const onGetNearbyBuses = async () => {
+    
+  }
 
   const renderBusCard = ({ item: bus }: { item: Bus }) => (
     <View style={[styles.busCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>

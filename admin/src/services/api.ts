@@ -215,7 +215,6 @@ class ApiService {
     capacity: number;
     driverId: string;
     routeId: string;
-    fare?: number;
   }) {
     return this.request<{
       message: string;
@@ -227,11 +226,10 @@ class ApiService {
   }
 
   async updateBus(id: string, data: {
-    plateNumber?: string;
-    capacity?: number;
-    driverId?: string;
-    routeId?: string;
-    fare?: number;
+    plateNumber: string;
+    capacity: number;
+    driverId: string;
+    routeId: string;
   }) {
     return this.request<{
       message: string;

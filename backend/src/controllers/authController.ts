@@ -1,11 +1,19 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import User from '../models/User';
+import { AuthRequest } from '../types';
 
-const generateToken = (id: string) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET!, {
-    expiresIn: process.env.JWT_EXPIRES_IN || '7d',
-  });
+const generateToken = (id: string): string => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_SECRET is not defined');
+  }
+  
+  return jwt.sign(
+    { id }, 
+    secret, 
+    { expiresIn: process.env.JWT_EXPIRES_IN || '7d' } as any
+  );
 };
 
 export const signup = async (req: Request, res: Response) => {
@@ -30,13 +38,13 @@ export const signup = async (req: Request, res: Response) => {
     await user.save();
 
     // Generate token
-    const token = generateToken(user._id.toString());
+    const token = generateToken(String(user._id));
 
     res.status(201).json({
       message: 'User created successfully',
       token,
       user: {
-        id: user._id,
+        id: String(user._id),
         name: user.name,
         email: user.email,
         phone: user.phone,
@@ -65,13 +73,13 @@ export const login = async (req: Request, res: Response) => {
     }
 
     // Generate token
-    const token = generateToken(user._id.toString());
+    const token = generateToken(String(user._id));
 
     res.json({
       message: 'Login successful',
       token,
       user: {
-        id: user._id,
+        id: String(user._id),
         name: user.name,
         email: user.email,
         phone: user.phone,
@@ -83,9 +91,13 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
-export const getProfile = async (req: Request, res: Response) => {
+export const getProfile = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = (req as any).user.id;
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
     const user = await User.findById(userId).select('-password');
     
     if (!user) {

@@ -14,7 +14,13 @@ import {
   Mail,
   Phone,
   Calendar,
-  AlertCircle
+  AlertCircle,
+  Activity,
+  Shield,
+  Car,
+  Bus,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -36,9 +42,19 @@ interface Pagination {
   hasPrev: boolean;
 }
 
+interface UserStats {
+  activeUsers: number;
+  activeDrivers: number;
+  activeAdmins: number;
+  inactiveUsers: number;
+  totalUsers: number;
+}
+
 export default function Users() {
   const { theme } = useTheme();
   const [users, setUsers] = useState<User[]>([]);
+  const [buses, setBuses] = useState<any[]>([]);
+  const [stats, setStats] = useState<UserStats | null>(null);
   const [pagination, setPagination] = useState<Pagination | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -48,9 +64,21 @@ export default function Users() {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showUserModal, setShowUserModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [createForm, setCreateForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    password: '',
+    role: 'user'
+  });
+  const [createLoading, setCreateLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     fetchUsers();
+    fetchStats();
+    fetchBuses();
   }, [currentPage, roleFilter, statusFilter]);
 
   const fetchUsers = async () => {
@@ -78,11 +106,30 @@ export default function Users() {
     }
   };
 
+  const fetchStats = async () => {
+    try {
+      const response = await apiService.getUserStats();
+      setStats(response.stats);
+    } catch (err: any) {
+      console.error('Error fetching user stats:', err);
+    }
+  };
+
+  const fetchBuses = async () => {
+    try {
+      const response = await apiService.getBuses();
+      setBuses(response.buses);
+    } catch (err: any) {
+      console.error('Error fetching buses:', err);
+    }
+  };
+
   const handleStatusToggle = async (user: User) => {
     try {
       await apiService.updateUserStatus(user._id, !user.isActive);
       toast.success(`User ${!user.isActive ? 'activated' : 'deactivated'} successfully`);
       fetchUsers();
+      fetchStats();
     } catch (err: any) {
       console.error('Error updating user status:', err);
       toast.error(err.message || 'Failed to update user status');
@@ -94,6 +141,7 @@ export default function Users() {
       await apiService.updateUserRole(user._id, newRole);
       toast.success('User role updated successfully');
       fetchUsers();
+      fetchStats();
     } catch (err: any) {
       console.error('Error updating user role:', err);
       toast.error(err.message || 'Failed to update user role');
@@ -109,10 +157,54 @@ export default function Users() {
       await apiService.deleteUser(user._id);
       toast.success('User deleted successfully');
       fetchUsers();
+      fetchStats();
     } catch (err: any) {
       console.error('Error deleting user:', err);
       toast.error(err.message || 'Failed to delete user');
     }
+  };
+
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!createForm.name || !createForm.email || !createForm.phone || !createForm.password) {
+      toast.error('Please fill in all fields');
+      return;
+    }
+    
+    // Simple email validation
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(createForm.email)) {
+      toast.error('Please enter a valid email');
+      return;
+    }
+    
+    if (createForm.password.length < 6) {
+      toast.error('Password must be at least 6 characters');
+      return;
+    }
+    
+    setCreateLoading(true);
+    try {
+      await apiService.createUser({
+        ...createForm,
+      });
+      toast.success(`${createForm.role === 'driver' ? 'Driver' : 'User'} created successfully`);
+      setShowCreateModal(false);
+      setCreateForm({ name: '', email: '', phone: '', password: '', role: 'user' });
+      fetchUsers();
+      fetchStats();
+    } catch (err: any) {
+      toast.error(err.message || `Failed to create ${createForm.role}`);
+    } finally {
+      setCreateLoading(false);
+    }
+  };
+
+  const getDriverBus = (driverId: string) => {
+    return buses.find(bus => 
+      (bus.driverId?._id === driverId || bus.driverId?.id === driverId || bus.driverId === driverId) && 
+      bus.isActive
+    );
   };
 
   const filteredUsers = users.filter(user =>
@@ -129,6 +221,17 @@ export default function Users() {
         return 'admin-badge-warning';
       default:
         return 'admin-badge-primary';
+    }
+  };
+
+  const getRoleIcon = (role: string) => {
+    switch (role) {
+      case 'admin':
+        return Shield;
+      case 'driver':
+        return Car;
+      default:
+        return UsersIcon;
     }
   };
 
@@ -153,11 +256,103 @@ export default function Users() {
           <h1 className="admin-page-title">Users Management</h1>
           <p className="admin-page-subtitle">Manage all users, drivers, and administrators</p>
         </div>
-        <button className="admin-btn admin-btn-primary">
+        <button 
+          className="admin-btn admin-btn-primary"
+          onClick={() => setShowCreateModal(true)}
+        >
           <Plus size={18} />
           Add User
         </button>
       </div>
+
+      {/* Stats Cards */}
+      {stats && (
+        <div className="admin-grid admin-grid-4 admin-mb-6">
+          <div className="admin-card">
+            <div className="admin-card-body">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium" style={{ color: theme.textSecondary }}>
+                    Total Users
+                  </p>
+                  <p className="text-2xl font-bold mt-1" style={{ color: theme.text }}>
+                    {stats.totalUsers}
+                  </p>
+                </div>
+                <div 
+                  className="w-12 h-12 rounded-lg flex items-center justify-center"
+                  style={{ backgroundColor: theme.primary + '20' }}
+                >
+                  <UsersIcon size={24} style={{ color: theme.primary }} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="admin-card">
+            <div className="admin-card-body">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium" style={{ color: theme.textSecondary }}>
+                    Active Drivers
+                  </p>
+                  <p className="text-2xl font-bold mt-1" style={{ color: theme.text }}>
+                    {stats.activeDrivers}
+                  </p>
+                </div>
+                <div 
+                  className="w-12 h-12 rounded-lg flex items-center justify-center"
+                  style={{ backgroundColor: theme.warning + '20' }}
+                >
+                  <Car size={24} style={{ color: theme.warning }} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="admin-card">
+            <div className="admin-card-body">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium" style={{ color: theme.textSecondary }}>
+                    Regular Users
+                  </p>
+                  <p className="text-2xl font-bold mt-1" style={{ color: theme.text }}>
+                    {stats.activeUsers}
+                  </p>
+                </div>
+                <div 
+                  className="w-12 h-12 rounded-lg flex items-center justify-center"
+                  style={{ backgroundColor: theme.success + '20' }}
+                >
+                  <Activity size={24} style={{ color: theme.success }} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="admin-card">
+            <div className="admin-card-body">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium" style={{ color: theme.textSecondary }}>
+                    Administrators
+                  </p>
+                  <p className="text-2xl font-bold mt-1" style={{ color: theme.text }}>
+                    {stats.activeAdmins}
+                  </p>
+                </div>
+                <div 
+                  className="w-12 h-12 rounded-lg flex items-center justify-center"
+                  style={{ backgroundColor: theme.error + '20' }}
+                >
+                  <Shield size={24} style={{ color: theme.error }} />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="admin-filters">
@@ -252,101 +447,132 @@ export default function Users() {
                     <th>User</th>
                     <th>Contact</th>
                     <th>Role</th>
+                    <th>Assignment</th>
                     <th>Status</th>
                     <th>Joined</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredUsers.map((user) => (
-                    <tr key={user._id}>
-                      <td>
-                        <div className="flex items-center gap-3">
-                          <div 
-                            className="w-10 h-10 rounded-full flex items-center justify-center"
-                            style={{ backgroundColor: theme.primary + '20' }}
-                          >
-                            <span className="font-semibold text-sm" style={{ color: theme.primary }}>
-                              {user.name.charAt(0).toUpperCase()}
-                            </span>
+                  {filteredUsers.map((user) => {
+                    const assignedBus = user.role === 'driver' ? getDriverBus(user._id) : null;
+                    const RoleIcon = getRoleIcon(user.role);
+                    
+                    return (
+                      <tr key={user._id}>
+                        <td>
+                          <div className="flex items-center gap-3">
+                            <div 
+                              className="w-10 h-10 rounded-full flex items-center justify-center"
+                              style={{ backgroundColor: theme.primary + '20' }}
+                            >
+                              <span className="font-semibold text-sm" style={{ color: theme.primary }}>
+                                {user.name.charAt(0).toUpperCase()}
+                              </span>
+                            </div>
+                            <div>
+                              <p className="font-medium" style={{ color: theme.text }}>
+                                {user.name}
+                              </p>
+                              <p className="text-xs" style={{ color: theme.textSecondary }}>
+                                ID: {user._id.slice(-8)}
+                              </p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="font-medium" style={{ color: theme.text }}>
-                              {user.name}
-                            </p>
-                            <p className="text-xs" style={{ color: theme.textSecondary }}>
-                              ID: {user._id.slice(-8)}
-                            </p>
+                        </td>
+                        <td>
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <Mail size={14} style={{ color: theme.textSecondary }} />
+                              <span className="text-sm" style={{ color: theme.text }}>
+                                {user.email}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Phone size={14} style={{ color: theme.textSecondary }} />
+                              <span className="text-sm" style={{ color: theme.text }}>
+                                {user.phone}
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                      </td>
-                      <td>
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <Mail size={14} style={{ color: theme.textSecondary }} />
-                            <span className="text-sm" style={{ color: theme.text }}>
-                              {user.email}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Phone size={14} style={{ color: theme.textSecondary }} />
-                            <span className="text-sm" style={{ color: theme.text }}>
-                              {user.phone}
-                            </span>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <span className={`admin-badge ${getRoleBadgeColor(user.role)}`}>
-                          {user.role}
-                        </span>
-                      </td>
-                      <td>
-                        <button
-                          onClick={() => handleStatusToggle(user)}
-                          className={`admin-badge ${user.isActive ? 'admin-badge-success' : 'admin-badge-danger'}`}
-                        >
-                          {user.isActive ? (
-                            <>
-                              <UserCheck size={12} className="mr-1" />
-                              Active
-                            </>
-                          ) : (
-                            <>
-                              <UserX size={12} className="mr-1" />
-                              Inactive
-                            </>
-                          )}
-                        </button>
-                      </td>
-                      <td>
-                        <div className="flex items-center gap-2">
-                          <Calendar size={14} style={{ color: theme.textSecondary }} />
-                          <span className="text-sm" style={{ color: theme.text }}>
-                            {new Date(user.createdAt).toLocaleDateString()}
+                        </td>
+                        <td>
+                          <span className={`admin-badge ${getRoleBadgeColor(user.role)}`}>
+                            {user.role}
                           </span>
-                        </div>
-                      </td>
-                      <td>
-                        <div className="flex items-center gap-2">
+                        </td>
+                        <td>
+                          {user.role === 'driver' ? (
+                            assignedBus ? (
+                              <div className="flex items-center gap-2">
+                                <Bus size={14} style={{ color: theme.warning }} />
+                                <div>
+                                  <span className="text-sm font-medium" style={{ color: theme.text }}>
+                                    {assignedBus.plateNumber}
+                                  </span>
+                                  <p className="text-xs" style={{ color: theme.textSecondary }}>
+                                    {assignedBus.routeId?.name || 'No route'}
+                                  </p>
+                                </div>
+                              </div>
+                            ) : (
+                              <span className="admin-badge admin-badge-secondary">
+                                Unassigned
+                              </span>
+                            )
+                          ) : (
+                            <span className="text-sm" style={{ color: theme.textSecondary }}>
+                              N/A
+                            </span>
+                          )}
+                        </td>
+                        <td>
                           <button
                             onClick={() => handleStatusToggle(user)}
-                            className="admin-btn admin-btn-secondary p-2"
-                            title={user.isActive ? 'Deactivate' : 'Activate'}
+                            className={`admin-badge ${user.isActive ? 'admin-badge-success' : 'admin-badge-danger'}`}
                           >
-                            {user.isActive ? <UserX size={14} /> : <UserCheck size={14} />}
+                            {user.isActive ? (
+                              <>
+                                <UserCheck size={12} className="mr-1" />
+                                Active
+                              </>
+                            ) : (
+                              <>
+                                <UserX size={12} className="mr-1" />
+                                Inactive
+                              </>
+                            )}
                           </button>
-                          <button
-                            onClick={() => handleDeleteUser(user)}
-                            className="admin-btn admin-btn-danger p-2"
-                            title="Delete User"
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td>
+                          <div className="flex items-center gap-2">
+                            <Calendar size={14} style={{ color: theme.textSecondary }} />
+                            <span className="text-sm" style={{ color: theme.text }}>
+                              {new Date(user.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => handleStatusToggle(user)}
+                              className="admin-btn admin-btn-secondary p-2"
+                              title={user.isActive ? 'Deactivate' : 'Activate'}
+                            >
+                              {user.isActive ? <UserX size={14} /> : <UserCheck size={14} />}
+                            </button>
+                            <button
+                              onClick={() => handleDeleteUser(user)}
+                              className="admin-btn admin-btn-danger p-2"
+                              title="Delete User"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -383,6 +609,122 @@ export default function Users() {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create User Modal */}
+      {showCreateModal && (
+        <div className="modal-overlay">
+          <div className="modal-content max-w-md">
+            <h2 className="text-xl font-bold mb-4" style={{ color: theme.text }}>
+              Add New User
+            </h2>
+            <form onSubmit={handleCreateUser} className="admin-space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: theme.text }}>
+                  User Type
+                </label>
+                <select
+                  className="admin-input"
+                  value={createForm.role}
+                  onChange={(e) => setCreateForm({...createForm, role: e.target.value})}
+                  required
+                >
+                  <option value="user">Regular User</option>
+                  <option value="driver">Driver</option>
+                  <option value="admin">Administrator</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: theme.text }}>
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  className="admin-input"
+                  value={createForm.name}
+                  onChange={(e) => setCreateForm({...createForm, name: e.target.value})}
+                  placeholder="Enter full name"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: theme.text }}>
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  className="admin-input"
+                  value={createForm.email}
+                  onChange={(e) => setCreateForm({...createForm, email: e.target.value})}
+                  placeholder="Enter email address"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: theme.text }}>
+                  Phone Number
+                </label>
+                <input
+                  type="tel"
+                  className="admin-input"
+                  value={createForm.phone}
+                  onChange={(e) => setCreateForm({...createForm, phone: e.target.value})}
+                  placeholder="Enter phone number"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: theme.text }}>
+                  Password
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    className="admin-input pr-10"
+                    value={createForm.password}
+                    onChange={(e) => setCreateForm({...createForm, password: e.target.value})}
+                    placeholder="Enter password (min 6 characters)"
+                    required
+                    minLength={6}
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-3 pt-4">
+                <button
+                  type="submit"
+                  disabled={createLoading}
+                  className="admin-btn admin-btn-primary flex-1"
+                >
+                  {createLoading ? <div className="spinner" /> : null}
+                  {createLoading ? 'Creating...' : `Create ${createForm.role === 'driver' ? 'Driver' : createForm.role === 'admin' ? 'Admin' : 'User'}`}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowCreateModal(false);
+                    setCreateForm({ name: '', email: '', phone: '', password: '', role: 'user' });
+                    setShowPassword(false);
+                  }}
+                  className="admin-btn admin-btn-secondary flex-1"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

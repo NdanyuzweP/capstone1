@@ -22,7 +22,6 @@ interface BackendBus {
   _id: string;
   plateNumber: string;
   capacity: number;
-  fare?: number; // Make fare optional to match backend data
   driverId: any;
   routeId: any;
   currentLocation: {
@@ -91,7 +90,7 @@ export function useBuses(userLocation?: { latitude: number; longitude: number },
       currentPassengers: Math.floor(Math.random() * (backendBus.capacity || 25)),
       isActive: backendBus.isActive && backendBus.isOnline,
       interested: Math.floor(Math.random() * 10),
-      fare: backendBus.fare || backendBus.routeId?.fare || 400, // Use actual fare from database
+      fare: backendBus.routeId?.fare || 400, // Get fare from route only
       schedule: '05:00–23:00', // You can enhance this with actual schedule data
       distance: distance,
     };
@@ -113,7 +112,7 @@ export function useBuses(userLocation?: { latitude: number; longitude: number },
       currentPassengers: Math.floor(Math.random() * 25),
       isActive: apiBus.isOnline,
       interested: Math.floor(Math.random() * 10),
-      fare: 400,
+      fare: apiBus.route?.fare || 400, // Get fare from route
       schedule: '05:00–23:00',
       distance: apiBus.distance,
     };
@@ -178,10 +177,10 @@ export function useBuses(userLocation?: { latitude: number; longitude: number },
               bus.currentLocation.longitude
             );
           }
-          // Ensure 'fare' property exists for BackendBus
-          const backendBusWithFare = { ...bus, fare: (bus as any).fare } as BackendBus;
+          // Remove the fare handling from bus mapping since buses don't have fare anymore
+          const backendBusData = bus as BackendBus;
           return {
-            ...transformBackendBusToFrontendBus(backendBusWithFare, distance),
+            ...transformBackendBusToFrontendBus(backendBusData, distance),
             scheduleId,
             pickupPointId,
           };

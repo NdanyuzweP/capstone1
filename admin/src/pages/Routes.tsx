@@ -10,7 +10,6 @@ import {
   Trash2, 
   MapPin,
   Clock,
-  DollarSign,
   AlertCircle
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -387,7 +386,6 @@ export default function Routes() {
 
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <DollarSign size={14} style={{ color: theme.textSecondary }} />
                       <span className="text-sm" style={{ color: theme.textSecondary }}>
                         Fare
                       </span>

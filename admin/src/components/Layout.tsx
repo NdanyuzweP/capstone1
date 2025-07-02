@@ -4,7 +4,6 @@ import { useAuth } from '../contexts/AuthContext';
 import {
   LayoutDashboard,
   Users,
-  UserCheck,
   Bus,
   Navigation,
   MapPin,
@@ -19,7 +18,6 @@ import {
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Users', href: '/users', icon: Users },
-  { name: 'Drivers', href: '/drivers', icon: UserCheck },
   { name: 'Buses', href: '/buses', icon: Bus },
   { name: 'Routes', href: '/routes', icon: Navigation },
   { name: 'Pickup Points', href: '/pickup-points', icon: MapPin },
@@ -42,15 +40,15 @@ export default function Layout() {
   return (
     <div className="flex min-h-screen bg-surface">
       {/* Sidebar */}
-      <aside className="hidden lg:flex flex-col w-64 h-screen fixed left-0 top-0 bg-gradient-to-b from-white via-surface to-surface shadow-lg z-40 border-r border-light">
+      <aside className="hidden lg:flex flex-col w-64 fixed left-0 top-0 bottom-0 bg-gradient-to-b from-white via-surface to-surface shadow-lg z-40 border-r border-light" style={{ height: '100vh', minHeight: '100vh' }}>
         {/* Logo */}
-        <div className="flex items-center justify-between h-16 px-6 border-b border-light">
+        <div className="flex items-center justify-between h-16 px-6 border-b border-light flex-shrink-0">
           <div className="flex items-center">
             <h1 className="text-2xl font-bold text-primary tracking-tight">Ridra Admin</h1>
           </div>
         </div>
         {/* Navigation */}
-        <nav className="flex-1 px-4 py-6 space-y-2">
+        <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
           {navigation.map((item) => {
             const isActive = location.pathname === item.href;
             const Icon = item.icon;
@@ -69,7 +67,7 @@ export default function Layout() {
           })}
         </nav>
         {/* User info and logout */}
-        <div className="p-6 border-t border-light flex flex-col gap-4">
+        <div className="p-6 border-t border-light flex flex-col gap-4 flex-shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full flex items-center justify-center bg-primary text-white font-semibold shadow">
               {user?.name?.charAt(0) || 'A'}
@@ -91,9 +89,9 @@ export default function Layout() {
       {sidebarOpen && (
         <div className="fixed inset-0 z-50 flex lg:hidden">
           <div className="fixed inset-0 bg-black bg-opacity-40" onClick={() => setSidebarOpen(false)} />
-          <aside className="relative w-64 h-full bg-gradient-to-b from-white via-surface to-surface shadow-lg border-r border-light flex flex-col">
+          <aside className="relative w-64 bg-gradient-to-b from-white via-surface to-surface shadow-lg border-r border-light flex flex-col" style={{ height: '100vh', minHeight: '100vh' }}>
             {/* Logo */}
-            <div className="flex items-center justify-between h-16 px-6 border-b border-light">
+            <div className="flex items-center justify-between h-16 px-6 border-b border-light flex-shrink-0">
               <div className="flex items-center">
                 <h1 className="text-2xl font-bold text-primary tracking-tight">Ridra Admin</h1>
               </div>
@@ -102,7 +100,7 @@ export default function Layout() {
               </button>
             </div>
             {/* Navigation */}
-            <nav className="flex-1 px-4 py-6 space-y-2">
+            <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
               {navigation.map((item) => {
                 const isActive = location.pathname === item.href;
                 const Icon = item.icon;
@@ -122,7 +120,7 @@ export default function Layout() {
               })}
             </nav>
             {/* User info and logout */}
-            <div className="p-6 border-t border-light flex flex-col gap-4">
+            <div className="p-6 border-t border-light flex flex-col gap-4 flex-shrink-0">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full flex items-center justify-center bg-primary text-white font-semibold shadow">
                   {user?.name?.charAt(0) || 'A'}
