@@ -116,33 +116,31 @@ app.get('/', (req, res) => {
   });
 });
 
-// Database stats endpoint (development only)
-if (process.env.NODE_ENV === 'development') {
-  app.get('/api/stats', async (req, res) => {
-    try {
-      const Bus = (await import('./models/Bus')).default;
-      const Route = (await import('./models/Route')).default;
-      const User = (await import('./models/User')).default;
-      const BusSchedule = (await import('./models/BusSchedule')).default;
-      const PickupPoint = (await import('./models/PickupPoint')).default;
-      const UserInterest = (await import('./models/UserInterest')).default;
-      
-      const stats = {
-        buses: await Bus.countDocuments(),
-        routes: await Route.countDocuments(),
-        users: await User.countDocuments(),
-        schedules: await BusSchedule.countDocuments(),
-        pickupPoints: await PickupPoint.countDocuments(),
-        userInterests: await UserInterest.countDocuments(),
-      };
-      
-      res.json({ stats });
-    } catch (error) {
-      console.error('Stats error:', error);
-      res.status(500).json({ error: 'Failed to get stats' });
-    }
-  });
-}
+// Database stats endpoint
+app.get('/api/stats', async (req, res) => {
+  try {
+    const Bus = (await import('./models/Bus')).default;
+    const Route = (await import('./models/Route')).default;
+    const User = (await import('./models/User')).default;
+    const BusSchedule = (await import('./models/BusSchedule')).default;
+    const PickupPoint = (await import('./models/PickupPoint')).default;
+    const UserInterest = (await import('./models/UserInterest')).default;
+    
+    const stats = {
+      buses: await Bus.countDocuments(),
+      routes: await Route.countDocuments(),
+      users: await User.countDocuments(),
+      schedules: await BusSchedule.countDocuments(),
+      pickupPoints: await PickupPoint.countDocuments(),
+      userInterests: await UserInterest.countDocuments(),
+    };
+    
+    res.json({ stats });
+  } catch (error) {
+    console.error('Stats error:', error);
+    res.status(500).json({ error: 'Failed to get stats' });
+  }
+});
 
 // 404 handler
 app.use('*', (req, res) => {
@@ -171,8 +169,8 @@ const startServer = async () => {
     // Create admin user if not exists
     await createAdminUser();
     
-    // Seed database with sample data if empty
-    await seedDatabase();
+    // Database seeding disabled - using real data only
+    // await seedDatabase();
     
     // Check existing data in database
     const Bus = (await import('./models/Bus')).default;
@@ -199,11 +197,9 @@ const startServer = async () => {
       console.log(`🚀 Server running on port ${PORT}`);
       console.log(`📚 API Documentation: http://localhost:${PORT}/api-docs`);
       console.log(`🔍 Health Check: http://localhost:${PORT}/health`);
+      console.log(`📊 Stats endpoint: http://localhost:${PORT}/api/stats`);
       console.log(`🌍 Environment: ${process.env.NODE_ENV}`);
       console.log(`📱 CORS enabled for mobile development`);
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`📊 Stats endpoint: GET http://localhost:${PORT}/api/stats`);
-      }
     });
   } catch (error) {
     console.error('Failed to start server:', error);
