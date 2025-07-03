@@ -3,7 +3,7 @@ import Bus from '../models/Bus';
 import User from '../models/User';
 import Route from '../models/Route';
 
-export const createBus = async (req: Request, res: Response) => {
+export const createBus = async (req: Request, res: Response): Promise<any> => {
   try {
     const { plateNumber, capacity, driverId, routeId } = req.body;
 
@@ -44,7 +44,7 @@ export const createBus = async (req: Request, res: Response) => {
   }
 };
 
-export const getAllBuses = async (req: Request, res: Response) => {
+export const getAllBuses = async (req: Request, res: Response): Promise<any> => {
   try {
     const buses = await Bus.find({ isActive: true })
       .populate('driverId', 'name email phone')
@@ -56,7 +56,7 @@ export const getAllBuses = async (req: Request, res: Response) => {
   }
 };
 
-export const getBusById = async (req: Request, res: Response) => {
+export const getBusById = async (req: Request, res: Response): Promise<any> => {
   try {
     const bus = await Bus.findById(req.params.id)
       .populate('driverId', 'name email phone')
@@ -72,7 +72,7 @@ export const getBusById = async (req: Request, res: Response) => {
   }
 };
 
-export const getDriverBus = async (req: Request, res: Response) => {
+export const getDriverBus = async (req: Request, res: Response): Promise<any> => {
   try {
     const driverId = (req as any).user.id;
     
@@ -90,7 +90,7 @@ export const getDriverBus = async (req: Request, res: Response) => {
   }
 };
 
-export const updateBus = async (req: Request, res: Response) => {
+export const updateBus = async (req: Request, res: Response): Promise<any> => {
   try {
     const { plateNumber, capacity, driverId, routeId } = req.body;
 
@@ -132,7 +132,7 @@ export const updateBus = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteBus = async (req: Request, res: Response) => {
+export const deleteBus = async (req: Request, res: Response): Promise<any> => {
   try {
     const bus = await Bus.findByIdAndUpdate(
       req.params.id,

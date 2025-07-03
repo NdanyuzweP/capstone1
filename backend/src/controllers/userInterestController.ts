@@ -3,7 +3,7 @@ import UserInterest from '../models/UserInterest';
 import BusSchedule from '../models/BusSchedule';
 import PickupPoint from '../models/PickupPoint';
 
-export const createUserInterest = async (req: Request, res: Response) => {
+export const createUserInterest = async (req: Request, res: Response): Promise<any> => {
   try {
     const userId = (req as any).user.id;
     const { busScheduleId, pickupPointId } = req.body;
@@ -58,7 +58,7 @@ export const createUserInterest = async (req: Request, res: Response) => {
   }
 };
 
-export const getUserInterests = async (req: Request, res: Response) => {
+export const getUserInterests = async (req: Request, res: Response): Promise<any> => {
   try {
     const userId = (req as any).user.id;
     
@@ -83,7 +83,7 @@ export const getUserInterests = async (req: Request, res: Response) => {
   }
 };
 
-export const updateUserInterest = async (req: Request, res: Response) => {
+export const updateUserInterest = async (req: Request, res: Response): Promise<any> => {
   try {
     const userId = (req as any).user.id;
     const { status } = req.body;
@@ -109,7 +109,7 @@ export const updateUserInterest = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteUserInterest = async (req: Request, res: Response) => {
+export const deleteUserInterest = async (req: Request, res: Response): Promise<any> => {
   try {
     const userId = (req as any).user.id;
 

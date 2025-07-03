@@ -9,7 +9,7 @@ const User_1 = __importDefault(require("../models/User"));
 const Route_1 = __importDefault(require("../models/Route"));
 const createBus = async (req, res) => {
     try {
-        const { plateNumber, capacity, driverId, routeId, fare } = req.body;
+        const { plateNumber, capacity, driverId, routeId } = req.body;
         const driver = await User_1.default.findById(driverId);
         if (!driver || driver.role !== 'driver') {
             return res.status(400).json({ error: 'Invalid driver' });
@@ -23,7 +23,6 @@ const createBus = async (req, res) => {
             capacity,
             driverId,
             routeId,
-            fare: fare || route.fare || 400,
         });
         await bus.save();
         const populatedBus = await Bus_1.default.findById(bus._id)
@@ -87,7 +86,7 @@ const getDriverBus = async (req, res) => {
 exports.getDriverBus = getDriverBus;
 const updateBus = async (req, res) => {
     try {
-        const { plateNumber, capacity, driverId, routeId, fare } = req.body;
+        const { plateNumber, capacity, driverId, routeId } = req.body;
         if (driverId) {
             const driver = await User_1.default.findById(driverId);
             if (!driver || driver.role !== 'driver') {
@@ -101,9 +100,6 @@ const updateBus = async (req, res) => {
             }
         }
         const updateData = { plateNumber, capacity, driverId, routeId };
-        if (fare !== undefined) {
-            updateData.fare = fare;
-        }
         const bus = await Bus_1.default.findByIdAndUpdate(req.params.id, updateData, { new: true }).populate('driverId', 'name email phone')
             .populate('routeId', 'name description fare');
         if (!bus) {

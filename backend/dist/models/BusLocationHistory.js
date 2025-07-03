@@ -36,7 +36,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const busLocationHistorySchema = new mongoose_1.Schema({
     busId: {
-        type: mongoose_1.Schema.Types.ObjectId,
+        type: String,
         ref: 'Bus',
         required: true,
     },

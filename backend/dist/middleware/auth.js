@@ -10,15 +10,22 @@ const authenticate = async (req, res, next) => {
     try {
         const token = req.header('Authorization')?.replace('Bearer ', '');
         if (!token) {
-            return res.status(401).json({ error: 'No token provided' });
+            res.status(401).json({ error: 'No token provided' });
+            return;
         }
-        const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
+        const secret = process.env.JWT_SECRET;
+        if (!secret) {
+            res.status(500).json({ error: 'Server configuration error' });
+            return;
+        }
+        const decoded = jsonwebtoken_1.default.verify(token, secret);
         const user = await User_1.default.findById(decoded.id).select('-password');
         if (!user || !user.isActive) {
-            return res.status(401).json({ error: 'Invalid token' });
+            res.status(401).json({ error: 'Invalid token' });
+            return;
         }
         req.user = {
-            id: user._id.toString(),
+            id: String(user._id),
             email: user.email,
             role: user.role,
         };
@@ -32,7 +39,8 @@ exports.authenticate = authenticate;
 const authorize = (...roles) => {
     return (req, res, next) => {
         if (!req.user || !roles.includes(req.user.role)) {
-            return res.status(403).json({ error: 'Access denied' });
+            res.status(403).json({ error: 'Access denied' });
+            return;
         }
         next();
     };

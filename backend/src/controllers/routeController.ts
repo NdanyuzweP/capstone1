@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import Route from '../models/Route';
 import PickupPoint from '../models/PickupPoint';
 
-export const createRoute = async (req: Request, res: Response) => {
+export const createRoute = async (req: Request, res: Response): Promise<any> => {
   try {
     const { name, description, estimatedDuration, fare } = req.body;
 
@@ -24,7 +24,7 @@ export const createRoute = async (req: Request, res: Response) => {
   }
 };
 
-export const getAllRoutes = async (req: Request, res: Response) => {
+export const getAllRoutes = async (req: Request, res: Response): Promise<any> => {
   try {
     const routes = await Route.find({ isActive: true })
       .populate('pickupPoints');
@@ -35,7 +35,7 @@ export const getAllRoutes = async (req: Request, res: Response) => {
   }
 };
 
-export const getRouteById = async (req: Request, res: Response) => {
+export const getRouteById = async (req: Request, res: Response): Promise<any> => {
   try {
     const route = await Route.findById(req.params.id)
       .populate('pickupPoints');
@@ -50,7 +50,7 @@ export const getRouteById = async (req: Request, res: Response) => {
   }
 };
 
-export const updateRoute = async (req: Request, res: Response) => {
+export const updateRoute = async (req: Request, res: Response): Promise<any> => {
   try {
     const { name, description, estimatedDuration, fare } = req.body;
 
@@ -78,7 +78,7 @@ export const updateRoute = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteRoute = async (req: Request, res: Response) => {
+export const deleteRoute = async (req: Request, res: Response): Promise<any> => {
   try {
     const route = await Route.findByIdAndUpdate(
       req.params.id,

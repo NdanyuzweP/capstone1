@@ -3,7 +3,7 @@ import Bus from '../models/Bus';
 import BusLocationHistory from '../models/BusLocationHistory';
 import User from '../models/User';
 
-export const updateBusLocation = async (req: Request, res: Response) => {
+export const updateBusLocation = async (req: Request, res: Response): Promise<any> => {
   try {
     const { busId, latitude, longitude, speed = 0, heading = 0, accuracy = 0 } = req.body;
     const driverId = (req as any).user.id;
@@ -50,7 +50,7 @@ export const updateBusLocation = async (req: Request, res: Response) => {
   }
 };
 
-export const getBusLocation = async (req: Request, res: Response) => {
+export const getBusLocation = async (req: Request, res: Response): Promise<any> => {
   try {
     const { busId } = req.params;
 
@@ -82,7 +82,7 @@ export const getBusLocation = async (req: Request, res: Response) => {
   }
 };
 
-export const getAllBusLocations = async (req: Request, res: Response) => {
+export const getAllBusLocations = async (req: Request, res: Response): Promise<any> => {
   try {
     const { routeId, isOnline } = req.query;
 
@@ -121,7 +121,7 @@ export const getAllBusLocations = async (req: Request, res: Response) => {
   }
 };
 
-export const getBusLocationHistory = async (req: Request, res: Response) => {
+export const getBusLocationHistory = async (req: Request, res: Response): Promise<any> => {
   try {
     const { busId } = req.params;
     const { hours = 1 } = req.query;
@@ -141,7 +141,7 @@ export const getBusLocationHistory = async (req: Request, res: Response) => {
   }
 };
 
-export const getNearbyBuses = async (req: Request, res: Response) => {
+export const getNearbyBuses = async (req: Request, res: Response): Promise<any> => {
   try {
     const { latitude, longitude, radius = 5 } = req.query;
 
@@ -195,7 +195,7 @@ export const getNearbyBuses = async (req: Request, res: Response) => {
   }
 };
 
-export const setDriverOnlineStatus = async (req: Request, res: Response) => {
+export const setDriverOnlineStatus = async (req: Request, res: Response): Promise<any> => {
   try {
     const { busId, isOnline } = req.body;
     const driverId = (req as any).user.id;

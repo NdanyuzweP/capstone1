@@ -1,7 +1,7 @@
 import Joi from 'joi';
 import { Request, Response, NextFunction } from 'express';
 
-export const validateSignup = (req: Request, res: Response, next: NextFunction) => {
+export const validateSignup = (req: Request, res: Response, next: NextFunction): any => {
   const schema = Joi.object({
     name: Joi.string().required().min(2).max(50),
     email: Joi.string().email().required(),
@@ -17,7 +17,7 @@ export const validateSignup = (req: Request, res: Response, next: NextFunction) 
   next();
 };
 
-export const validateLogin = (req: Request, res: Response, next: NextFunction) => {
+export const validateLogin = (req: Request, res: Response, next: NextFunction): any => {
   const schema = Joi.object({
     email: Joi.string().email().required(),
     password: Joi.string().required(),
@@ -30,7 +30,7 @@ export const validateLogin = (req: Request, res: Response, next: NextFunction) =
   next();
 };
 
-export const validateBus = (req: Request, res: Response, next: NextFunction) => {
+export const validateBus = (req: Request, res: Response, next: NextFunction): any => {
   const schema = Joi.object({
     plateNumber: Joi.string().required(),
     capacity: Joi.number().required().min(1),
@@ -45,7 +45,7 @@ export const validateBus = (req: Request, res: Response, next: NextFunction) => 
   next();
 };
 
-export const validateRoute = (req: Request, res: Response, next: NextFunction) => {
+export const validateRoute = (req: Request, res: Response, next: NextFunction): any => {
   const schema = Joi.object({
     name: Joi.string().required(),
     description: Joi.string().optional(),
@@ -60,7 +60,7 @@ export const validateRoute = (req: Request, res: Response, next: NextFunction) =
   next();
 };
 
-export const validatePickupPoint = (req: Request, res: Response, next: NextFunction) => {
+export const validatePickupPoint = (req: Request, res: Response, next: NextFunction): any => {
   const schema = Joi.object({
     name: Joi.string().required(),
     description: Joi.string().optional(),
@@ -77,7 +77,7 @@ export const validatePickupPoint = (req: Request, res: Response, next: NextFunct
   next();
 };
 
-export const validateBusSchedule = (req: Request, res: Response, next: NextFunction) => {
+export const validateBusSchedule = (req: Request, res: Response, next: NextFunction): any => {
   const schema = Joi.object({
     busId: Joi.string().required(),
     routeId: Joi.string().required(),
@@ -97,7 +97,7 @@ export const validateBusSchedule = (req: Request, res: Response, next: NextFunct
   next();
 };
 
-export const validateUserInterest = (req: Request, res: Response, next: NextFunction) => {
+export const validateUserInterest = (req: Request, res: Response, next: NextFunction): any => {
   const schema = Joi.object({
     busScheduleId: Joi.string().required(),
     pickupPointId: Joi.string().required(),
@@ -110,7 +110,7 @@ export const validateUserInterest = (req: Request, res: Response, next: NextFunc
   next();
 };
 
-export const validateUserStatus = (req: Request, res: Response, next: NextFunction) => {
+export const validateUserStatus = (req: Request, res: Response, next: NextFunction): any => {
   const schema = Joi.object({
     isActive: Joi.boolean().required(),
   });
@@ -122,7 +122,7 @@ export const validateUserStatus = (req: Request, res: Response, next: NextFuncti
   next();
 };
 
-export const validateUserRole = (req: Request, res: Response, next: NextFunction) => {
+export const validateUserRole = (req: Request, res: Response, next: NextFunction): any => {
   const schema = Joi.object({
     role: Joi.string().valid('user', 'driver', 'admin').required(),
   });
@@ -134,7 +134,7 @@ export const validateUserRole = (req: Request, res: Response, next: NextFunction
   next();
 };
 
-export const validateBusLocation = (req: Request, res: Response, next: NextFunction) => {
+export const validateBusLocation = (req: Request, res: Response, next: NextFunction): any => {
   const schema = Joi.object({
     busId: Joi.string().required(),
     latitude: Joi.number().required().min(-90).max(90),
@@ -151,7 +151,7 @@ export const validateBusLocation = (req: Request, res: Response, next: NextFunct
   next();
 };
 
-export const validateDriverStatus = (req: Request, res: Response, next: NextFunction) => {
+export const validateDriverStatus = (req: Request, res: Response, next: NextFunction): any => {
   const schema = Joi.object({
     busId: Joi.string().required(),
     isOnline: Joi.boolean().required(),
@@ -164,7 +164,7 @@ export const validateDriverStatus = (req: Request, res: Response, next: NextFunc
   next();
 };
 
-export const validateInterestStatus = (req: Request, res: Response, next: NextFunction) => {
+export const validateInterestStatus = (req: Request, res: Response, next: NextFunction): any => {
   const schema = Joi.object({
     status: Joi.string().valid('interested', 'confirmed', 'cancelled').required(),
   });

@@ -47,12 +47,12 @@ const busSchema = new mongoose_1.Schema({
         min: 1,
     },
     driverId: {
-        type: mongoose_1.Schema.Types.ObjectId,
+        type: String,
         ref: 'User',
         required: true,
     },
     routeId: {
-        type: mongoose_1.Schema.Types.ObjectId,
+        type: String,
         ref: 'Route',
         required: true,
     },
@@ -77,12 +77,6 @@ const busSchema = new mongoose_1.Schema({
             type: Number,
             default: 0,
         },
-    },
-    fare: {
-        type: Number,
-        required: true,
-        min: 0,
-        default: 400,
     },
     isActive: {
         type: Boolean,

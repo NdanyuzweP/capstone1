@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import User from '../models/User';
 
-export const getAllUsers = async (req: Request, res: Response) => {
+export const getAllUsers = async (req: Request, res: Response): Promise<any> => {
   try {
     const { role, isActive, page = 1, limit = 10 } = req.query;
     
@@ -38,7 +38,7 @@ export const getAllUsers = async (req: Request, res: Response) => {
   }
 };
 
-export const getUserById = async (req: Request, res: Response) => {
+export const getUserById = async (req: Request, res: Response): Promise<any> => {
   try {
     const user = await User.findById(req.params.id).select('-password');
 
@@ -52,7 +52,7 @@ export const getUserById = async (req: Request, res: Response) => {
   }
 };
 
-export const updateUserStatus = async (req: Request, res: Response) => {
+export const updateUserStatus = async (req: Request, res: Response): Promise<any> => {
   try {
     const { isActive } = req.body;
     const userId = req.params.id;
@@ -82,7 +82,7 @@ export const updateUserStatus = async (req: Request, res: Response) => {
   }
 };
 
-export const updateUserRole = async (req: Request, res: Response) => {
+export const updateUserRole = async (req: Request, res: Response): Promise<any> => {
   try {
     const { role } = req.body;
     const userId = req.params.id;
@@ -112,7 +112,7 @@ export const updateUserRole = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteUser = async (req: Request, res: Response) => {
+export const deleteUser = async (req: Request, res: Response): Promise<any> => {
   try {
     const userId = req.params.id;
     const currentUserId = (req as any).user.id;
@@ -138,7 +138,7 @@ export const deleteUser = async (req: Request, res: Response) => {
   }
 };
 
-export const getUserStats = async (req: Request, res: Response) => {
+export const getUserStats = async (req: Request, res: Response): Promise<any> => {
   try {
     const stats = await Promise.all([
       User.countDocuments({ role: 'user', isActive: true }),
@@ -162,7 +162,7 @@ export const getUserStats = async (req: Request, res: Response) => {
   }
 };
 
-export const getDrivers = async (req: Request, res: Response) => {
+export const getDrivers = async (req: Request, res: Response): Promise<any> => {
   try {
     const { isActive = true, page = 1, limit = 10 } = req.query;
     
@@ -234,7 +234,7 @@ export const getRegularUsers = async (req: Request, res: Response) => {
   }
 };
 
-export const createUser = async (req: Request, res: Response) => {
+export const createUser = async (req: Request, res: Response): Promise<any> => {
   try {
     const { name, email, phone, password, role } = req.body;
     const user = new User({ name, email, phone, password, role });

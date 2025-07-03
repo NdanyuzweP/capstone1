@@ -46,7 +46,7 @@ const routeSchema = new mongoose_1.Schema({
     },
     pickupPoints: [
         {
-            type: mongoose_1.Schema.Types.ObjectId,
+            type: String,
             ref: 'PickupPoint',
         },
     ],

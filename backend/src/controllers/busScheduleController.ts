@@ -4,7 +4,7 @@ import Bus from '../models/Bus';
 import Route from '../models/Route';
 import UserInterest from '../models/UserInterest';
 
-export const createBusSchedule = async (req: Request, res: Response) => {
+export const createBusSchedule = async (req: Request, res: Response): Promise<any> => {
   try {
     const { busId, routeId, departureTime, estimatedArrivalTimes } = req.body;
 
@@ -43,7 +43,7 @@ export const createBusSchedule = async (req: Request, res: Response) => {
   }
 };
 
-export const getAllBusSchedules = async (req: Request, res: Response) => {
+export const getAllBusSchedules = async (req: Request, res: Response): Promise<any> => {
   try {
     const { status, routeId, date } = req.query;
     
@@ -69,7 +69,7 @@ export const getAllBusSchedules = async (req: Request, res: Response) => {
   }
 };
 
-export const getBusScheduleById = async (req: Request, res: Response) => {
+export const getBusScheduleById = async (req: Request, res: Response): Promise<any> => {
   try {
     const schedule = await BusSchedule.findById(req.params.id)
       .populate('busId', 'plateNumber capacity')
@@ -86,7 +86,7 @@ export const getBusScheduleById = async (req: Request, res: Response) => {
   }
 };
 
-export const updateBusSchedule = async (req: Request, res: Response) => {
+export const updateBusSchedule = async (req: Request, res: Response): Promise<any> => {
   try {
     const { departureTime, estimatedArrivalTimes, status } = req.body;
 
@@ -111,7 +111,7 @@ export const updateBusSchedule = async (req: Request, res: Response) => {
   }
 };
 
-export const updateArrivalTime = async (req: Request, res: Response) => {
+export const updateArrivalTime = async (req: Request, res: Response): Promise<any> => {
   try {
     const { pickupPointId, actualTime } = req.body;
 
@@ -141,7 +141,7 @@ export const updateArrivalTime = async (req: Request, res: Response) => {
   }
 };
 
-export const getInterestedUsers = async (req: Request, res: Response) => {
+export const getInterestedUsers = async (req: Request, res: Response): Promise<any> => {
   try {
     const interests = await UserInterest.find({
       busScheduleId: req.params.id,
@@ -155,7 +155,7 @@ export const getInterestedUsers = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteBusSchedule = async (req: Request, res: Response) => {
+export const deleteBusSchedule = async (req: Request, res: Response): Promise<any> => {
   try {
     const schedule = await BusSchedule.findByIdAndUpdate(
       req.params.id,

@@ -38,7 +38,6 @@ const validateBus = (req, res, next) => {
         capacity: joi_1.default.number().required().min(1),
         driverId: joi_1.default.string().required(),
         routeId: joi_1.default.string().required(),
-        fare: joi_1.default.number().optional().min(0),
     });
     const { error } = schema.validate(req.body);
     if (error) {

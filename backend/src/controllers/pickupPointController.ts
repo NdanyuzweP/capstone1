@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import PickupPoint from '../models/PickupPoint';
 import Route from '../models/Route';
 
-export const createPickupPoint = async (req: Request, res: Response) => {
+export const createPickupPoint = async (req: Request, res: Response): Promise<any> => {
   try {
     const { name, description, latitude, longitude, routeId, order } = req.body;
 
@@ -38,7 +38,7 @@ export const createPickupPoint = async (req: Request, res: Response) => {
   }
 };
 
-export const getAllPickupPoints = async (req: Request, res: Response) => {
+export const getAllPickupPoints = async (req: Request, res: Response): Promise<any> => {
   try {
     const { routeId } = req.query;
     
@@ -57,7 +57,7 @@ export const getAllPickupPoints = async (req: Request, res: Response) => {
   }
 };
 
-export const getPickupPointById = async (req: Request, res: Response) => {
+export const getPickupPointById = async (req: Request, res: Response): Promise<any> => {
   try {
     const pickupPoint = await PickupPoint.findById(req.params.id)
       .populate('routeId', 'name description');
@@ -72,7 +72,7 @@ export const getPickupPointById = async (req: Request, res: Response) => {
   }
 };
 
-export const updatePickupPoint = async (req: Request, res: Response) => {
+export const updatePickupPoint = async (req: Request, res: Response): Promise<any> => {
   try {
     const { name, description, latitude, longitude, order } = req.body;
 
@@ -95,7 +95,7 @@ export const updatePickupPoint = async (req: Request, res: Response) => {
   }
 };
 
-export const deletePickupPoint = async (req: Request, res: Response) => {
+export const deletePickupPoint = async (req: Request, res: Response): Promise<any> => {
   try {
     const pickupPoint = await PickupPoint.findByIdAndUpdate(
       req.params.id,

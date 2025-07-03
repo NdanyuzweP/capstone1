@@ -23,7 +23,6 @@ export interface IBus extends Document {
         speed: number;
         heading: number;
     };
-    fare: number;
     isActive: boolean;
     isOnline: boolean;
     createdAt: Date;

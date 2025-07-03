@@ -16,7 +16,7 @@ const generateToken = (id: string): string => {
   );
 };
 
-export const signup = async (req: Request, res: Response) => {
+export const signup = async (req: Request, res: Response): Promise<any> => {
   try {
     const { name, email, password, phone, role } = req.body;
 
@@ -56,7 +56,7 @@ export const signup = async (req: Request, res: Response) => {
   }
 };
 
-export const login = async (req: Request, res: Response) => {
+export const login = async (req: Request, res: Response): Promise<any> => {
   try {
     const { email, password } = req.body;
 
@@ -91,7 +91,7 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
-export const getProfile = async (req: AuthRequest, res: Response) => {
+export const getProfile = async (req: AuthRequest, res: Response): Promise<any> => {
   try {
     const userId = req.user?.id;
     if (!userId) {

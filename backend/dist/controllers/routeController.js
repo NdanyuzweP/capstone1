@@ -8,11 +8,12 @@ const Route_1 = __importDefault(require("../models/Route"));
 const PickupPoint_1 = __importDefault(require("../models/PickupPoint"));
 const createRoute = async (req, res) => {
     try {
-        const { name, description, estimatedDuration } = req.body;
+        const { name, description, estimatedDuration, fare } = req.body;
         const route = new Route_1.default({
             name,
             description,
             estimatedDuration,
+            fare,
         });
         await route.save();
         res.status(201).json({
@@ -52,8 +53,12 @@ const getRouteById = async (req, res) => {
 exports.getRouteById = getRouteById;
 const updateRoute = async (req, res) => {
     try {
-        const { name, description, estimatedDuration } = req.body;
-        const route = await Route_1.default.findByIdAndUpdate(req.params.id, { name, description, estimatedDuration }, { new: true }).populate('pickupPoints');
+        const { name, description, estimatedDuration, fare } = req.body;
+        const updateData = { name, description, estimatedDuration };
+        if (fare !== undefined) {
+            updateData.fare = fare;
+        }
+        const route = await Route_1.default.findByIdAndUpdate(req.params.id, updateData, { new: true }).populate('pickupPoints');
         if (!route) {
             return res.status(404).json({ error: 'Route not found' });
         }
