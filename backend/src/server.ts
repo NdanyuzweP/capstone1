@@ -41,7 +41,16 @@ const corsOptions = {
     if (!origin) return callback(null, true);
     
     const allowedOrigins = [
-      "*"
+      "http://localhost:3000",  // Admin frontend
+      "http://localhost:3001",  // Backend
+      "http://localhost:8081",  // React Native Metro bundler
+      "http://localhost:19006", // Expo web
+      "http://localhost:19000", // Expo DevTools
+      "exp://localhost:19000",  // Expo app
+      "exp://192.168.1.100:19000", // Expo app (network)
+      "capacitor://localhost",  // Capacitor apps
+      "http://localhost",       // Generic localhost
+      "https://localhost",      // Generic localhost HTTPS
     ];
     
     // Add any additional origins from environment variable
@@ -49,7 +58,14 @@ const corsOptions = {
       allowedOrigins.push(...process.env.CORS_ORIGIN.split(','));
     }
     
-    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+    // Check if origin is in allowed list or if it's a localhost variant
+    const isAllowed = allowedOrigins.includes(origin) || 
+                     (origin && origin.includes('localhost')) ||
+                     (origin && origin.includes('192.168.')) ||
+                     (origin && origin.includes('10.0.')) ||
+                     (origin && origin.includes('172.16.'));
+    
+    if (isAllowed) {
       callback(null, true);
     } else {
       console.log('CORS blocked origin:', origin);
