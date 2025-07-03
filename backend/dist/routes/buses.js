@@ -15,4 +15,3 @@ router.get('/:id', busController_1.getBusById);
 router.put('/:id', auth_1.authenticate, (0, auth_1.authorize)('admin'), busController_1.updateBus);
 router.delete('/:id', auth_1.authenticate, (0, auth_1.authorize)('admin'), busController_1.deleteBus);
 exports.default = router;
-//# sourceMappingURL=buses.js.map

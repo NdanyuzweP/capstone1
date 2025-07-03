@@ -70,4 +70,3 @@ const pickupPointSchema = new mongoose_1.Schema({
     timestamps: true,
 });
 exports.default = mongoose_1.default.model('PickupPoint', pickupPointSchema);
-//# sourceMappingURL=PickupPoint.js.map

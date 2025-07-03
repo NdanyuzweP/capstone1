@@ -14,4 +14,3 @@ router.get('/:id', routeController_1.getRouteById);
 router.put('/:id', auth_1.authenticate, (0, auth_1.authorize)('admin'), routeController_1.updateRoute);
 router.delete('/:id', auth_1.authenticate, (0, auth_1.authorize)('admin'), routeController_1.deleteRoute);
 exports.default = router;
-//# sourceMappingURL=routes.js.map

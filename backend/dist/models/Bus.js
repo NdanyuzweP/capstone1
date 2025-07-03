@@ -91,4 +91,3 @@ const busSchema = new mongoose_1.Schema({
 });
 busSchema.index({ 'currentLocation.latitude': 1, 'currentLocation.longitude': 1 });
 exports.default = mongoose_1.default.model('Bus', busSchema);
-//# sourceMappingURL=Bus.js.map

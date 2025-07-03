@@ -15,4 +15,3 @@ router.get('/:busId/history', busLocationController_1.getBusLocationHistory);
 router.get('/nearby/search', busLocationController_1.getNearbyBuses);
 router.post('/driver/status', auth_1.authenticate, (0, auth_1.authorize)('driver'), validation_1.validateDriverStatus, busLocationController_1.setDriverOnlineStatus);
 exports.default = router;
-//# sourceMappingURL=busLocations.js.map

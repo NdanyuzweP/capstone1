@@ -72,4 +72,3 @@ const busLocationHistorySchema = new mongoose_1.Schema({
 busLocationHistorySchema.index({ busId: 1, timestamp: -1 });
 busLocationHistorySchema.index({ timestamp: 1 }, { expireAfterSeconds: 86400 });
 exports.default = mongoose_1.default.model('BusLocationHistory', busLocationHistorySchema);
-//# sourceMappingURL=BusLocationHistory.js.map

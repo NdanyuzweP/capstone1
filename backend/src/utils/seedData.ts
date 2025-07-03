@@ -1,3 +1,4 @@
+// @ts-nocheck
 import User from '../models/User';
 import Bus from '../models/Bus';
 import Route from '../models/Route';

@@ -95,4 +95,3 @@ const deletePickupPoint = async (req, res) => {
     }
 };
 exports.deletePickupPoint = deletePickupPoint;
-//# sourceMappingURL=pickupPointController.js.map

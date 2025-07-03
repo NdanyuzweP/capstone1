@@ -92,4 +92,3 @@ const getProfile = async (req, res) => {
     }
 };
 exports.getProfile = getProfile;
-//# sourceMappingURL=authController.js.map

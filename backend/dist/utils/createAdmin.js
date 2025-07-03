@@ -31,4 +31,3 @@ const createAdminUser = async () => {
     }
 };
 exports.createAdminUser = createAdminUser;
-//# sourceMappingURL=createAdmin.js.map

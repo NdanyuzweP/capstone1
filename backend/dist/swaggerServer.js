@@ -16,4 +16,3 @@ app.get('/', (req, res) => {
 app.listen(SWAGGER_PORT, () => {
     console.log(`Swagger docs available at http://localhost:${SWAGGER_PORT}/api-docs`);
 });
-//# sourceMappingURL=swaggerServer.js.map

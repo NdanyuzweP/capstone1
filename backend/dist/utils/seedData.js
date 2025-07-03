@@ -186,4 +186,3 @@ const seedDatabase = async () => {
     }
 };
 exports.seedDatabase = seedDatabase;
-//# sourceMappingURL=seedData.js.map

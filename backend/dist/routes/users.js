@@ -18,4 +18,3 @@ router.patch('/:id/role', auth_1.authenticate, (0, auth_1.authorize)('admin'), u
 router.delete('/:id', auth_1.authenticate, (0, auth_1.authorize)('admin'), userController_1.deleteUser);
 router.post('/', auth_1.authenticate, (0, auth_1.authorize)('admin'), validation_1.validateSignup, userController_1.createUser);
 exports.default = router;
-//# sourceMappingURL=users.js.map

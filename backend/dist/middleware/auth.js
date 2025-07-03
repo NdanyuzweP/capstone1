@@ -46,4 +46,3 @@ const authorize = (...roles) => {
     };
 };
 exports.authorize = authorize;
-//# sourceMappingURL=auth.js.map

@@ -152,4 +152,3 @@ const deleteBusSchedule = async (req, res) => {
     }
 };
 exports.deleteBusSchedule = deleteBusSchedule;
-//# sourceMappingURL=busScheduleController.js.map

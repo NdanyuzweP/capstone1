@@ -14,4 +14,3 @@ router.get('/:id', pickupPointController_1.getPickupPointById);
 router.put('/:id', auth_1.authenticate, (0, auth_1.authorize)('admin'), pickupPointController_1.updatePickupPoint);
 router.delete('/:id', auth_1.authenticate, (0, auth_1.authorize)('admin'), pickupPointController_1.deletePickupPoint);
 exports.default = router;
-//# sourceMappingURL=pickupPoints.js.map

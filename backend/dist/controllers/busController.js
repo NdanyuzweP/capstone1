@@ -128,4 +128,3 @@ const deleteBus = async (req, res) => {
     }
 };
 exports.deleteBus = deleteBus;
-//# sourceMappingURL=busController.js.map

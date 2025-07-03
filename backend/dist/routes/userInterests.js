@@ -13,4 +13,3 @@ router.get('/', auth_1.authenticate, userInterestController_1.getUserInterests);
 router.put('/:id', auth_1.authenticate, validation_1.validateInterestStatus, userInterestController_1.updateUserInterest);
 router.delete('/:id', auth_1.authenticate, userInterestController_1.deleteUserInterest);
 exports.default = router;
-//# sourceMappingURL=userInterests.js.map

@@ -16,4 +16,3 @@ router.patch('/:id/arrival', auth_1.authenticate, (0, auth_1.authorize)('driver'
 router.get('/:id/interested-users', auth_1.authenticate, (0, auth_1.authorize)('driver', 'admin'), busScheduleController_1.getInterestedUsers);
 router.delete('/:id', auth_1.authenticate, (0, auth_1.authorize)('admin'), busScheduleController_1.deleteBusSchedule);
 exports.default = router;
-//# sourceMappingURL=busSchedules.js.map

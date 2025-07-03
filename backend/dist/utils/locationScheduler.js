@@ -42,4 +42,3 @@ const startLocationHistoryCleanup = () => {
     console.log('Location history cleanup scheduler started - running every hour');
 };
 exports.startLocationHistoryCleanup = startLocationHistoryCleanup;
-//# sourceMappingURL=locationScheduler.js.map

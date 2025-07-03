@@ -86,4 +86,3 @@ const deleteRoute = async (req, res) => {
     }
 };
 exports.deleteRoute = deleteRoute;
-//# sourceMappingURL=routeController.js.map

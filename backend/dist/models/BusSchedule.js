@@ -74,4 +74,3 @@ const busScheduleSchema = new mongoose_1.Schema({
     timestamps: true,
 });
 exports.default = mongoose_1.default.model('BusSchedule', busScheduleSchema);
-//# sourceMappingURL=BusSchedule.js.map

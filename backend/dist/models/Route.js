@@ -69,4 +69,3 @@ const routeSchema = new mongoose_1.Schema({
     timestamps: true,
 });
 exports.default = mongoose_1.default.model('Route', routeSchema);
-//# sourceMappingURL=Route.js.map

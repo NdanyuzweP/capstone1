@@ -107,4 +107,3 @@ const deleteUserInterest = async (req, res) => {
     }
 };
 exports.deleteUserInterest = deleteUserInterest;
-//# sourceMappingURL=userInterestController.js.map

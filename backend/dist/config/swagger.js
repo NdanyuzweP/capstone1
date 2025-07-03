@@ -35,4 +35,3 @@ const options = {
 };
 const specs = (0, swagger_jsdoc_1.default)(options);
 exports.specs = specs;
-//# sourceMappingURL=swagger.js.map

@@ -59,4 +59,3 @@ const userInterestSchema = new mongoose_1.Schema({
     timestamps: true,
 });
 exports.default = mongoose_1.default.model('UserInterest', userInterestSchema);
-//# sourceMappingURL=UserInterest.js.map
