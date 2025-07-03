@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const connectDB = async (): Promise<void> => {
   try {
-    const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/ridra';
+    const mongoURI = process.env.MONGODB_URI || 'ongodb+srv://ndanyuzwep02:HQvORnb4yVqDucV5@ridra.cdohdhu.mongodb.net/?retryWrites=true&w=majority&appName=ridra';
     
     await mongoose.connect(mongoURI);
     
