@@ -27,6 +27,6 @@ export const getApiUrl = () => {
     return API_CONFIG.BASE_URL;
   }
   
-  // Production API URL would go here
-  return 'https://your-production-api.com/api';
+  // Production API URL - deployed backend
+  return 'https://capstone1-60ax.onrender.com/api';
 };
