@@ -97,4 +97,8 @@ export interface AuthRequest extends Request {
     email: string;
     role: string;
   };
+  headers: {
+    authorization?: string;
+    [key: string]: string | string[] | undefined;
+  };
 }
