@@ -8,7 +8,7 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const User_1 = __importDefault(require("../models/User"));
 const authenticate = async (req, res, next) => {
     try {
-        const token = req.header('Authorization')?.replace('Bearer ', '');
+        const token = req.headers.authorization?.replace('Bearer ', '');
         if (!token) {
             res.status(401).json({ error: 'No token provided' });
             return;

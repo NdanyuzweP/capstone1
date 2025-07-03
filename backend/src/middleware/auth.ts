@@ -5,7 +5,7 @@ import { AuthRequest } from '../types';
 
 export const authenticate = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
+    const token = req.headers.authorization?.replace('Bearer ', '');
     
     if (!token) {
       res.status(401).json({ error: 'No token provided' });
