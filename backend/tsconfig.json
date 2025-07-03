@@ -3,7 +3,6 @@
     "target": "ES2020",
     "module": "commonjs",
     "lib": ["ES2020", "DOM"],
-    "types": ["node", "express", "jsonwebtoken", "bcryptjs", "cors", "swagger-jsdoc", "swagger-ui-express", "node-cron", "jest"],
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": false,
