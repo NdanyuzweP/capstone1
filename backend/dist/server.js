@@ -45,7 +45,6 @@ require("express-async-errors");
 const database_1 = __importDefault(require("./config/database"));
 const swagger_1 = require("./config/swagger");
 const createAdmin_1 = require("./utils/createAdmin");
-const seedData_1 = require("./utils/seedData");
 const locationScheduler_1 = require("./utils/locationScheduler");
 const auth_1 = __importDefault(require("./routes/auth"));
 const buses_1 = __importDefault(require("./routes/buses"));
@@ -128,31 +127,29 @@ app.get('/', (req, res) => {
         health: '/health'
     });
 });
-if (process.env.NODE_ENV === 'development') {
-    app.get('/api/stats', async (req, res) => {
-        try {
-            const Bus = (await Promise.resolve().then(() => __importStar(require('./models/Bus')))).default;
-            const Route = (await Promise.resolve().then(() => __importStar(require('./models/Route')))).default;
-            const User = (await Promise.resolve().then(() => __importStar(require('./models/User')))).default;
-            const BusSchedule = (await Promise.resolve().then(() => __importStar(require('./models/BusSchedule')))).default;
-            const PickupPoint = (await Promise.resolve().then(() => __importStar(require('./models/PickupPoint')))).default;
-            const UserInterest = (await Promise.resolve().then(() => __importStar(require('./models/UserInterest')))).default;
-            const stats = {
-                buses: await Bus.countDocuments(),
-                routes: await Route.countDocuments(),
-                users: await User.countDocuments(),
-                schedules: await BusSchedule.countDocuments(),
-                pickupPoints: await PickupPoint.countDocuments(),
-                userInterests: await UserInterest.countDocuments(),
-            };
-            res.json({ stats });
-        }
-        catch (error) {
-            console.error('Stats error:', error);
-            res.status(500).json({ error: 'Failed to get stats' });
-        }
-    });
-}
+app.get('/api/stats', async (req, res) => {
+    try {
+        const Bus = (await Promise.resolve().then(() => __importStar(require('./models/Bus')))).default;
+        const Route = (await Promise.resolve().then(() => __importStar(require('./models/Route')))).default;
+        const User = (await Promise.resolve().then(() => __importStar(require('./models/User')))).default;
+        const BusSchedule = (await Promise.resolve().then(() => __importStar(require('./models/BusSchedule')))).default;
+        const PickupPoint = (await Promise.resolve().then(() => __importStar(require('./models/PickupPoint')))).default;
+        const UserInterest = (await Promise.resolve().then(() => __importStar(require('./models/UserInterest')))).default;
+        const stats = {
+            buses: await Bus.countDocuments(),
+            routes: await Route.countDocuments(),
+            users: await User.countDocuments(),
+            schedules: await BusSchedule.countDocuments(),
+            pickupPoints: await PickupPoint.countDocuments(),
+            userInterests: await UserInterest.countDocuments(),
+        };
+        res.json({ stats });
+    }
+    catch (error) {
+        console.error('Stats error:', error);
+        res.status(500).json({ error: 'Failed to get stats' });
+    }
+});
 app.use('*', (req, res) => {
     res.status(404).json({
         error: 'Route not found',
@@ -170,7 +167,6 @@ const startServer = async () => {
     try {
         await (0, database_1.default)();
         await (0, createAdmin_1.createAdminUser)();
-        await (0, seedData_1.seedDatabase)();
         const Bus = (await Promise.resolve().then(() => __importStar(require('./models/Bus')))).default;
         const Route = (await Promise.resolve().then(() => __importStar(require('./models/Route')))).default;
         const User = (await Promise.resolve().then(() => __importStar(require('./models/User')))).default;
@@ -190,11 +186,9 @@ const startServer = async () => {
             console.log(`🚀 Server running on port ${PORT}`);
             console.log(`📚 API Documentation: http://localhost:${PORT}/api-docs`);
             console.log(`🔍 Health Check: http://localhost:${PORT}/health`);
+            console.log(`📊 Stats endpoint: http://localhost:${PORT}/api/stats`);
             console.log(`🌍 Environment: ${process.env.NODE_ENV}`);
             console.log(`📱 CORS enabled for mobile development`);
-            if (process.env.NODE_ENV === 'development') {
-                console.log(`📊 Stats endpoint: GET http://localhost:${PORT}/api/stats`);
-            }
         });
     }
     catch (error) {
