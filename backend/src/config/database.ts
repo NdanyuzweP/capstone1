@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const connectDB = async (): Promise<void> => {
   try {
-    const mongoURI = 'mongodb+srv://princen:princeoo01@ridradb.6w3jqh0.mongodb.net/idradb?retryWrites=true&w=majority';
+    const mongoURI = 'mongodb+srv://princen:princeoo01@ridradb.6w3jqh0.mongodb.net/ridradb?retryWrites=true&w=majority';
     
     await mongoose.connect(mongoURI);
     
