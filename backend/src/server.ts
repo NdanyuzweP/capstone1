@@ -41,11 +41,7 @@ const corsOptions = {
     if (!origin) return callback(null, true);
     
     const allowedOrigins = [
-      'http://localhost:8081', // Expo development server
-      'http://localhost:19006', // Expo web
-      'http://localhost:3000', // React web
-      'exp://192.168.1.100:8081', // Expo on physical device (adjust IP)
-      'exp://localhost:8081', // Expo localhost
+      "*"
     ];
     
     // Add any additional origins from environment variable
