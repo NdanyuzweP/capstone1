@@ -4,12 +4,12 @@ import { IBusSchedule } from '../types';
 const busScheduleSchema = new Schema<IBusSchedule>(
   {
     busId: {
-      type: Schema.Types.ObjectId,
+      type: String,
       ref: 'Bus',
       required: true,
     },
     routeId: {
-      type: Schema.Types.ObjectId,
+      type: String,
       ref: 'Route',
       required: true,
     },
@@ -20,7 +20,7 @@ const busScheduleSchema = new Schema<IBusSchedule>(
     estimatedArrivalTimes: [
       {
         pickupPointId: {
-          type: Schema.Types.ObjectId,
+          type: String,
           ref: 'PickupPoint',
           required: true,
         },

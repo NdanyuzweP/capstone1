@@ -15,12 +15,12 @@ const busSchema = new Schema<IBus>(
       min: 1,
     },
     driverId: {
-      type: Schema.Types.ObjectId,
+      type: String,
       ref: 'User',
       required: true,
     },
     routeId: {
-      type: Schema.Types.ObjectId,
+      type: String,
       ref: 'Route',
       required: true,
     },

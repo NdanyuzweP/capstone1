@@ -4,7 +4,7 @@ import { IBusLocationHistory } from '../types';
 const busLocationHistorySchema = new Schema<IBusLocationHistory>(
   {
     busId: {
-      type: Schema.Types.ObjectId,
+      type: String,
       ref: 'Bus',
       required: true,
     },

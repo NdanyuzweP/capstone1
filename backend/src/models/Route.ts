@@ -14,7 +14,7 @@ const routeSchema = new Schema<IRoute>(
     },
     pickupPoints: [
       {
-        type: Schema.Types.ObjectId,
+        type: String,
         ref: 'PickupPoint',
       },
     ],

@@ -4,17 +4,17 @@ import { IUserInterest } from '../types';
 const userInterestSchema = new Schema<IUserInterest>(
   {
     userId: {
-      type: Schema.Types.ObjectId,
+      type: String,
       ref: 'User',
       required: true,
     },
     busScheduleId: {
-      type: Schema.Types.ObjectId,
+      type: String,
       ref: 'BusSchedule',
       required: true,
     },
     pickupPointId: {
-      type: Schema.Types.ObjectId,
+      type: String,
       ref: 'PickupPoint',
       required: true,
     },

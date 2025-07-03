@@ -1,6 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
 import { IPickupPoint } from '../types';
 
+
 const pickupPointSchema = new Schema<IPickupPoint>(
   {
     name: {
@@ -21,7 +22,7 @@ const pickupPointSchema = new Schema<IPickupPoint>(
       required: true,
     },
     routeId: {
-      type: Schema.Types.ObjectId,
+      type: String,
       ref: 'Route',
       required: true,
     },
