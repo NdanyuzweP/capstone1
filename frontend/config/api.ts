@@ -20,13 +20,13 @@ export const API_CONFIG = {
 
 // Environment-specific configurations
 export const getApiUrl = () => {
-  // You can add environment-specific logic here
-  // For example, check if running in development, staging, or production
-  
-  if (__DEV__) {
-    return API_CONFIG.BASE_URL;
-  }
-  
-  // Production API URL - deployed backend
+  // Always use production URL for now since backend is deployed
+  // You can change this back to __DEV__ logic when you want to run local backend
   return 'https://capstone1-60ax.onrender.com/api';
+  
+  // Original logic (commented out):
+  // if (__DEV__) {
+  //   return API_CONFIG.BASE_URL;
+  // }
+  // return 'https://capstone1-60ax.onrender.com/api';
 };

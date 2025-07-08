@@ -171,7 +171,7 @@ export default function Dashboard() {
       <div className="dashboard-header">
         <div className="dashboard-title">Dashboard Overview</div>
         <div className="dashboard-subtitle">
-          Welcome to your Ridra admin dashboard. Here's what's happening today.
+          Here's what's happening today.
         </div>
       </div>
 
