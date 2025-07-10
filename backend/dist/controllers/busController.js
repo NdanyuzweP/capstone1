@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteBus = exports.updateBus = exports.getDriverBus = exports.getBusById = exports.getAllBuses = exports.createBus = void 0;
+exports.reassignBusToDriver = exports.checkDriverBusAssignment = exports.deleteBus = exports.updateBus = exports.getDriverBus = exports.getBusById = exports.getAllBuses = exports.createBus = void 0;
 const Bus_1 = __importDefault(require("../models/Bus"));
 const User_1 = __importDefault(require("../models/User"));
 const Route_1 = __importDefault(require("../models/Route"));
@@ -128,3 +128,51 @@ const deleteBus = async (req, res) => {
     }
 };
 exports.deleteBus = deleteBus;
+const checkDriverBusAssignment = async (req, res) => {
+    try {
+        const driverId = req.user.id;
+        const bus = await Bus_1.default.findOne({ driverId, isActive: true })
+            .populate('driverId', 'name email phone')
+            .populate('routeId', 'name description fare estimatedDuration');
+        if (!bus) {
+            return res.status(404).json({
+                error: 'No bus assigned to you',
+                driverId,
+                availableBuses: await Bus_1.default.find({ isActive: true }).select('_id plateNumber driverId')
+            });
+        }
+        res.json({
+            bus,
+            message: 'Bus assignment found'
+        });
+    }
+    catch (error) {
+        console.error('Error checking driver bus assignment:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+exports.checkDriverBusAssignment = checkDriverBusAssignment;
+const reassignBusToDriver = async (req, res) => {
+    try {
+        const { busId, driverId } = req.body;
+        const bus = await Bus_1.default.findById(busId);
+        if (!bus) {
+            return res.status(404).json({ error: 'Bus not found' });
+        }
+        const driver = await User_1.default.findById(driverId);
+        if (!driver || driver.role !== 'driver') {
+            return res.status(400).json({ error: 'Invalid driver' });
+        }
+        const updatedBus = await Bus_1.default.findByIdAndUpdate(busId, { driverId }, { new: true }).populate('driverId', 'name email phone')
+            .populate('routeId', 'name description fare');
+        res.json({
+            message: 'Bus reassigned successfully',
+            bus: updatedBus,
+        });
+    }
+    catch (error) {
+        console.error('Error reassigning bus:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+exports.reassignBusToDriver = reassignBusToDriver;

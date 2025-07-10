@@ -17,4 +17,6 @@ router.patch('/:id/status', auth_1.authenticate, (0, auth_1.authorize)('admin'),
 router.patch('/:id/role', auth_1.authenticate, (0, auth_1.authorize)('admin'), userController_1.updateUserRole);
 router.delete('/:id', auth_1.authenticate, (0, auth_1.authorize)('admin'), userController_1.deleteUser);
 router.post('/', auth_1.authenticate, (0, auth_1.authorize)('admin'), validation_1.validateSignup, userController_1.createUser);
+router.get('/weekly-activity', auth_1.authenticate, (0, auth_1.authorize)('admin'), userController_1.getWeeklyActivity);
+router.get('/recent-activity', auth_1.authenticate, (0, auth_1.authorize)('admin'), userController_1.getRecentActivity);
 exports.default = router;

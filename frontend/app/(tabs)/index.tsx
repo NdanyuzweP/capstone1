@@ -31,19 +31,20 @@ export default function Home() {
   }, [hasPermission, location]);
 
   const handleShowInterest = async (busId: string) => {
-    // For now, we'll use mock data since we need bus schedule and pickup point IDs
-    // In a real implementation, you'd get these from the bus data
-    const mockScheduleId = `schedule_${busId}`;
-    const mockPickupPointId = `pickup_${busId}`;
-    
+    const bus = buses.find(b => b.id === busId);
+    if (!bus || !bus.scheduleId || !bus.pickupPointId) {
+      console.error('Missing real schedule or pickup point ID:', bus);
+      alert('This bus is missing schedule or pickup point information. Please try another bus.');
+      return;
+    }
+    console.log('Showing interest:', { scheduleId: bus.scheduleId, pickupPointId: bus.pickupPointId });
     const existingInterest = interests.find(interest => 
-      interest.busScheduleId === mockScheduleId
+      interest.busScheduleId === bus.scheduleId
     );
-    
     if (existingInterest) {
       await removeInterest(existingInterest.id);
     } else {
-      await showInterest(mockScheduleId, mockPickupPointId);
+      await showInterest(bus.scheduleId, bus.pickupPointId);
     }
   };
 

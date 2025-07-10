@@ -4,12 +4,14 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import 'express-async-errors';
+import { createServer } from 'http';
 
 import connectDB from './config/database';
 import { specs, swaggerUi } from './config/swagger';
 import { createAdminUser } from './utils/createAdmin';
 import { seedDatabase } from './utils/seedData';
 import { startLocationScheduler, startLocationHistoryCleanup } from './utils/locationScheduler';
+import socketService from './services/socketService';
 
 // Import routes
 import authRoutes from './routes/auth';
@@ -25,6 +27,7 @@ import busLocationRoutes from './routes/busLocations';
 dotenv.config();
 
 const app = express();
+const server = createServer(app);
 const PORT = process.env.PORT || 3001;
 
 // Rate limiting
@@ -201,11 +204,14 @@ const startServer = async () => {
     console.log(`   - Users: ${userCount}`);
     console.log(`   - User Interests: ${interestCount}`);
     
+    // Initialize WebSocket service
+    socketService.initialize(server);
+    
     // Start background schedulers
     startLocationScheduler();
     startLocationHistoryCleanup();
     
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
       console.log(`📚 API Documentation: http://localhost:${PORT}/api-docs`);
       console.log(`🔍 Health Check: http://localhost:${PORT}/health`);

@@ -7,17 +7,22 @@ exports.deleteUserInterest = exports.updateUserInterest = exports.getUserInteres
 const UserInterest_1 = __importDefault(require("../models/UserInterest"));
 const BusSchedule_1 = __importDefault(require("../models/BusSchedule"));
 const PickupPoint_1 = __importDefault(require("../models/PickupPoint"));
+const Bus_1 = __importDefault(require("../models/Bus"));
+const User_1 = __importDefault(require("../models/User"));
+const socketService_1 = __importDefault(require("../services/socketService"));
 const createUserInterest = async (req, res) => {
     try {
         const userId = req.user.id;
         const { busScheduleId, pickupPointId } = req.body;
         let busSchedule = await BusSchedule_1.default.findById(busScheduleId);
         if (!busSchedule) {
-            console.log('Bus schedule not found, creating mock schedule for demo');
+            console.error('Bus schedule not found for ID:', busScheduleId);
+            return res.status(400).json({ error: 'Bus schedule not found' });
         }
-        let pickupPoint = await PickupPoint_1.default.findById(pickupPointId);
-        if (!pickupPoint) {
-            console.log('Pickup point not found, creating mock pickup point for demo');
+        let pickupPointDoc = await PickupPoint_1.default.findById(pickupPointId);
+        if (!pickupPointDoc) {
+            console.error('Pickup point not found for ID:', pickupPointId);
+            return res.status(400).json({ error: 'Pickup point not found' });
         }
         const existingInterest = await UserInterest_1.default.findOne({
             userId,
@@ -37,13 +42,27 @@ const createUserInterest = async (req, res) => {
         const populatedInterest = await UserInterest_1.default.findById(userInterest._id)
             .populate('busScheduleId', 'departureTime status')
             .populate('pickupPointId', 'name description');
+        const populatedBusSchedule = populatedInterest.busScheduleId;
+        const bus = await Bus_1.default.findById(populatedBusSchedule.busId);
+        const user = await User_1.default.findById(userId);
+        const pickupPoint = pickupPointDoc;
+        if (bus && user && pickupPoint) {
+            socketService_1.default.emitUserInterestUpdate({
+                busId: bus._id.toString(),
+                userId: user._id.toString(),
+                userName: user.name,
+                pickupPointId: pickupPoint._id.toString(),
+                pickupPointName: pickupPoint.name,
+                action: 'added',
+            });
+        }
         res.status(201).json({
             message: 'Interest registered successfully',
             interest: populatedInterest,
         });
     }
     catch (error) {
-        console.error('Error creating user interest:', error);
+        console.error('Error creating user interest:', error, req.body);
         res.status(500).json({ error: 'Server error' });
     }
 };

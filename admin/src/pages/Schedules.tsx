@@ -14,7 +14,8 @@ import {
   AlertCircle,
   CheckCircle,
   XCircle,
-  Play
+  Play,
+  MapPin
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -43,12 +44,37 @@ export default function Schedules() {
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [routeFilter, setRouteFilter] = useState<string>('');
   const [dateFilter, setDateFilter] = useState<string>('');
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [scheduleForm, setScheduleForm] = useState({
+    busId: '',
+    routeId: '',
+    departureTime: '',
+    estimatedArrivalTimes: [] as Array<{ pickupPointId: string; estimatedTime: string }>,
+  });
+  const [pickupPoints, setPickupPoints] = useState<any[]>([]);
+  const [creating, setCreating] = useState(false);
 
   useEffect(() => {
     fetchSchedules();
     fetchBuses();
     fetchRoutes();
   }, [statusFilter, routeFilter, dateFilter]);
+
+  useEffect(() => {
+    const fetchPickupPoints = async () => {
+      if (!scheduleForm.routeId) {
+        setPickupPoints([]);
+        return;
+      }
+      try {
+        const response = await apiService.getPickupPoints(scheduleForm.routeId);
+        setPickupPoints(response.pickupPoints || []);
+      } catch (err) {
+        setPickupPoints([]);
+      }
+    };
+    fetchPickupPoints();
+  }, [scheduleForm.routeId]);
 
   const fetchSchedules = async () => {
     try {
@@ -150,9 +176,91 @@ export default function Schedules() {
     const busName = getBusName(schedule.busId);
     const routeName = getRouteName(schedule.routeId);
     
-    return busName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-           routeName.toLowerCase().includes(searchTerm.toLowerCase());
+    // Search filter
+    const matchesSearch = busName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         routeName.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // Status filter
+    const matchesStatus = !statusFilter || schedule.status === statusFilter;
+    
+    // Route filter
+    const matchesRoute = !routeFilter || schedule.routeId === routeFilter || 
+                        (typeof schedule.routeId === 'object' && schedule.routeId._id === routeFilter);
+    
+    // Date filter
+    const matchesDate = !dateFilter || 
+                       new Date(schedule.departureTime).toISOString().split('T')[0] === dateFilter;
+    
+    return matchesSearch && matchesStatus && matchesRoute && matchesDate;
   });
+
+  const handleOpenModal = () => {
+    setScheduleForm({
+      busId: '',
+      routeId: '',
+      departureTime: '',
+      estimatedArrivalTimes: [],
+    });
+    setPickupPoints([]);
+    setShowScheduleModal(true);
+  };
+
+  const handleScheduleFormChange = (field: string, value: any) => {
+    setScheduleForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleEstimatedTimeChange = (pickupPointId: string, value: string) => {
+    setScheduleForm((prev) => ({
+      ...prev,
+      estimatedArrivalTimes: prev.estimatedArrivalTimes.map((item) =>
+        item.pickupPointId === pickupPointId ? { ...item, estimatedTime: value } : item
+      ),
+    }));
+  };
+
+  const handleAddEstimatedTime = (pickupPointId: string) => {
+    setScheduleForm((prev) => ({
+      ...prev,
+      estimatedArrivalTimes: [
+        ...prev.estimatedArrivalTimes,
+        { pickupPointId, estimatedTime: '' },
+      ],
+    }));
+  };
+
+  const handleCreateSchedule = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!scheduleForm.busId || !scheduleForm.routeId || !scheduleForm.departureTime) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+    if (pickupPoints.length > 0 && scheduleForm.estimatedArrivalTimes.length !== pickupPoints.length) {
+      toast.error('Please provide estimated times for all pickup points');
+      return;
+    }
+    setCreating(true);
+    try {
+      // Combine date and time for each pickup point
+      const baseDate = scheduleForm.departureTime.split('T')[0];
+      const estimatedArrivalTimes = scheduleForm.estimatedArrivalTimes.map(item => ({
+        pickupPointId: item.pickupPointId,
+        estimatedTime: `${baseDate}T${item.estimatedTime}:00`, // e.g., '2024-07-08T15:30:00'
+      }));
+      await apiService.createBusSchedule({
+        busId: scheduleForm.busId,
+        routeId: scheduleForm.routeId,
+        departureTime: scheduleForm.departureTime,
+        estimatedArrivalTimes,
+      });
+      toast.success('Bus schedule created successfully');
+      setShowScheduleModal(false);
+      fetchSchedules();
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to create schedule');
+    } finally {
+      setCreating(false);
+    }
+  };
 
   if (loading && schedules.length === 0) {
     return (
@@ -163,183 +271,196 @@ export default function Schedules() {
   }
 
   return (
-    <div className="space-y-6 bg-content p-4 min-h-screen">
+    <div className="admin-page-container">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <div className="section-title">Bus Schedules</div>
-          <div className="section-subtitle">Manage bus schedules and departure times</div>
+      <div className="admin-page-header">
+        <div className="admin-page-title-section">
+          <h1 className="admin-page-title">Bus Schedules</h1>
+          <p className="admin-page-subtitle">Manage bus schedules and departure times</p>
         </div>
-        <button className="btn btn-primary text-base px-4 py-2 rounded-xl shadow-md">
+        <button 
+          className="admin-btn admin-btn-primary"
+          onClick={handleOpenModal}
+        >
           <Plus size={18} />
           Add Schedule
         </button>
       </div>
 
       {/* Stats Cards */}
-      <div className="stats-row">
-        <div className="card card-compact">
-          <div className="card-body flex items-center gap-3">
-            <div>
-              <div className="text-xs text-muted font-medium">Total</div>
-              <div className="text-lg font-bold mt-0.5">{schedules.length}</div>
-            </div>
-            <div className="stats-icon-sm" style={{ backgroundColor: theme.primary + '15' }}>
-              <Calendar size={18} style={{ color: theme.primary }} />
-            </div>
-          </div>
-        </div>
-        <div className="card card-compact">
-          <div className="card-body flex items-center gap-3">
-            <div>
-              <div className="text-xs text-muted font-medium">Scheduled</div>
-              <div className="text-lg font-bold mt-0.5">{schedules.filter(s => s.status === 'scheduled').length}</div>
-            </div>
-            <div className="stats-icon-sm" style={{ backgroundColor: theme.primary + '15' }}>
-              <Clock size={18} style={{ color: theme.primary }} />
+      <div className="admin-grid admin-grid-4 admin-mb-6">
+        <div className="admin-card">
+          <div className="admin-card-body">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium" style={{ color: theme.textSecondary }}>
+                  Total Schedules
+                </p>
+                <p className="text-2xl font-bold mt-1" style={{ color: theme.text }}>
+                  {schedules.length}
+                </p>
+              </div>
+              <div 
+                className="w-12 h-12 rounded-lg flex items-center justify-center"
+                style={{ backgroundColor: theme.primary + '20' }}
+              >
+                <Calendar size={24} style={{ color: theme.primary }} />
+              </div>
             </div>
           </div>
         </div>
-        <div className="card card-compact">
-          <div className="card-body flex items-center gap-3">
-            <div>
-              <div className="text-xs text-muted font-medium">In Transit</div>
-              <div className="text-lg font-bold mt-0.5">{schedules.filter(s => s.status === 'in-transit').length}</div>
-            </div>
-            <div className="stats-icon-sm" style={{ backgroundColor: theme.warning + '15' }}>
-              <Play size={18} style={{ color: theme.warning }} />
+
+        <div className="admin-card">
+          <div className="admin-card-body">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium" style={{ color: theme.textSecondary }}>
+                  Scheduled
+                </p>
+                <p className="text-2xl font-bold mt-1" style={{ color: theme.text }}>
+                  {schedules.filter(s => s.status === 'scheduled').length}
+                </p>
+              </div>
+              <div 
+                className="w-12 h-12 rounded-lg flex items-center justify-center"
+                style={{ backgroundColor: theme.secondary + '20' }}
+              >
+                <Clock size={24} style={{ color: theme.secondary }} />
+              </div>
             </div>
           </div>
         </div>
-        <div className="card card-compact">
-          <div className="card-body flex items-center gap-3">
-            <div>
-              <div className="text-xs text-muted font-medium">Completed</div>
-              <div className="text-lg font-bold mt-0.5">{schedules.filter(s => s.status === 'completed').length}</div>
+
+        <div className="admin-card">
+          <div className="admin-card-body">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium" style={{ color: theme.textSecondary }}>
+                  In Transit
+                </p>
+                <p className="text-2xl font-bold mt-1" style={{ color: theme.text }}>
+                  {schedules.filter(s => s.status === 'in-transit').length}
+                </p>
+              </div>
+              <div 
+                className="w-12 h-12 rounded-lg flex items-center justify-center"
+                style={{ backgroundColor: theme.warning + '20' }}
+              >
+                <Play size={24} style={{ color: theme.warning }} />
+              </div>
             </div>
-            <div className="stats-icon-sm" style={{ backgroundColor: theme.success + '15' }}>
-              <CheckCircle size={18} style={{ color: theme.success }} />
+          </div>
+        </div>
+
+        <div className="admin-card">
+          <div className="admin-card-body">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium" style={{ color: theme.textSecondary }}>
+                  Completed
+                </p>
+                <p className="text-2xl font-bold mt-1" style={{ color: theme.text }}>
+                  {schedules.filter(s => s.status === 'completed').length}
+                </p>
+              </div>
+              <div 
+                className="w-12 h-12 rounded-lg flex items-center justify-center"
+                style={{ backgroundColor: theme.success + '20' }}
+              >
+                <CheckCircle size={24} style={{ color: theme.success }} />
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="card mb-6">
-        <div className="card-body">
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            <div className="relative">
-              <Search 
-                size={16} 
-                className="absolute left-3 top-1/2 transform -translate-y-1/2"
-                style={{ color: theme.textSecondary }}
-              />
-              <input
-                type="text"
-                placeholder="Search schedules..."
-                className="form-input pl-10"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                style={{
-                  backgroundColor: theme.background,
-                  borderColor: theme.border,
-                  color: theme.text,
-                }}
-              />
-            </div>
-            
-            <select
-              className="form-select"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              style={{
-                backgroundColor: theme.background,
-                borderColor: theme.border,
-                color: theme.text,
-              }}
-            >
-              <option value="">All Status</option>
-              <option value="scheduled">Scheduled</option>
-              <option value="in-transit">In Transit</option>
-              <option value="completed">Completed</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
-            
-            <select
-              className="form-select"
-              value={routeFilter}
-              onChange={(e) => setRouteFilter(e.target.value)}
-              style={{
-                backgroundColor: theme.background,
-                borderColor: theme.border,
-                color: theme.text,
-              }}
-            >
-              <option value="">All Routes</option>
-              {routes.map((route) => (
-                <option key={route._id} value={route._id}>
-                  {route.name}
-                </option>
-              ))}
-            </select>
-            
+      <div className="admin-filters">
+        <div className="admin-filters-grid">
+          <div className="admin-input-with-icon">
+            <Search size={16} className="admin-input-icon" />
             <input
-              type="date"
-              className="form-input"
-              value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value)}
-              style={{
-                backgroundColor: theme.background,
-                borderColor: theme.border,
-                color: theme.text,
-              }}
+              type="text"
+              placeholder="Search schedules..."
+              className="admin-input"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
-            
-            <button
-              onClick={fetchSchedules}
-              className="btn btn-outline"
-              disabled={loading}
-            >
-              {loading ? <div className="spinner" /> : <Filter size={16} />}
-              {loading ? 'Loading...' : 'Refresh'}
-            </button>
           </div>
+          <select
+            className="admin-select"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <option value="">All Status</option>
+            <option value="scheduled">Scheduled</option>
+            <option value="in-transit">In Transit</option>
+            <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+          <select
+            className="admin-select"
+            value={routeFilter}
+            onChange={(e) => setRouteFilter(e.target.value)}
+          >
+            <option value="">All Routes</option>
+            {routes.map((route) => (
+              <option key={route._id} value={route._id}>
+                {route.name}
+              </option>
+            ))}
+          </select>
+          <input
+            type="date"
+            className="admin-input"
+            value={dateFilter}
+            onChange={(e) => setDateFilter(e.target.value)}
+          />
+          <button
+            onClick={fetchSchedules}
+            className="admin-btn admin-btn-secondary"
+            disabled={loading}
+          >
+            {loading ? <div className="spinner" /> : <Filter size={16} />}
+            {loading ? 'Loading...' : 'Refresh'}
+          </button>
         </div>
       </div>
 
       {/* Schedules Table */}
-      <div className="card">
-        <div className="card-header">
-          <h3 className="text-lg font-bold section-title" style={{ color: theme.text }}>
+      <div className="admin-card">
+        <div className="admin-card-header">
+          <h3 className="admin-card-title">
             Schedules ({filteredSchedules.length})
           </h3>
+          <p className="admin-card-subtitle">All bus schedules and their status</p>
         </div>
-        <div className="card-body p-0">
+        <div className="admin-card-body">
           {error ? (
-            <div className="flex items-center justify-center p-6">
-              <div className="text-center">
-                <AlertCircle size={40} style={{ color: theme.error }} className="mx-auto mb-3" />
-                <p style={{ color: theme.error }} className="text-base font-semibold mb-1">
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center max-w-md">
+                <AlertCircle size={48} style={{ color: theme.error }} className="mx-auto mb-4" />
+                <h3 style={{ color: theme.error }} className="text-lg font-semibold mb-2">
                   Error Loading Schedules
-                </p>
-                <p style={{ color: theme.textSecondary }} className="mb-2">
+                </h3>
+                <p style={{ color: theme.textSecondary }} className="mb-4">
                   {error}
                 </p>
                 <button
                   onClick={fetchSchedules}
-                  className="btn btn-primary text-base px-4 py-2 rounded-xl shadow-md"
+                  className="admin-btn admin-btn-primary"
                 >
-                  Retry
+                  Try Again
                 </button>
               </div>
             </div>
           ) : filteredSchedules.length === 0 ? (
-            <div className="flex items-center justify-center p-6">
+            <div className="flex items-center justify-center py-12">
               <div className="text-center">
-                <Calendar size={40} style={{ color: theme.textSecondary }} className="mx-auto mb-3" />
-                <p style={{ color: theme.text }} className="text-base font-semibold mb-1">
+                <Calendar size={48} style={{ color: theme.textSecondary }} className="mx-auto mb-4" />
+                <h3 style={{ color: theme.text }} className="text-lg font-semibold mb-2">
                   No Schedules Found
-                </p>
+                </h3>
                 <p style={{ color: theme.textSecondary }}>
                   {searchTerm || statusFilter || routeFilter || dateFilter
                     ? 'Try adjusting your filters' 
@@ -349,53 +470,49 @@ export default function Schedules() {
               </div>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="table table-striped table-hover text-sm">
+            <div className="admin-table-container">
+              <table className="admin-table">
                 <thead>
                   <tr>
-                    <th style={{ color: theme.textSecondary }}>Bus & Route</th>
-                    <th style={{ color: theme.textSecondary }}>Departure</th>
-                    <th style={{ color: theme.textSecondary }}>Status</th>
-                    <th style={{ color: theme.textSecondary }}>Pickup Points</th>
-                    <th style={{ color: theme.textSecondary }}>Created</th>
-                    <th style={{ color: theme.textSecondary }}>Actions</th>
+                    <th>Bus & Route</th>
+                    <th>Departure Time</th>
+                    <th>Status</th>
+                    <th>Stops</th>
+                    <th>Created</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredSchedules.map((schedule) => {
                     const StatusIcon = getStatusIcon(schedule.status);
+                    const statusColor = getStatusColor(schedule.status);
                     
                     return (
                       <tr key={schedule._id}>
                         <td>
-                          <div className="space-y-2">
-                            <div className="flex items-center">
-                              <div 
-                                className="w-8 h-8 rounded-lg flex items-center justify-center mr-3"
-                                style={{ backgroundColor: theme.primary + '20' }}
-                              >
-                                <Bus size={16} style={{ color: theme.primary }} />
-                              </div>
-                              <span className="font-medium" style={{ color: theme.text }}>
-                                {getBusName(schedule.busId)}
-                              </span>
+                          <div className="flex items-center gap-3">
+                            <div 
+                              className="w-12 h-12 rounded-xl flex items-center justify-center"
+                              style={{ backgroundColor: statusColor + '15' }}
+                            >
+                              <Bus size={20} style={{ color: statusColor }} />
                             </div>
-                            <div className="flex items-center">
-                              <div 
-                                className="w-8 h-8 rounded-lg flex items-center justify-center mr-3"
-                                style={{ backgroundColor: theme.secondary + '20' }}
-                              >
-                                <RouteIcon size={16} style={{ color: theme.secondary }} />
+                            <div>
+                              <p className="font-semibold" style={{ color: theme.text }}>
+                                {getBusName(schedule.busId)}
+                              </p>
+                              <div className="flex items-center gap-2 mt-1">
+                                <RouteIcon size={14} style={{ color: theme.secondary }} />
+                                <span className="text-sm" style={{ color: theme.textSecondary }}>
+                                  {getRouteName(schedule.routeId)}
+                                </span>
                               </div>
-                              <span className="text-sm" style={{ color: theme.textSecondary }}>
-                                {getRouteName(schedule.routeId)}
-                              </span>
                             </div>
                           </div>
                         </td>
                         <td>
-                          <div className="flex items-center">
-                            <Clock size={16} className="mr-2" style={{ color: theme.textSecondary }} />
+                          <div className="flex items-center gap-2">
+                            <Clock size={16} style={{ color: theme.primary }} />
                             <div>
                               <p className="font-medium" style={{ color: theme.text }}>
                                 {new Date(schedule.departureTime).toLocaleTimeString([], {
@@ -411,20 +528,24 @@ export default function Schedules() {
                         </td>
                         <td>
                           <div 
-                            className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+                            className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium"
                             style={{ 
-                              backgroundColor: getStatusColor(schedule.status) + '20',
-                              color: getStatusColor(schedule.status)
+                              backgroundColor: statusColor + '20',
+                              color: statusColor,
+                              border: `1px solid ${statusColor + '30'}`
                             }}
                           >
-                            <StatusIcon size={14} className="mr-1" />
+                            <StatusIcon size={14} className="mr-2" />
                             {schedule.status.charAt(0).toUpperCase() + schedule.status.slice(1)}
                           </div>
                         </td>
                         <td>
-                          <span style={{ color: theme.text }}>
-                            {schedule.estimatedArrivalTimes.length} stops
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <MapPin size={16} style={{ color: theme.warning }} />
+                            <span className="font-medium" style={{ color: theme.text }}>
+                              {schedule.estimatedArrivalTimes.length} stops
+                            </span>
+                          </div>
                         </td>
                         <td>
                           <span className="text-sm" style={{ color: theme.textSecondary }}>
@@ -432,11 +553,20 @@ export default function Schedules() {
                           </span>
                         </td>
                         <td>
-                          <div className="table-row-actions">
-                            <button className="btn btn-outline text-xs px-3 py-1 rounded-lg">
+                          <div className="flex items-center gap-2">
+                            <button 
+                              className="admin-btn admin-btn-secondary p-2"
+                              title="Edit Schedule"
+                              style={{ minWidth: 36, minHeight: 36, borderRadius: 8 }}
+                            >
                               <Edit size={14} />
                             </button>
-                            <button className="btn btn-danger text-xs px-3 py-1 rounded-lg" onClick={() => handleDeleteSchedule(schedule)}>
+                            <button 
+                              onClick={() => handleDeleteSchedule(schedule)}
+                              className="admin-btn admin-btn-danger p-2"
+                              title="Delete Schedule"
+                              style={{ minWidth: 36, minHeight: 36, borderRadius: 8 }}
+                            >
                               <Trash2 size={14} />
                             </button>
                           </div>
@@ -450,6 +580,111 @@ export default function Schedules() {
           )}
         </div>
       </div>
+
+      {/* Modal for creating schedule */}
+      {showScheduleModal && (
+        <div className="modal-overlay">
+          <div className="modal-content max-w-2xl">
+            <h2 className="text-xl font-bold mb-4" style={{ color: theme.text }}>
+              Create New Bus Schedule
+            </h2>
+            <form onSubmit={handleCreateSchedule} className="admin-space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: theme.text }}>
+                  Bus
+                </label>
+                <select
+                  className="admin-select"
+                  value={scheduleForm.busId}
+                  onChange={e => handleScheduleFormChange('busId', e.target.value)}
+                  required
+                >
+                  <option value="">Select a bus</option>
+                  {buses.map(bus => (
+                    <option key={bus._id} value={bus._id}>
+                      {bus.plateNumber}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: theme.text }}>
+                  Route
+                </label>
+                <select
+                  className="admin-select"
+                  value={scheduleForm.routeId}
+                  onChange={e => handleScheduleFormChange('routeId', e.target.value)}
+                  required
+                >
+                  <option value="">Select a route</option>
+                  {routes.map(route => (
+                    <option key={route._id} value={route._id}>
+                      {route.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: theme.text }}>
+                  Departure Time
+                </label>
+                <input
+                  type="datetime-local"
+                  className="admin-input"
+                  value={scheduleForm.departureTime}
+                  onChange={e => handleScheduleFormChange('departureTime', e.target.value)}
+                  required
+                />
+              </div>
+              {pickupPoints.length > 0 && (
+                <div>
+                  <label className="block text-sm font-medium mb-1" style={{ color: theme.text }}>
+                    Estimated Arrival Times (for each pickup point)
+                  </label>
+                  <div className="admin-space-y-2">
+                    {pickupPoints.map((point, idx) => {
+                      const existing = scheduleForm.estimatedArrivalTimes.find(e => e.pickupPointId === point._id);
+                      return (
+                        <div key={point._id} className="flex items-center gap-2">
+                          <span className="w-40 text-sm" style={{ color: theme.textSecondary }}>{point.name}</span>
+                          <input
+                            type="time"
+                            className="admin-input"
+                            value={existing?.estimatedTime || ''}
+                            onChange={e => {
+                              if (existing) {
+                                handleEstimatedTimeChange(point._id, e.target.value);
+                              } else {
+                                handleAddEstimatedTime(point._id);
+                                setTimeout(() => handleEstimatedTimeChange(point._id, e.target.value), 0);
+                              }
+                            }}
+                            required
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+              <div className="flex items-center gap-3 pt-4">
+                <button type="submit" className="admin-btn admin-btn-primary flex-1" disabled={creating}>
+                  {creating ? 'Creating...' : 'Create Schedule'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowScheduleModal(false)}
+                  className="admin-btn admin-btn-secondary flex-1"
+                  disabled={creating}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

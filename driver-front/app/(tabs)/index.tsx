@@ -23,7 +23,7 @@ export default function Dashboard() {
   const { theme } = useTheme();
   const { user } = useAuth();
   const { location, requestLocation } = useLocation();
-  const { bus, passengers, schedules, loading, error, updateOnlineStatus } = useDriverData();
+  const { bus, passengers, schedules, loading, error, updateOnlineStatus, updateBusLocation } = useDriverData();
   const [isOnline, setIsOnline] = useState(false);
 
   useEffect(() => {
@@ -49,10 +49,35 @@ export default function Dashboard() {
     
     if (success) {
       setIsOnline(newStatus);
-      Alert.alert(
-        'Status Updated',
-        `You are now ${newStatus ? 'online' : 'offline'}`
-      );
+      
+      // If going online, start location tracking automatically
+      if (newStatus) {
+        // Start location tracking immediately
+        const locationSuccess = await updateBusLocation(
+          location.latitude,
+          location.longitude,
+          0, // speed
+          0, // heading
+          location.accuracy || 0
+        );
+        
+        if (locationSuccess) {
+          Alert.alert(
+            'Status Updated',
+            'You are now online and location tracking has started'
+          );
+        } else {
+          Alert.alert(
+            'Status Updated',
+            'You are now online but location tracking failed. Please check your location settings.'
+          );
+        }
+      } else {
+        Alert.alert(
+          'Status Updated',
+          'You are now offline'
+        );
+      }
     } else {
       Alert.alert('Error', 'Failed to update status');
     }

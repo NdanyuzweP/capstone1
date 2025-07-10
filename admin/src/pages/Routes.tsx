@@ -322,87 +322,101 @@ export default function Routes() {
           </div>
         ) : (
           filteredRoutes.map((route) => (
-            <div key={route._id} className="admin-card">
-              <div className="admin-card-body">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div 
-                      className="w-10 h-10 rounded-lg flex items-center justify-center"
-                      style={{ backgroundColor: theme.primary + '20' }}
-                    >
-                      <RouteIcon size={20} style={{ color: theme.primary }} />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold" style={{ color: theme.text }}>
+            <div
+              key={route._id}
+              className="admin-card route-card-redesign"
+              style={{
+                borderLeft: `6px solid ${route.isActive ? theme.primary : theme.error}`,
+                boxShadow: '0 4px 24px rgba(22, 105, 122, 0.10)',
+                padding: '1.5rem 1.5rem 1.25rem 1.25rem',
+                marginBottom: '1.5rem',
+                position: 'relative',
+                transition: 'box-shadow 0.2s',
+                minHeight: 210,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+              }}
+            >
+              {/* Top section: Icon, Name, Status */}
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                  <div
+                    style={{
+                      width: 48,
+                      height: 48,
+                      borderRadius: '50%',
+                      background: route.isActive ? theme.primary + '22' : theme.error + '22',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginRight: 8,
+                    }}
+                  >
+                    <RouteIcon size={26} style={{ color: route.isActive ? theme.primary : theme.error }} />
+                  </div>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <h3 style={{ color: theme.text, fontWeight: 700, fontSize: 20, margin: 0 }}>
                         {route.name}
                       </h3>
-                      <p className="text-sm" style={{ color: theme.textSecondary }}>
-                        {route.description}
-                      </p>
+                      <span
+                        className={`admin-badge ${route.isActive ? 'admin-badge-success' : 'admin-badge-danger'}`}
+                        style={{ fontSize: 13, marginLeft: 4 }}
+                      >
+                        {route.isActive ? 'Active' : 'Inactive'}
+                      </span>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => handleEditRoute(route)}
-                      className="admin-btn admin-btn-secondary p-2"
-                      title="Edit Route"
-                    >
-                      <Edit size={14} />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteRoute(route)}
-                      className="admin-btn admin-btn-danger p-2"
-                      title="Delete Route"
-                    >
-                      <Trash2 size={14} />
-                    </button>
+                    <p style={{ color: theme.textSecondary, fontSize: 14, margin: '4px 0 0 0', maxWidth: 260 }}>
+                      {route.description}
+                    </p>
                   </div>
                 </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <button
+                    onClick={() => handleEditRoute(route)}
+                    className="admin-btn admin-btn-secondary p-2"
+                    title="Edit Route"
+                    style={{ minWidth: 36, minHeight: 36, borderRadius: 8 }}
+                  >
+                    <Edit size={16} />
+                  </button>
+                  <button
+                    onClick={() => handleDeleteRoute(route)}
+                    className="admin-btn admin-btn-danger p-2"
+                    title="Delete Route"
+                    style={{ minWidth: 36, minHeight: 36, borderRadius: 8 }}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              </div>
 
-                <div className="admin-space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <MapPin size={14} style={{ color: theme.textSecondary }} />
-                      <span className="text-sm" style={{ color: theme.textSecondary }}>
-                        Pickup Points
-                      </span>
-                    </div>
-                    <span className="font-medium text-sm" style={{ color: theme.text }}>
-                      {route.pickupPoints.length}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Clock size={14} style={{ color: theme.textSecondary }} />
-                      <span className="text-sm" style={{ color: theme.textSecondary }}>
-                        Duration
-                      </span>
-                    </div>
-                    <span className="font-medium text-sm" style={{ color: theme.text }}>
-                      {route.estimatedDuration} min
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm" style={{ color: theme.textSecondary }}>
-                        Fare
-                      </span>
-                    </div>
-                    <span className="font-medium text-sm" style={{ color: theme.success }}>
-                      {route.fare} RWF
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm" style={{ color: theme.textSecondary }}>
-                      Status
-                    </span>
-                    <span className={`admin-badge ${route.isActive ? 'admin-badge-success' : 'admin-badge-danger'}`}>
-                      {route.isActive ? 'Active' : 'Inactive'}
-                    </span>
-                  </div>
+              {/* Stats row */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                background: '#f8f9fa',
+                borderRadius: 10,
+                padding: '0.75rem 1rem',
+                marginTop: 8,
+                marginBottom: 0,
+                gap: 16,
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <MapPin size={16} style={{ color: theme.primary }} />
+                  <span style={{ color: theme.textSecondary, fontSize: 14 }}>Pickup Points</span>
+                  <span style={{ color: theme.text, fontWeight: 600, fontSize: 15, marginLeft: 4 }}>{route.pickupPoints.length}</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <Clock size={16} style={{ color: theme.secondary }} />
+                  <span style={{ color: theme.textSecondary, fontSize: 14 }}>Duration</span>
+                  <span style={{ color: theme.text, fontWeight: 600, fontSize: 15, marginLeft: 4 }}>{route.estimatedDuration} min</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ color: theme.success, fontWeight: 600, fontSize: 15 }}>{route.fare} RWF</span>
+                  <span style={{ color: theme.textSecondary, fontSize: 14 }}>Fare</span>
                 </div>
               </div>
             </div>

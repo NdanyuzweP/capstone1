@@ -26,6 +26,8 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     checkPermissions();
+    // Automatically request location when app starts
+    autoRequestLocation();
   }, []);
 
   const checkPermissions = async () => {
@@ -41,6 +43,67 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
     } catch (err) {
       console.error('Error checking location permissions:', err);
       setError('Failed to check location permissions');
+    }
+  };
+
+  const autoRequestLocation = async () => {
+    // Automatically request location when app starts
+    try {
+      if (Platform.OS === 'web') {
+        // For web, try to get location automatically
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              setLocation({
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+                accuracy: position.coords.accuracy || undefined,
+              });
+              setHasPermission(true);
+            },
+            (error) => {
+              console.log('Auto location request failed:', error);
+              // Don't set error for auto-request failures
+            },
+            {
+              enableHighAccuracy: true,
+              timeout: 10000,
+              maximumAge: 60000,
+            }
+          );
+        }
+      } else {
+        // For native platforms, try to get location automatically
+        let { status } = await Location.getForegroundPermissionsAsync();
+        if (status !== 'granted') {
+          // Try to request permission automatically
+          const { status: newStatus } = await Location.requestForegroundPermissionsAsync();
+          if (newStatus === 'granted') {
+            setHasPermission(true);
+            const locationData = await Location.getCurrentPositionAsync({
+              accuracy: Location.Accuracy.High,
+            });
+            setLocation({
+              latitude: locationData.coords.latitude,
+              longitude: locationData.coords.longitude,
+              accuracy: locationData.coords.accuracy || undefined,
+            });
+          }
+        } else {
+          setHasPermission(true);
+          const locationData = await Location.getCurrentPositionAsync({
+            accuracy: Location.Accuracy.High,
+          });
+          setLocation({
+            latitude: locationData.coords.latitude,
+            longitude: locationData.coords.longitude,
+            accuracy: locationData.coords.accuracy || undefined,
+          });
+        }
+      }
+    } catch (err) {
+      console.log('Auto location request failed:', err);
+      // Don't set error for auto-request failures
     }
   };
 
@@ -85,7 +148,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
         setLocation({
           latitude: locationData.coords.latitude,
           longitude: locationData.coords.longitude,
-          accuracy: locationData.coords.accuracy,
+          accuracy: locationData.coords.accuracy || undefined,
         });
       }
     } catch (err: any) {

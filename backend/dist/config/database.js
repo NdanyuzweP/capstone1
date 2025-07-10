@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
 const connectDB = async () => {
     try {
-        const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/ridra';
+        const mongoURI = 'mongodb+srv://princen:princeoo01@ridradb.6w3jqh0.mongodb.net/ridradb?retryWrites=true&w=majority';
         await mongoose_1.default.connect(mongoURI);
         console.log('MongoDB connected successfully');
     }

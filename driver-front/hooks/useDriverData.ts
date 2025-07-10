@@ -154,14 +154,25 @@ export function useDriverData() {
   };
 
   const updateOnlineStatus = async (isOnline: boolean): Promise<boolean> => {
-    if (!bus) return false;
+    if (!bus) {
+      console.error('No bus available for driver');
+      return false;
+    }
 
     try {
+      console.log('Attempting to update online status:', { busId: bus.id, isOnline });
       await apiService.setDriverOnlineStatus(bus.id, isOnline);
+      console.log('Online status updated successfully');
       setBus(prev => prev ? { ...prev, isOnline } : null);
       return true;
     } catch (err: any) {
       console.error('Error updating online status:', err);
+      console.error('Error details:', {
+        message: err.message,
+        busId: bus?.id,
+        busPlateNumber: bus?.plateNumber,
+        isOnline
+      });
       setError(err.message || 'Failed to update online status');
       return false;
     }

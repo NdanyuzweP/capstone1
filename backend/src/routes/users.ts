@@ -9,6 +9,8 @@ import {
   getDrivers,
   getRegularUsers,
   createUser,
+  getWeeklyActivity,
+  getRecentActivity,
 } from '../controllers/userController';
 import { authenticate, authorize } from '../middleware/auth';
 import { validateSignup } from '../middleware/validation';
@@ -317,5 +319,80 @@ router.delete('/:id', authenticate, authorize('admin'), deleteUser);
  *         description: Invalid request body
  */
 router.post('/', authenticate, authorize('admin'), validateSignup, createUser);
+
+/**
+ * @swagger
+ * /api/users/weekly-activity:
+ *   get:
+ *     summary: Get weekly activity data (Admin only)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Weekly activity data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 weeklyData:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       name:
+ *                         type: string
+ *                       users:
+ *                         type: integer
+ *                       schedules:
+ *                         type: integer
+ *                       interests:
+ *                         type: integer
+ *                       trips:
+ *                         type: integer
+ */
+router.get('/weekly-activity', authenticate, authorize('admin'), getWeeklyActivity);
+
+/**
+ * @swagger
+ * /api/users/recent-activity:
+ *   get:
+ *     summary: Get recent activity data (Admin only)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of activities to return
+ *     responses:
+ *       200:
+ *         description: Recent activity data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 activities:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       type:
+ *                         type: string
+ *                       action:
+ *                         type: string
+ *                       text:
+ *                         type: string
+ *                       time:
+ *                         type: string
+ *                       icon:
+ *                         type: string
+ */
+router.get('/recent-activity', authenticate, authorize('admin'), getRecentActivity);
 
 export default router;

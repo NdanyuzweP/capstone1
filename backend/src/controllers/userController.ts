@@ -1,5 +1,8 @@
 import { Request, Response } from 'express';
 import User from '../models/User';
+import BusSchedule from '../models/BusSchedule';
+import UserInterest from '../models/UserInterest';
+import Bus from '../models/Bus';
 
 export const getAllUsers = async (req: Request, res: Response): Promise<any> => {
   try {
@@ -245,5 +248,164 @@ export const createUser = async (req: Request, res: Response): Promise<any> => {
       return res.status(400).json({ error: 'Email already exists' });
     }
     res.status(500).json({ error: 'Server error' });
+  }
+};
+
+export const getWeeklyActivity = async (req: Request, res: Response): Promise<any> => {
+  try {
+    console.log('Fetching weekly activity data...');
+    
+    // Get the start of the week (Monday)
+    const now = new Date();
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay() + 1); // Monday
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    console.log('Start of week:', startOfWeek);
+
+    // Get data for each day of the week
+    const weeklyData = [];
+    for (let i = 0; i < 7; i++) {
+      const currentDate = new Date(startOfWeek);
+      currentDate.setDate(startOfWeek.getDate() + i);
+      const nextDate = new Date(currentDate);
+      nextDate.setDate(currentDate.getDate() + 1);
+
+      console.log(`Processing day ${i}: ${currentDate} to ${nextDate}`);
+
+      // Count new users for this day
+      const newUsers = await User.countDocuments({
+        createdAt: { $gte: currentDate, $lt: nextDate }
+      });
+
+      // Count new bus schedules for this day
+      const newSchedules = await BusSchedule.countDocuments({
+        createdAt: { $gte: currentDate, $lt: nextDate }
+      });
+
+      // Count user interests for this day
+      const newInterests = await UserInterest.countDocuments({
+        createdAt: { $gte: currentDate, $lt: nextDate }
+      });
+
+      const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      weeklyData.push({
+        name: dayNames[i],
+        users: newUsers,
+        schedules: newSchedules,
+        interests: newInterests,
+        trips: newSchedules + Math.floor(newInterests / 2) // Estimate trips based on schedules and interests
+      });
+    }
+
+    console.log('Weekly data prepared:', weeklyData);
+    res.json({ weeklyData });
+  } catch (error) {
+    console.error('Error fetching weekly activity:', error);
+    res.status(500).json({ error: 'Server error', details: error.message });
+  }
+};
+
+export const getRecentActivity = async (req: Request, res: Response): Promise<any> => {
+  try {
+    console.log('Fetching recent activity data...');
+    const { limit = 10 } = req.query;
+    const activities = [];
+
+    // Get recent user registrations
+    const recentUsers = await User.find({})
+      .select('name email role createdAt')
+      .sort({ createdAt: -1 })
+      .limit(5);
+
+    console.log(`Found ${recentUsers.length} recent users`);
+
+    recentUsers.forEach(user => {
+      activities.push({
+        type: 'user',
+        action: 'registered',
+        text: `New ${user.role} registered: ${user.name}`,
+        time: user.createdAt,
+        icon: 'Users'
+      });
+    });
+
+    // Get recent bus schedules
+    const recentSchedules = await BusSchedule.find({})
+      .populate('busId', 'plateNumber')
+      .populate('routeId', 'name')
+      .sort({ createdAt: -1 })
+      .limit(5);
+
+    console.log(`Found ${recentSchedules.length} recent schedules`);
+
+    recentSchedules.forEach(schedule => {
+      const busPlateNumber = (schedule.busId as any)?.plateNumber || 'Bus';
+      const routeName = (schedule.routeId as any)?.name || 'Route';
+      
+      activities.push({
+        type: 'schedule',
+        action: 'created',
+        text: `Schedule created for ${busPlateNumber} on ${routeName}`,
+        time: schedule.createdAt,
+        icon: 'Calendar'
+      });
+    });
+
+    // Get recent bus status changes (online/offline)
+    const recentBuses = await Bus.find({})
+      .populate('driverId', 'name')
+      .sort({ 'currentLocation.lastUpdated': -1 })
+      .limit(5);
+
+    console.log(`Found ${recentBuses.length} recent buses`);
+
+    recentBuses.forEach(bus => {
+      if (bus.currentLocation?.lastUpdated) {
+        const isOnline = bus.isOnline && 
+          (new Date().getTime() - bus.currentLocation.lastUpdated.getTime()) < 5 * 60 * 1000;
+        
+        activities.push({
+          type: 'bus',
+          action: isOnline ? 'online' : 'offline',
+          text: `Bus ${bus.plateNumber} went ${isOnline ? 'online' : 'offline'}`,
+          time: bus.currentLocation.lastUpdated,
+          icon: 'Bus'
+        });
+      }
+    });
+
+    // Get recent user interests
+    const recentInterests = await UserInterest.find({})
+      .populate('userId', 'name')
+      .populate('pickupPointId', 'name')
+      .sort({ createdAt: -1 })
+      .limit(5);
+
+    console.log(`Found ${recentInterests.length} recent interests`);
+
+    recentInterests.forEach(interest => {
+      const userName = (interest.userId as any)?.name || 'User';
+      const pickupPointName = (interest.pickupPointId as any)?.name || 'location';
+      
+      activities.push({
+        type: 'interest',
+        action: 'added',
+        text: `${userName} interested in pickup at ${pickupPointName}`,
+        time: interest.createdAt,
+        icon: 'MapPin'
+      });
+    });
+
+    // Sort all activities by time and take the most recent ones
+    const sortedActivities = activities
+      .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
+      .slice(0, Number(limit));
+
+    console.log(`Returning ${sortedActivities.length} activities`);
+    res.json({ activities: sortedActivities });
+  } catch (error) {
+    console.error('Error fetching recent activity:', error);
+    res.status(500).json({ error: 'Server error', details: error.message });
   }
 };

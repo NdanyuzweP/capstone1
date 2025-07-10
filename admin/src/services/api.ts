@@ -159,6 +159,30 @@ class ApiService {
     }>('/users/stats');
   }
 
+  async getWeeklyActivity() {
+    return this.request<{
+      weeklyData: Array<{
+        name: string;
+        users: number;
+        schedules: number;
+        interests: number;
+        trips: number;
+      }>;
+    }>('/users/weekly-activity');
+  }
+
+  async getRecentActivity(limit: number = 10) {
+    return this.request<{
+      activities: Array<{
+        type: string;
+        action: string;
+        text: string;
+        time: string;
+        icon: string;
+      }>;
+    }>(`/users/recent-activity?limit=${limit}`);
+  }
+
   async getDrivers(params?: { isActive?: boolean; page?: number; limit?: number }) {
     const searchParams = new URLSearchParams();
     if (params?.isActive !== undefined) searchParams.append('isActive', params.isActive.toString());

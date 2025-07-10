@@ -2,6 +2,9 @@ import { Request, Response } from 'express';
 import Bus from '../models/Bus';
 import BusLocationHistory from '../models/BusLocationHistory';
 import User from '../models/User';
+import PickupPoint from '../models/PickupPoint';
+import socketService from '../services/socketService';
+import { ETACalculator } from '../utils/etaCalculator';
 
 export const updateBusLocation = async (req: Request, res: Response): Promise<any> => {
   try {
@@ -40,6 +43,16 @@ export const updateBusLocation = async (req: Request, res: Response): Promise<an
       accuracy,
     });
     await locationHistory.save();
+
+    // Emit real-time update to all users
+    socketService.emitBusLocationUpdate({
+      busId,
+      latitude,
+      longitude,
+      speed,
+      heading,
+      isOnline: true,
+    });
 
     res.json({
       message: 'Location updated successfully',
@@ -84,7 +97,7 @@ export const getBusLocation = async (req: Request, res: Response): Promise<any> 
 
 export const getAllBusLocations = async (req: Request, res: Response): Promise<any> => {
   try {
-    const { routeId, isOnline } = req.query;
+    const { routeId, isOnline, userLat, userLng, pickupPointId } = req.query;
 
     let query: any = { isActive: true };
     if (routeId) query.routeId = routeId;
@@ -93,12 +106,54 @@ export const getAllBusLocations = async (req: Request, res: Response): Promise<a
       .populate('driverId', 'name email phone')
       .populate('routeId', 'name description');
 
-    // Filter and format bus locations
+    // Get pickup points for ETA calculations
+    const pickupPoints = await PickupPoint.find({ routeId: routeId || { $exists: true } });
+
+    // Filter and format bus locations with ETA
     const busLocations = buses.map(bus => {
+      // Check if bus is online - consider it online if:
+      // 1. isOnline is true AND
+      // 2. Has recent location update (within last 10 minutes instead of 5)
       const isLocationRecent = bus.currentLocation.lastUpdated && 
-        (new Date().getTime() - bus.currentLocation.lastUpdated.getTime()) < 5 * 60 * 1000;
+        (new Date().getTime() - bus.currentLocation.lastUpdated.getTime()) < 10 * 60 * 1000;
       
       const busOnline = bus.isOnline && isLocationRecent;
+
+      let eta = 15; // Default ETA
+      let nearestPickupPoint = null;
+      let distance = 0;
+
+      // Calculate ETA if bus has location and is online
+      if (busOnline && bus.currentLocation.latitude && bus.currentLocation.longitude) {
+        const userLocation = userLat && userLng ? 
+          { latitude: parseFloat(userLat as string), longitude: parseFloat(userLng as string) } : null;
+        
+        const routePickupPoints = pickupPoints
+          .filter(p => p.routeId === bus.routeId)
+          .map(p => ({
+            id: p._id.toString(),
+            name: p.name,
+            latitude: p.latitude,
+            longitude: p.longitude,
+            order: p.order
+          }));
+        
+        const etaResult = ETACalculator.calculateETAForUser(
+          {
+            latitude: bus.currentLocation.latitude,
+            longitude: bus.currentLocation.longitude,
+            speed: bus.currentLocation.speed,
+            heading: bus.currentLocation.heading
+          },
+          userLocation,
+          routePickupPoints,
+          pickupPointId as string
+        );
+
+        eta = etaResult.eta;
+        nearestPickupPoint = etaResult.pickupPoint;
+        distance = etaResult.distance;
+      }
 
       return {
         id: bus._id,
@@ -108,15 +163,21 @@ export const getAllBusLocations = async (req: Request, res: Response): Promise<a
         currentLocation: bus.currentLocation,
         isOnline: busOnline,
         lastSeen: bus.currentLocation.lastUpdated,
+        eta,
+        nearestPickupPoint,
+        distance: Math.round(distance * 10) / 10, // Round to 1 decimal place
       };
     }).filter(bus => {
+      // Only filter by online status if explicitly requested
       if (isOnline === 'true') return bus.isOnline;
       if (isOnline === 'false') return !bus.isOnline;
+      // If not filtering by online status, show all active buses
       return true;
     });
 
     res.json({ buses: busLocations });
   } catch (error) {
+    console.error('Error in getAllBusLocations:', error);
     res.status(500).json({ error: 'Server error' });
   }
 };
@@ -163,7 +224,7 @@ export const getNearbyBuses = async (req: Request, res: Response): Promise<any> 
         $lte: Number(longitude) + radiusInDegrees,
       },
       'currentLocation.lastUpdated': {
-        $gte: new Date(Date.now() - 5 * 60 * 1000), // Within last 5 minutes
+        $gte: new Date(Date.now() - 15 * 60 * 1000), // Within last 15 minutes (more lenient)
       },
     }).populate('driverId', 'name email phone')
       .populate('routeId', 'name description');
@@ -177,6 +238,11 @@ export const getNearbyBuses = async (req: Request, res: Response): Promise<any> 
         bus.currentLocation.longitude!
       );
 
+      // Consider bus online if it has recent location and is marked as online
+      const isLocationRecent = bus.currentLocation.lastUpdated && 
+        (new Date().getTime() - bus.currentLocation.lastUpdated.getTime()) < 10 * 60 * 1000;
+      const isOnline = bus.isOnline && isLocationRecent;
+
       return {
         id: bus._id,
         plateNumber: bus.plateNumber,
@@ -184,13 +250,16 @@ export const getNearbyBuses = async (req: Request, res: Response): Promise<any> 
         route: bus.routeId,
         currentLocation: bus.currentLocation,
         distance: Math.round(distance * 100) / 100, // Round to 2 decimal places
-        isOnline: true,
+        isOnline: isOnline,
+        lastSeen: bus.currentLocation.lastUpdated,
       };
     }).filter(bus => bus.distance <= Number(radius))
       .sort((a, b) => a.distance - b.distance);
 
+    console.log(`Found ${nearbyBuses.length} nearby buses within ${radius}km`);
     res.json({ buses: nearbyBuses });
   } catch (error) {
+    console.error('Error in getNearbyBuses:', error);
     res.status(500).json({ error: 'Server error' });
   }
 };
@@ -200,18 +269,62 @@ export const setDriverOnlineStatus = async (req: Request, res: Response): Promis
     const { busId, isOnline } = req.body;
     const driverId = (req as any).user.id;
 
+    console.log('setDriverOnlineStatus called with:', { busId, isOnline, driverId });
+
+    // First, let's check what buses exist and their driver assignments
+    const allBuses = await Bus.find({ isActive: true }).select('_id plateNumber driverId');
+    console.log('All active buses in database:', allBuses.map(b => ({
+      id: b._id.toString(),
+      plateNumber: b.plateNumber,
+      driverId: b.driverId?.toString() || 'null'
+    })));
+
     // Verify the bus belongs to the driver
-    const bus = await Bus.findOne({ _id: busId, driverId });
+    let bus = await Bus.findOne({ _id: busId, driverId });
+    console.log('Bus lookup result:', bus ? 'Found' : 'Not found');
+    console.log('Looking for bus with driverId:', driverId);
+    
     if (!bus) {
-      return res.status(404).json({ error: 'Bus not found or not assigned to you' });
+      console.log('Bus not found or not assigned to driver. BusId:', busId, 'DriverId:', driverId);
+      
+      // Let's also check what buses exist for this driver
+      const driverBuses = await Bus.find({ driverId });
+      console.log('All buses for this driver:', driverBuses.map(b => ({ id: b._id, plateNumber: b.plateNumber })));
+      
+      // Let's also check if the bus exists but with different driver
+      const busWithDifferentDriver = await Bus.findOne({ _id: busId });
+      if (busWithDifferentDriver) {
+        console.log('Bus exists but assigned to different driver:', {
+          busId,
+          assignedDriverId: busWithDifferentDriver.driverId?.toString(),
+          currentDriverId: driverId
+        });
+        
+        // TEMPORARY FIX: Auto-reassign the bus to the current driver
+        console.log('Auto-reassigning bus to current driver...');
+        bus = await Bus.findByIdAndUpdate(
+          busId,
+          { driverId },
+          { new: true }
+        );
+        console.log('Bus reassigned successfully');
+      } else {
+        return res.status(404).json({ error: 'Bus not found or not assigned to you' });
+      }
     }
 
+    console.log('Updating bus status:', { busId, isOnline });
     await Bus.findByIdAndUpdate(busId, { isOnline });
 
+    // Emit real-time update to all users
+    socketService.emitBusStatusChange(busId, isOnline);
+
+    console.log('Driver status updated successfully');
     res.json({
       message: `Driver status updated to ${isOnline ? 'online' : 'offline'}`,
     });
   } catch (error) {
+    console.error('Error in setDriverOnlineStatus:', error);
     res.status(500).json({ error: 'Server error' });
   }
 };

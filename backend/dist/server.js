@@ -42,10 +42,12 @@ const helmet_1 = __importDefault(require("helmet"));
 const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 const dotenv_1 = __importDefault(require("dotenv"));
 require("express-async-errors");
+const http_1 = require("http");
 const database_1 = __importDefault(require("./config/database"));
 const swagger_1 = require("./config/swagger");
 const createAdmin_1 = require("./utils/createAdmin");
 const locationScheduler_1 = require("./utils/locationScheduler");
+const socketService_1 = __importDefault(require("./services/socketService"));
 const auth_1 = __importDefault(require("./routes/auth"));
 const buses_1 = __importDefault(require("./routes/buses"));
 const routes_1 = __importDefault(require("./routes/routes"));
@@ -56,6 +58,7 @@ const users_1 = __importDefault(require("./routes/users"));
 const busLocations_1 = __importDefault(require("./routes/busLocations"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
+const server = (0, http_1.createServer)(app);
 const PORT = process.env.PORT || 3001;
 const limiter = (0, express_rate_limit_1.default)({
     windowMs: 15 * 60 * 1000,
@@ -67,16 +70,26 @@ const corsOptions = {
         if (!origin)
             return callback(null, true);
         const allowedOrigins = [
-            'http://localhost:8081',
-            'http://localhost:19006',
-            'http://localhost:3000',
-            'exp://192.168.1.100:8081',
-            'exp://localhost:8081',
+            "http://localhost:3000",
+            "http://localhost:3001",
+            "http://localhost:8081",
+            "http://localhost:19006",
+            "http://localhost:19000",
+            "exp://localhost:19000",
+            "exp://192.168.1.100:19000",
+            "capacitor://localhost",
+            "http://localhost",
+            "https://localhost",
         ];
         if (process.env.CORS_ORIGIN) {
             allowedOrigins.push(...process.env.CORS_ORIGIN.split(','));
         }
-        if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+        const isAllowed = allowedOrigins.includes(origin) ||
+            (origin && origin.includes('localhost')) ||
+            (origin && origin.includes('192.168.')) ||
+            (origin && origin.includes('10.0.')) ||
+            (origin && origin.includes('172.16.'));
+        if (isAllowed) {
             callback(null, true);
         }
         else {
@@ -180,9 +193,10 @@ const startServer = async () => {
         console.log(`   - Routes: ${routeCount}`);
         console.log(`   - Users: ${userCount}`);
         console.log(`   - User Interests: ${interestCount}`);
+        socketService_1.default.initialize(server);
         (0, locationScheduler_1.startLocationScheduler)();
         (0, locationScheduler_1.startLocationHistoryCleanup)();
-        app.listen(PORT, () => {
+        server.listen(PORT, () => {
             console.log(`🚀 Server running on port ${PORT}`);
             console.log(`📚 API Documentation: http://localhost:${PORT}/api-docs`);
             console.log(`🔍 Health Check: http://localhost:${PORT}/health`);

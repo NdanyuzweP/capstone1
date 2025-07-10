@@ -30,7 +30,6 @@ class ApiService {
         ...(token && { Authorization: `Bearer ${token}` }),
         ...options.headers,
       },
-      timeout: API_CONFIG.TIMEOUT,
       ...options,
     };
 
@@ -101,6 +100,16 @@ class ApiService {
         isOnline: boolean;
       };
     }>('/buses/driver/my-bus');
+  }
+
+  async checkDriverBusAssignment() {
+    return this.request<{
+      bus?: any;
+      message?: string;
+      error?: string;
+      driverId?: string;
+      availableBuses?: any[];
+    }>('/buses/driver/check-assignment');
   }
 
   async updateBusLocation(busId: string, latitude: number, longitude: number, speed: number = 0, heading: number = 0, accuracy: number = 0) {

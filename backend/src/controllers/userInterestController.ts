@@ -2,6 +2,9 @@ import { Request, Response } from 'express';
 import UserInterest from '../models/UserInterest';
 import BusSchedule from '../models/BusSchedule';
 import PickupPoint from '../models/PickupPoint';
+import Bus from '../models/Bus';
+import User from '../models/User';
+import socketService from '../services/socketService';
 
 export const createUserInterest = async (req: Request, res: Response): Promise<any> => {
   try {
@@ -11,17 +14,15 @@ export const createUserInterest = async (req: Request, res: Response): Promise<a
     // For demo purposes, if the schedule doesn't exist, create a mock one
     let busSchedule = await BusSchedule.findById(busScheduleId);
     if (!busSchedule) {
-      console.log('Bus schedule not found, creating mock schedule for demo');
-      // This is for demo - in production you'd return an error
-      // For now, we'll just use the provided ID as a string reference
+      console.error('Bus schedule not found for ID:', busScheduleId);
+      return res.status(400).json({ error: 'Bus schedule not found' });
     }
 
     // For demo purposes, if the pickup point doesn't exist, create a mock one
-    let pickupPoint = await PickupPoint.findById(pickupPointId);
-    if (!pickupPoint) {
-      console.log('Pickup point not found, creating mock pickup point for demo');
-      // This is for demo - in production you'd return an error
-      // For now, we'll just use the provided ID as a string reference
+    let pickupPointDoc = await PickupPoint.findById(pickupPointId);
+    if (!pickupPointDoc) {
+      console.error('Pickup point not found for ID:', pickupPointId);
+      return res.status(400).json({ error: 'Pickup point not found' });
     }
 
     // Check if user already has interest for this schedule
@@ -48,12 +49,30 @@ export const createUserInterest = async (req: Request, res: Response): Promise<a
       .populate('busScheduleId', 'departureTime status')
       .populate('pickupPointId', 'name description');
 
+    // Get bus and user details for real-time notification
+    const populatedBusSchedule = populatedInterest.busScheduleId as any;
+    const bus = await Bus.findById(populatedBusSchedule.busId);
+    const user = await User.findById(userId);
+    const pickupPoint = pickupPointDoc;
+
+    if (bus && user && pickupPoint) {
+      // Emit real-time notification to driver
+      socketService.emitUserInterestUpdate({
+        busId: bus._id.toString(),
+        userId: user._id.toString(),
+        userName: user.name,
+        pickupPointId: pickupPoint._id.toString(),
+        pickupPointName: pickupPoint.name,
+        action: 'added',
+      });
+    }
+
     res.status(201).json({
       message: 'Interest registered successfully',
       interest: populatedInterest,
     });
   } catch (error) {
-    console.error('Error creating user interest:', error);
+    console.error('Error creating user interest:', error, req.body);
     res.status(500).json({ error: 'Server error' });
   }
 };

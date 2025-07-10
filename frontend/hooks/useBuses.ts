@@ -148,7 +148,7 @@ export function useBuses(userLocation?: { latitude: number; longitude: number },
       const schedules = schedulesResponse.schedules;
 
       let transformedBuses = response.buses
-        .filter(bus => bus.isActive)
+        .filter(bus => bus.isActive) // Show all active buses, not just online ones
         .map(bus => {
           // Find the next/active schedule for this bus
           const busSchedules = schedules.filter(s => {
@@ -186,7 +186,7 @@ export function useBuses(userLocation?: { latitude: number; longitude: number },
           };
         });
 
-      // For home page, only show nearby buses (within 10km)
+      // For home page, show nearby buses (within 10km) but be more lenient
       if (showNearbyOnly && userLocation) {
         transformedBuses = transformedBuses
           .filter(bus => !bus.distance || bus.distance <= 10) // Within 10km for home
@@ -200,13 +200,11 @@ export function useBuses(userLocation?: { latitude: number; longitude: number },
         }
       }
 
-      console.log('Transformed buses for frontend:', transformedBuses.length);
+      console.log(`Transformed ${transformedBuses.length} buses`);
       setBuses(transformedBuses);
-
     } catch (err: any) {
-      console.error('Error fetching buses from your database:', err);
-      setError(err.message || 'Failed to fetch buses from database');
-      setBuses([]);
+      console.error('Error fetching buses:', err);
+      setError(err.message || 'Failed to fetch buses');
     } finally {
       setLoading(false);
     }

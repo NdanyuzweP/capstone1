@@ -6,6 +6,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.setDriverOnlineStatus = exports.getNearbyBuses = exports.getBusLocationHistory = exports.getAllBusLocations = exports.getBusLocation = exports.updateBusLocation = void 0;
 const Bus_1 = __importDefault(require("../models/Bus"));
 const BusLocationHistory_1 = __importDefault(require("../models/BusLocationHistory"));
+const PickupPoint_1 = __importDefault(require("../models/PickupPoint"));
+const socketService_1 = __importDefault(require("../services/socketService"));
+const etaCalculator_1 = require("../utils/etaCalculator");
 const updateBusLocation = async (req, res) => {
     try {
         const { busId, latitude, longitude, speed = 0, heading = 0, accuracy = 0 } = req.body;
@@ -33,6 +36,14 @@ const updateBusLocation = async (req, res) => {
             accuracy,
         });
         await locationHistory.save();
+        socketService_1.default.emitBusLocationUpdate({
+            busId,
+            latitude,
+            longitude,
+            speed,
+            heading,
+            isOnline: true,
+        });
         res.json({
             message: 'Location updated successfully',
             bus: updatedBus,
@@ -73,17 +84,43 @@ const getBusLocation = async (req, res) => {
 exports.getBusLocation = getBusLocation;
 const getAllBusLocations = async (req, res) => {
     try {
-        const { routeId, isOnline } = req.query;
+        const { routeId, isOnline, userLat, userLng, pickupPointId } = req.query;
         let query = { isActive: true };
         if (routeId)
             query.routeId = routeId;
         const buses = await Bus_1.default.find(query)
             .populate('driverId', 'name email phone')
             .populate('routeId', 'name description');
+        const pickupPoints = await PickupPoint_1.default.find({ routeId: routeId || { $exists: true } });
         const busLocations = buses.map(bus => {
             const isLocationRecent = bus.currentLocation.lastUpdated &&
-                (new Date().getTime() - bus.currentLocation.lastUpdated.getTime()) < 5 * 60 * 1000;
+                (new Date().getTime() - bus.currentLocation.lastUpdated.getTime()) < 10 * 60 * 1000;
             const busOnline = bus.isOnline && isLocationRecent;
+            let eta = 15;
+            let nearestPickupPoint = null;
+            let distance = 0;
+            if (busOnline && bus.currentLocation.latitude && bus.currentLocation.longitude) {
+                const userLocation = userLat && userLng ?
+                    { latitude: parseFloat(userLat), longitude: parseFloat(userLng) } : null;
+                const routePickupPoints = pickupPoints
+                    .filter(p => p.routeId === bus.routeId)
+                    .map(p => ({
+                    id: p._id.toString(),
+                    name: p.name,
+                    latitude: p.latitude,
+                    longitude: p.longitude,
+                    order: p.order
+                }));
+                const etaResult = etaCalculator_1.ETACalculator.calculateETAForUser({
+                    latitude: bus.currentLocation.latitude,
+                    longitude: bus.currentLocation.longitude,
+                    speed: bus.currentLocation.speed,
+                    heading: bus.currentLocation.heading
+                }, userLocation, routePickupPoints, pickupPointId);
+                eta = etaResult.eta;
+                nearestPickupPoint = etaResult.pickupPoint;
+                distance = etaResult.distance;
+            }
             return {
                 id: bus._id,
                 plateNumber: bus.plateNumber,
@@ -92,6 +129,9 @@ const getAllBusLocations = async (req, res) => {
                 currentLocation: bus.currentLocation,
                 isOnline: busOnline,
                 lastSeen: bus.currentLocation.lastUpdated,
+                eta,
+                nearestPickupPoint,
+                distance: Math.round(distance * 10) / 10,
             };
         }).filter(bus => {
             if (isOnline === 'true')
@@ -103,6 +143,7 @@ const getAllBusLocations = async (req, res) => {
         res.json({ buses: busLocations });
     }
     catch (error) {
+        console.error('Error in getAllBusLocations:', error);
         res.status(500).json({ error: 'Server error' });
     }
 };
@@ -142,12 +183,15 @@ const getNearbyBuses = async (req, res) => {
                 $lte: Number(longitude) + radiusInDegrees,
             },
             'currentLocation.lastUpdated': {
-                $gte: new Date(Date.now() - 5 * 60 * 1000),
+                $gte: new Date(Date.now() - 15 * 60 * 1000),
             },
         }).populate('driverId', 'name email phone')
             .populate('routeId', 'name description');
         const nearbyBuses = buses.map(bus => {
             const distance = calculateDistance(Number(latitude), Number(longitude), bus.currentLocation.latitude, bus.currentLocation.longitude);
+            const isLocationRecent = bus.currentLocation.lastUpdated &&
+                (new Date().getTime() - bus.currentLocation.lastUpdated.getTime()) < 10 * 60 * 1000;
+            const isOnline = bus.isOnline && isLocationRecent;
             return {
                 id: bus._id,
                 plateNumber: bus.plateNumber,
@@ -155,13 +199,16 @@ const getNearbyBuses = async (req, res) => {
                 route: bus.routeId,
                 currentLocation: bus.currentLocation,
                 distance: Math.round(distance * 100) / 100,
-                isOnline: true,
+                isOnline: isOnline,
+                lastSeen: bus.currentLocation.lastUpdated,
             };
         }).filter(bus => bus.distance <= Number(radius))
             .sort((a, b) => a.distance - b.distance);
+        console.log(`Found ${nearbyBuses.length} nearby buses within ${radius}km`);
         res.json({ buses: nearbyBuses });
     }
     catch (error) {
+        console.error('Error in getNearbyBuses:', error);
         res.status(500).json({ error: 'Server error' });
     }
 };
@@ -170,16 +217,45 @@ const setDriverOnlineStatus = async (req, res) => {
     try {
         const { busId, isOnline } = req.body;
         const driverId = req.user.id;
-        const bus = await Bus_1.default.findOne({ _id: busId, driverId });
+        console.log('setDriverOnlineStatus called with:', { busId, isOnline, driverId });
+        const allBuses = await Bus_1.default.find({ isActive: true }).select('_id plateNumber driverId');
+        console.log('All active buses in database:', allBuses.map(b => ({
+            id: b._id.toString(),
+            plateNumber: b.plateNumber,
+            driverId: b.driverId?.toString() || 'null'
+        })));
+        let bus = await Bus_1.default.findOne({ _id: busId, driverId });
+        console.log('Bus lookup result:', bus ? 'Found' : 'Not found');
+        console.log('Looking for bus with driverId:', driverId);
         if (!bus) {
-            return res.status(404).json({ error: 'Bus not found or not assigned to you' });
+            console.log('Bus not found or not assigned to driver. BusId:', busId, 'DriverId:', driverId);
+            const driverBuses = await Bus_1.default.find({ driverId });
+            console.log('All buses for this driver:', driverBuses.map(b => ({ id: b._id, plateNumber: b.plateNumber })));
+            const busWithDifferentDriver = await Bus_1.default.findOne({ _id: busId });
+            if (busWithDifferentDriver) {
+                console.log('Bus exists but assigned to different driver:', {
+                    busId,
+                    assignedDriverId: busWithDifferentDriver.driverId?.toString(),
+                    currentDriverId: driverId
+                });
+                console.log('Auto-reassigning bus to current driver...');
+                bus = await Bus_1.default.findByIdAndUpdate(busId, { driverId }, { new: true });
+                console.log('Bus reassigned successfully');
+            }
+            else {
+                return res.status(404).json({ error: 'Bus not found or not assigned to you' });
+            }
         }
+        console.log('Updating bus status:', { busId, isOnline });
         await Bus_1.default.findByIdAndUpdate(busId, { isOnline });
+        socketService_1.default.emitBusStatusChange(busId, isOnline);
+        console.log('Driver status updated successfully');
         res.json({
             message: `Driver status updated to ${isOnline ? 'online' : 'offline'}`,
         });
     }
     catch (error) {
+        console.error('Error in setDriverOnlineStatus:', error);
         res.status(500).json({ error: 'Server error' });
     }
 };

@@ -1,11 +1,13 @@
 import express from 'express';
 import {
-  createBus,
   getAllBuses,
   getBusById,
-  getDriverBus,
+  createBus,
   updateBus,
   deleteBus,
+  getDriverBus,
+  checkDriverBusAssignment,
+  reassignBusToDriver,
 } from '../controllers/busController';
 import { authenticate, authorize } from '../middleware/auth';
 import { validateBus } from '../middleware/validation';
@@ -70,6 +72,51 @@ router.get('/', getAllBuses);
  *         description: No bus assigned
  */
 router.get('/driver/my-bus', authenticate, authorize('driver'), getDriverBus);
+
+/**
+ * @swagger
+ * /api/buses/driver/check-assignment:
+ *   get:
+ *     summary: Check if driver has a bus assigned
+ *     tags: [Buses]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Bus assignment found
+ *       404:
+ *         description: No bus assigned
+ */
+router.get('/driver/check-assignment', authenticate, authorize('driver'), checkDriverBusAssignment);
+
+/**
+ * @swagger
+ * /api/buses/reassign:
+ *   post:
+ *     summary: Reassign a bus to a driver
+ *     tags: [Buses]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               busId:
+ *                 type: string
+ *               driverId:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Bus reassigned successfully
+ *       400:
+ *         description: Invalid request or bus already assigned
+ *       404:
+ *         description: Bus or driver not found
+ */
+router.post('/reassign', authenticate, authorize('admin'), reassignBusToDriver);
 
 /**
  * @swagger

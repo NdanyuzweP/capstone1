@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, Pressable, TextInput, Alert } from 'react-native';
+import { View, Text, StyleSheet, Pressable, TextInput, Alert, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -33,81 +33,93 @@ export default function Login() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-      <View style={styles.header}>
-        <Pressable
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <ArrowLeft color={theme.text} size={24} />
-        </Pressable>
-        <Text style={[styles.title, { color: theme.text }]}>
-          {t('login')}
-        </Text>
-      </View>
-
-      <View style={styles.form}>
-        <View style={styles.inputContainer}>
-          <Text style={[styles.label, { color: theme.text }]}>
-            {t('email')}
-          </Text>
-          <TextInput
-            style={[styles.input, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
-            value={email}
-            onChangeText={setEmail}
-            placeholder="Enter your email"
-            placeholderTextColor={theme.textSecondary}
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={[styles.label, { color: theme.text }]}>
-            {t('password')}
-          </Text>
-          <View style={styles.passwordContainer}>
-            <TextInput
-              style={[styles.passwordInput, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
-              value={password}
-              onChangeText={setPassword}
-              placeholder="Enter your password"
-              placeholderTextColor={theme.textSecondary}
-              secureTextEntry={!showPassword}
-            />
-            <Pressable
-              style={styles.eyeButton}
-              onPress={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? (
-                <EyeOff color={theme.textSecondary} size={20} />
-              ) : (
-                <Eye color={theme.textSecondary} size={20} />
-              )}
-            </Pressable>
-          </View>
-        </View>
-
-        <Pressable
-          style={[styles.loginButton, { backgroundColor: theme.primary }]}
-          onPress={handleLogin}
-          disabled={loading}
-        >
-          <Text style={[styles.loginButtonText, { color: theme.background }]}>
-            {loading ? t('loading') : t('login')}
-          </Text>
-        </Pressable>
-
-        <View style={styles.footer}>
-          <Text style={[styles.footerText, { color: theme.textSecondary }]}>
-            Don't have an account?{' '}
-          </Text>
-          <Pressable onPress={() => router.push('/auth/signup')}>
-            <Text style={[styles.linkText, { color: theme.primary }]}>
-              {t('signup')}
-            </Text>
+      <KeyboardAvoidingView 
+        style={styles.keyboardAvoidingView}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <View style={styles.header}>
+          <Pressable
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <ArrowLeft color={theme.text} size={24} />
           </Pressable>
+          <Text style={[styles.title, { color: theme.text }]}>
+            {t('login')}
+          </Text>
         </View>
-      </View>
+
+        <ScrollView 
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.form}>
+            <View style={styles.inputContainer}>
+              <Text style={[styles.label, { color: theme.text }]}>
+                {t('email')}
+              </Text>
+              <TextInput
+                style={[styles.input, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
+                value={email}
+                onChangeText={setEmail}
+                placeholder="Enter your email"
+                placeholderTextColor={theme.textSecondary}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={[styles.label, { color: theme.text }]}>
+                {t('password')}
+              </Text>
+              <View style={styles.passwordContainer}>
+                <TextInput
+                  style={[styles.passwordInput, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
+                  value={password}
+                  onChangeText={setPassword}
+                  placeholder="Enter your password"
+                  placeholderTextColor={theme.textSecondary}
+                  secureTextEntry={!showPassword}
+                />
+                <Pressable
+                  style={styles.eyeButton}
+                  onPress={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOff color={theme.textSecondary} size={20} />
+                  ) : (
+                    <Eye color={theme.textSecondary} size={20} />
+                  )}
+                </Pressable>
+              </View>
+            </View>
+
+            <Pressable
+              style={[styles.loginButton, { backgroundColor: theme.primary }]}
+              onPress={handleLogin}
+              disabled={loading}
+            >
+              <Text style={[styles.loginButtonText, { color: theme.background }]}>
+                {loading ? t('loading') : t('login')}
+              </Text>
+            </Pressable>
+
+            <View style={styles.footer}>
+              <Text style={[styles.footerText, { color: theme.textSecondary }]}>
+                Don't have an account?{' '}
+              </Text>
+              <Pressable onPress={() => router.push('/auth/signup')}>
+                <Text style={[styles.linkText, { color: theme.primary }]}>
+                  {t('signup')}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -132,7 +144,6 @@ const styles = StyleSheet.create({
   },
   form: {
     flex: 1,
-    paddingHorizontal: 24,
   },
   inputContainer: {
     marginBottom: 20,
@@ -191,5 +202,14 @@ const styles = StyleSheet.create({
   linkText: {
     fontSize: 14,
     fontFamily: 'Inter-SemiBold',
+  },
+  keyboardAvoidingView: {
+    flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: 24,
   },
 });

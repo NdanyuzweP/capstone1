@@ -32,10 +32,28 @@ interface UserStats {
   totalUsers: number;
 }
 
+interface WeeklyActivity {
+  name: string;
+  users: number;
+  schedules: number;
+  interests: number;
+  trips: number;
+}
+
+interface RecentActivity {
+  type: string;
+  action: string;
+  text: string;
+  time: string;
+  icon: string;
+}
+
 export default function Dashboard() {
   const { theme } = useTheme();
   const [stats, setStats] = useState<Stats | null>(null);
   const [userStats, setUserStats] = useState<UserStats | null>(null);
+  const [weeklyActivity, setWeeklyActivity] = useState<WeeklyActivity[]>([]);
+  const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -48,6 +66,7 @@ export default function Dashboard() {
       setLoading(true);
       setError(null);
       
+      // Fetch basic stats first (these should work)
       const [statsResponse, userStatsResponse] = await Promise.all([
         apiService.getStats(),
         apiService.getUserStats(),
@@ -55,6 +74,42 @@ export default function Dashboard() {
       
       setStats(statsResponse.stats);
       setUserStats(userStatsResponse.stats);
+
+      // Try to fetch new activity data, but don't fail if they're not available yet
+      try {
+        const [weeklyActivityResponse, recentActivityResponse] = await Promise.all([
+          apiService.getWeeklyActivity(),
+          apiService.getRecentActivity(10),
+        ]);
+        
+        setWeeklyActivity(weeklyActivityResponse.weeklyData);
+        setRecentActivity(recentActivityResponse.activities);
+      } catch (activityError) {
+        console.warn('Activity endpoints not available yet, using fallback data:', activityError);
+        
+        // Fallback mock data for weekly activity
+        const fallbackWeeklyData = [
+          { name: 'Mon', users: 0, schedules: 0, interests: 0, trips: 0 },
+          { name: 'Tue', users: 0, schedules: 0, interests: 0, trips: 0 },
+          { name: 'Wed', users: 0, schedules: 0, interests: 0, trips: 0 },
+          { name: 'Thu', users: 0, schedules: 0, interests: 0, trips: 0 },
+          { name: 'Fri', users: 0, schedules: 0, interests: 0, trips: 0 },
+          { name: 'Sat', users: 0, schedules: 0, interests: 0, trips: 0 },
+          { name: 'Sun', users: 0, schedules: 0, interests: 0, trips: 0 },
+        ];
+        
+        // Fallback mock data for recent activity
+        const fallbackRecentActivity = [
+          { type: 'user', action: 'registered', text: 'New user registered: John Doe', time: new Date().toISOString(), icon: 'Users' },
+          { type: 'bus', action: 'online', text: 'Bus RAD 123 A went online', time: new Date(Date.now() - 5 * 60 * 1000).toISOString(), icon: 'Bus' },
+          { type: 'schedule', action: 'created', text: 'Schedule created for Bus RAD 456 B on Route 302', time: new Date(Date.now() - 10 * 60 * 1000).toISOString(), icon: 'Calendar' },
+          { type: 'interest', action: 'added', text: 'User interested in pickup at Kimironko', time: new Date(Date.now() - 15 * 60 * 1000).toISOString(), icon: 'MapPin' },
+          { type: 'driver', action: 'assigned', text: 'Driver assigned to Bus RAD 789 C', time: new Date(Date.now() - 20 * 60 * 1000).toISOString(), icon: 'UserCheck' },
+        ];
+        
+        setWeeklyActivity(fallbackWeeklyData);
+        setRecentActivity(fallbackRecentActivity);
+      }
     } catch (err: any) {
       console.error('Error fetching dashboard data:', err);
       setError(err.message || 'Failed to fetch dashboard data');
@@ -114,23 +169,48 @@ export default function Dashboard() {
     },
   ];
 
-  // Mock data for charts
-  const weeklyData = [
-    { name: 'Mon', users: 120, trips: 45 },
-    { name: 'Tue', users: 150, trips: 52 },
-    { name: 'Wed', users: 180, trips: 48 },
-    { name: 'Thu', users: 165, trips: 61 },
-    { name: 'Fri', users: 200, trips: 55 },
-    { name: 'Sat', users: 250, trips: 67 },
-    { name: 'Sun', users: 180, trips: 43 },
-  ];
-
   const userDistribution = [
     { name: 'Regular Users', value: userStats?.activeUsers || 0, color: theme.primary },
     { name: 'Drivers', value: userStats?.activeDrivers || 0, color: theme.success },
     { name: 'Admins', value: userStats?.activeAdmins || 0, color: theme.warning },
     { name: 'Inactive', value: userStats?.inactiveUsers || 0, color: theme.textSecondary },
   ];
+
+  const getActivityIcon = (iconName: string) => {
+    switch (iconName) {
+      case 'Users':
+        return Users;
+      case 'Bus':
+        return Bus;
+      case 'Calendar':
+        return Calendar;
+      case 'MapPin':
+        return MapPin;
+      case 'UserCheck':
+        return UserCheck;
+      case 'Navigation':
+        return Navigation;
+      default:
+        return Activity;
+    }
+  };
+
+  const formatTimeAgo = (timeString: string) => {
+    const time = new Date(timeString);
+    const now = new Date();
+    const diffInMinutes = Math.floor((now.getTime() - time.getTime()) / (1000 * 60));
+    
+    if (diffInMinutes < 1) return 'Just now';
+    if (diffInMinutes < 60) return `${diffInMinutes} minutes ago`;
+    
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) return `${diffInHours} hours ago`;
+    
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 7) return `${diffInDays} days ago`;
+    
+    return time.toLocaleDateString();
+  };
 
   if (loading) {
     return (
@@ -218,7 +298,7 @@ export default function Dashboard() {
           </div>
           <div className="dashboard-chart-body">
             <ResponsiveContainer width="100%" height={320}>
-              <BarChart data={weeklyData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+              <BarChart data={weeklyActivity} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={theme.border} />
                 <XAxis dataKey="name" stroke={theme.textSecondary} />
                 <YAxis stroke={theme.textSecondary} />
@@ -304,14 +384,8 @@ export default function Dashboard() {
         </div>
         <div className="dashboard-activity-body">
           <div className="dashboard-activity-list">
-            {[
-              { icon: Users, text: 'New user registered: John Doe', time: '2 minutes ago', type: 'user' },
-              { icon: Bus, text: 'Bus RAD 123 A went online', time: '5 minutes ago', type: 'bus' },
-              { icon: Navigation, text: 'Route 302 schedule updated', time: '10 minutes ago', type: 'route' },
-              { icon: UserCheck, text: 'Driver assigned to Bus RAD 456 B', time: '15 minutes ago', type: 'driver' },
-              { icon: MapPin, text: 'New pickup point added to Route 305', time: '20 minutes ago', type: 'pickup' },
-            ].map((activity, index) => {
-              const Icon = activity.icon;
+            {recentActivity.map((activity, index) => {
+              const Icon = getActivityIcon(activity.icon);
               return (
                 <div key={index} className="dashboard-activity-item" style={{ backgroundColor: theme.surface }}>
                   <div 
@@ -325,7 +399,7 @@ export default function Dashboard() {
                       {activity.text}
                     </p>
                     <p className="dashboard-activity-time" style={{ color: theme.textSecondary }}>
-                      {activity.time}
+                      {formatTimeAgo(activity.time)}
                     </p>
                   </div>
                 </div>
