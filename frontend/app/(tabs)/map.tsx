@@ -62,7 +62,7 @@ export default function Map() {
             {t('map')}
           </Text>
           <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
-            {busesLoading ? 'Loading...' : `${buses.length} buses tracked`}
+            {`${buses.length} buses tracked`}
           </Text>
         </View>
         
@@ -72,11 +72,7 @@ export default function Map() {
             onPress={requestLocation}
             disabled={locationLoading}
           >
-            {locationLoading ? (
-              <Text style={[styles.locationButtonText, { color: theme.textSecondary }]}>
-                Loading...
-              </Text>
-            ) : location ? (
+            {location ? (
               <>
                 <Navigation size={16} color={theme.primary} />
                 <Text style={[styles.locationButtonText, { color: theme.primary }]}>

@@ -3,7 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useDriverData } from '@/hooks/useDriverData';
 import { useState } from 'react';
-import { Users, MapPin, Clock, Phone, Mail, Filter, CheckCircle, XCircle } from 'lucide-react-native';
+import { Users, MapPin, Clock, Filter, CheckCircle, XCircle } from 'lucide-react-native';
 
 export default function Passengers() {
   const { theme } = useTheme();
@@ -48,18 +48,6 @@ export default function Passengers() {
           <Text style={[styles.passengerName, { color: theme.text }]}>
             {passenger.user?.name || 'Unknown User'}
           </Text>
-          <View style={styles.passengerContact}>
-            <Mail size={14} color={theme.textSecondary} />
-            <Text style={[styles.contactText, { color: theme.textSecondary }]}>
-              {passenger.user?.email || 'No email'}
-            </Text>
-          </View>
-          <View style={styles.passengerContact}>
-            <Phone size={14} color={theme.textSecondary} />
-            <Text style={[styles.contactText, { color: theme.textSecondary }]}>
-              {passenger.user?.phone || 'No phone'}
-            </Text>
-          </View>
         </View>
         <View style={[
           styles.statusBadge,
@@ -103,17 +91,7 @@ export default function Passengers() {
     </View>
   );
 
-  if (loading) {
-    return (
-      <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-        <View style={styles.loadingContainer}>
-          <Text style={[styles.loadingText, { color: theme.text }]}>
-            Loading passengers...
-          </Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
+
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
@@ -198,15 +176,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    fontSize: 16,
-    fontFamily: 'Inter-Regular',
-  },
+
   header: {
     paddingHorizontal: 24,
     paddingTop: 20,

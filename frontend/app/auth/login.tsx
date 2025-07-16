@@ -103,7 +103,7 @@ export default function Login() {
               disabled={loading}
             >
               <Text style={[styles.loginButtonText, { color: theme.background }]}>
-                {loading ? t('loading') : t('login')}
+                {t('login')}
               </Text>
             </Pressable>
 

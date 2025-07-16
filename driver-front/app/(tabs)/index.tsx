@@ -93,17 +93,7 @@ export default function Dashboard() {
     .filter(schedule => new Date(schedule.departureTime) > new Date())
     .sort((a, b) => new Date(a.departureTime).getTime() - new Date(b.departureTime).getTime())[0];
 
-  if (loading) {
-    return (
-      <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-        <View style={styles.loadingContainer}>
-          <Text style={[styles.loadingText, { color: theme.text }]}>
-            Loading dashboard...
-          </Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
+
 
   if (error) {
     return (
@@ -291,7 +281,7 @@ export default function Dashboard() {
           </View>
         </View>
 
-        {/* Today's Summary */}
+        {/* Today's Summary
         <View style={[styles.section, { backgroundColor: theme.surface }]}>
           <Text style={[styles.sectionTitle, { color: theme.text }]}>
             Today's Summary
@@ -327,7 +317,7 @@ export default function Dashboard() {
               </Text>
             </View>
           </View>
-        </View>
+        </View> */}
       </ScrollView>
     </SafeAreaView>
   );
@@ -340,15 +330,7 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    fontSize: 16,
-    fontFamily: 'Inter-Regular',
-  },
+
   errorContainer: {
     flex: 1,
     justifyContent: 'center',

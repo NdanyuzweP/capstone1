@@ -98,7 +98,7 @@ export default function Login() {
           disabled={loading}
         >
           <Text style={[styles.loginButtonText, { color: theme.background }]}>
-            {loading ? 'Signing In...' : 'Sign In as Driver'}
+            Sign In as Driver
           </Text>
         </Pressable>
 

@@ -19,11 +19,7 @@ export default function Index() {
     }
   }, [user, loading, router]);
 
-  return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* Loading screen while checking authentication */}
-    </View>
-  );
+  return null;
 }
 
 const styles = StyleSheet.create({

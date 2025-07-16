@@ -30,7 +30,7 @@ export function useUserInterests() {
     } catch (err: any) {
       console.error('Error fetching user interests:', err);
       setError(err.message || 'Failed to fetch user interests');
-      setInterests([]); // Set empty array on error
+      setInterests([]); 
     } finally {
       setLoading(false);
     }

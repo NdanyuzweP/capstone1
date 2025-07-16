@@ -32,17 +32,7 @@ export default function MyBus() {
     return scheduleDate > now;
   }).slice(0, 3);
 
-  if (loading) {
-    return (
-      <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-        <View style={styles.loadingContainer}>
-          <Text style={[styles.loadingText, { color: theme.text }]}>
-            Loading bus information...
-          </Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
+
 
   if (error || !bus) {
     return (
@@ -302,15 +292,7 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    fontSize: 16,
-    fontFamily: 'Inter-Regular',
-  },
+
   errorContainer: {
     flex: 1,
     justifyContent: 'center',

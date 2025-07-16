@@ -93,13 +93,7 @@ export function GoogleMapView({ buses, userLocation, onBusPress }: GoogleMapView
         ))}
       </MapView>
 
-      {!mapLoaded && (
-        <View style={[styles.loadingOverlay, { backgroundColor: theme.surface }]}>
-          <Text style={[styles.loadingText, { color: theme.text }]}>
-            Loading Google Maps...
-          </Text>
-        </View>
-      )}
+
 
       <View style={[styles.mapStats, { backgroundColor: theme.surface + 'E6' }]}>
         <Text style={[styles.statsText, { color: theme.text }]}>
@@ -129,19 +123,7 @@ const styles = StyleSheet.create({
   map: {
     flex: 1,
   },
-  loadingOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    fontSize: 16,
-    fontFamily: 'Inter-SemiBold',
-  },
+
   userLocationMarker: {
     width: 32,
     height: 32,

@@ -171,11 +171,7 @@ export default function Home() {
             onPress={requestLocation}
             disabled={locationLoading}
           >
-            {locationLoading ? (
-              <Text style={[styles.locationButtonText, { color: theme.textSecondary }]}>
-                Loading...
-              </Text>
-            ) : location ? (
+            {location ? (
               <>
                 <Navigation size={16} color={theme.primary} />
                 <Text style={[styles.locationButtonText, { color: theme.primary }]}>
@@ -224,13 +220,7 @@ export default function Home() {
           <Text style={[styles.sectionTitle, { color: theme.text }]}>
             Buses Near You
           </Text>
-          {busesLoading ? (
-            <View style={[styles.loadingState, { backgroundColor: theme.surface }]}>
-              <Text style={[styles.loadingText, { color: theme.text }]}>
-                Loading nearby buses...
-              </Text>
-            </View>
-          ) : buses.length > 0 ? (
+          {buses.length > 0 ? (
             <FlatList
               data={buses}
               renderItem={renderBusCard}
@@ -433,15 +423,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
     textAlign: 'center',
   },
-  loadingState: {
-    padding: 32,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  loadingText: {
-    fontSize: 16,
-    fontFamily: 'Inter-SemiBold',
-  },
+
   errorContainer: {
     flex: 1,
     justifyContent: 'center',

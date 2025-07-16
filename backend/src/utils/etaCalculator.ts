@@ -14,14 +14,15 @@ interface PickupPoint {
 interface BusLocation {
   latitude: number;
   longitude: number;
-  speed: number; // km/h
-  heading: number; // degrees
+  speed: number;
+  heading: number;
 }
 
 export class ETACalculator {
+  
   // Calculate distance between two points using Haversine formula
   static calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
-    const R = 6371; // Earth's radius in kilometers
+    const R = 6371; 
     const dLat = this.deg2rad(lat2 - lat1);
     const dLon = this.deg2rad(lon2 - lon1);
     const a = 
@@ -29,7 +30,7 @@ export class ETACalculator {
       Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) * 
       Math.sin(dLon/2) * Math.sin(dLon/2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    const distance = R * c; // Distance in kilometers
+    const distance = R * c; 
     return distance;
   }
 
@@ -41,7 +42,7 @@ export class ETACalculator {
   static calculateETA(
     busLocation: BusLocation,
     pickupPoint: PickupPoint,
-    averageSpeed: number = 30 // Default average speed in km/h
+    averageSpeed: number = 30 
   ): number {
     const distance = this.calculateDistance(
       busLocation.latitude,

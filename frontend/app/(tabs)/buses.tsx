@@ -32,6 +32,7 @@ export default function Buses() {
     }
   }, [hasPermission, location, filter]);
 
+  
   const applyFilter = () => {
     let filtered = buses;
     
@@ -259,11 +260,7 @@ export default function Buses() {
           onPress={requestLocation}
           disabled={locationLoading}
         >
-          {locationLoading ? (
-            <Text style={[styles.locationButtonText, { color: theme.textSecondary }]}>
-              Loading...
-            </Text>
-          ) : location ? (
+          {location ? (
             <>
               <Navigation size={16} color={theme.primary} />
               <Text style={[styles.locationButtonText, { color: theme.primary }]}>
@@ -288,14 +285,7 @@ export default function Buses() {
         {renderFilterButton('affordable', 'Affordable')}
       </View>
 
-      {busesLoading ? (
-        <View style={[styles.loadingState, { backgroundColor: theme.surface }]}>
-          <Text style={[styles.loadingText, { color: theme.text }]}>
-            Loading all buses...
-          </Text>
-        </View>
-      ) : (
-        <FlatList
+      <FlatList
           data={filteredBuses}
           renderItem={renderBusCard}
           keyExtractor={(item) => item.id}
@@ -316,7 +306,6 @@ export default function Buses() {
             </View>
           )}
         />
-      )}
 
       <LocationPermissionModal
         visible={showLocationModal}
@@ -505,17 +494,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
     textAlign: 'center',
   },
-  loadingState: {
-    padding: 32,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginHorizontal: 24,
-    marginTop: 40,
-  },
-  loadingText: {
-    fontSize: 16,
-    fontFamily: 'Inter-SemiBold',
-  },
+
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
