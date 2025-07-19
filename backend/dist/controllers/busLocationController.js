@@ -137,7 +137,7 @@ const getAllBusLocations = async (req, res) => {
                 return bus.isOnline;
             if (isOnline === 'false')
                 return !bus.isOnline;
-            return bus.isOnline;
+            return true;
         });
         res.json({ buses: busLocations });
     }

@@ -46,11 +46,8 @@ export const createBus = async (req: Request, res: Response): Promise<any> => {
 
 export const getAllBuses = async (req: Request, res: Response): Promise<any> => {
   try {
-    // For regular users, only return online buses
-    const buses = await Bus.find({ 
-      isActive: true,
-      isOnline: true // Only return online buses for users
-    })
+    // Return all active buses for users (both online and offline)
+    const buses = await Bus.find({ isActive: true })
       .populate('driverId', 'name email phone')
       .populate('routeId', 'name description fare');
 
@@ -63,6 +60,7 @@ export const getAllBuses = async (req: Request, res: Response): Promise<any> => 
 
 export const getAllBusesForAdmin = async (req: Request, res: Response): Promise<any> => {
   try {
+    // Admin endpoint to get all buses including offline ones
     const buses = await Bus.find({ isActive: true })
       .populate('driverId', 'name email phone')
       .populate('routeId', 'name description fare');

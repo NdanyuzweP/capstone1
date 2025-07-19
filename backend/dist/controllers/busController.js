@@ -43,10 +43,7 @@ const createBus = async (req, res) => {
 exports.createBus = createBus;
 const getAllBuses = async (req, res) => {
     try {
-        const buses = await Bus_1.default.find({
-            isActive: true,
-            isOnline: true
-        })
+        const buses = await Bus_1.default.find({ isActive: true })
             .populate('driverId', 'name email phone')
             .populate('routeId', 'name description fare');
         res.json({ buses });

@@ -130,7 +130,7 @@ export function useBuses(userLocation?: { latitude: number; longitude: number },
       console.log('Fetching buses from your database...');
 
       if (userLocation && showNearbyOnly) {
-        // For nearby buses only (home page) - only online buses
+        // For nearby buses only (home page) - only online buses within 2km
         try {
           const response = await apiService.getNearbyBuses(
             userLocation.latitude,
@@ -177,18 +177,18 @@ export function useBuses(userLocation?: { latitude: number; longitude: number },
         }
       }
 
-      // Fetch all buses from your database - only online buses for users
-      const response = await apiService.getAllBusLocations(); // This now only returns online buses
+      // Fetch all buses from your database - show all buses for main list
+      const response = await apiService.getBuses(); // This now returns all active buses
       const schedulesResponse = await apiService.getBusSchedules();
       const schedules = schedulesResponse.schedules;
 
       let transformedBuses = response.buses
-        .filter(bus => bus.isOnline) // Double-check: only show online buses
+        .filter(bus => bus.isActive) // Show all active buses
         .map(bus => {
           // Find the next/active schedule for this bus
           const busSchedules = schedules.filter(s => {
-            if (typeof s.busId === 'string') return s.busId === bus.id;
-            if (s.busId && s.busId._id) return s.busId._id === bus.id;
+            if (typeof s.busId === 'string') return s.busId === bus._id;
+            if (s.busId && s.busId._id) return s.busId._id === bus._id;
             return false;
           });
           const schedule = busSchedules[0];
@@ -213,17 +213,9 @@ export function useBuses(userLocation?: { latitude: number; longitude: number },
             );
           }
           // Remove the fare handling from bus mapping since buses don't have fare anymore
+          const backendBusData = bus as BackendBus;
           return {
-            ...transformBackendBusToFrontendBus({
-              _id: bus.id,
-              plateNumber: bus.plateNumber,
-              capacity: 30, // Default capacity
-              driverId: bus.driver,
-              routeId: bus.route,
-              currentLocation: bus.currentLocation,
-              isActive: true,
-              isOnline: bus.isOnline,
-            } as BackendBus, distance),
+            ...transformBackendBusToFrontendBus(backendBusData, distance),
             scheduleId,
             pickupPointId,
           };
@@ -236,14 +228,14 @@ export function useBuses(userLocation?: { latitude: number; longitude: number },
           .sort((a, b) => (a.distance || 999) - (b.distance || 999))
           .slice(0, 8); // Limit to 8 buses for home page
       } else {
-        // For buses page, show all online buses but sort by distance if location available
+        // For buses page, show all buses but sort by distance if location available
         if (userLocation) {
           transformedBuses = transformedBuses
             .sort((a, b) => (a.distance || 999) - (b.distance || 999));
         }
       }
 
-      console.log(`Transformed ${transformedBuses.length} online buses`);
+      console.log(`Transformed ${transformedBuses.length} buses`);
       setBuses(transformedBuses);
     } catch (err: any) {
       console.error('Error fetching buses:', err);

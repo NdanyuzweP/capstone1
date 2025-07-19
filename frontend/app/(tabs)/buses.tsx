@@ -44,24 +44,26 @@ export default function Buses() {
 
   
   const applyFilter = () => {
-    let filtered = buses.filter(bus => bus.isOnline); // Only show online buses
+    let filtered = buses; // Show all buses by default
     
     switch (filter) {
       case 'active':
-        filtered = buses.filter(bus => bus.isActive && bus.isOnline);
+        filtered = buses.filter(bus => bus.isActive);
         break;
       case 'nearby':
         if (location) {
+          // For nearby filter, only show online buses within 5km
           filtered = buses.filter(bus => bus.isOnline && bus.distance && bus.distance <= 5);
         } else {
+          // If no location, show online buses with good ETA
           filtered = buses.filter(bus => bus.isOnline && bus.eta <= 15);
         }
         break;
       case 'affordable':
-        filtered = buses.filter(bus => bus.isOnline && bus.fare && bus.fare <= 400);
+        filtered = buses.filter(bus => bus.fare && bus.fare <= 400);
         break;
       default:
-        filtered = buses.filter(bus => bus.isOnline); // Default: only online buses
+        filtered = buses; // Show all buses by default
     }
     
     setFilteredBuses(filtered);
