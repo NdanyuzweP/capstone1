@@ -168,11 +168,11 @@ export const getAllBusLocations = async (req: Request, res: Response): Promise<a
         distance: Math.round(distance * 10) / 10, // Round to 1 decimal place
       };
     }).filter(bus => {
-      // For user-facing API, only show online buses unless explicitly filtering
+      // Only filter by online status if explicitly requested
       if (isOnline === 'true') return bus.isOnline;
       if (isOnline === 'false') return !bus.isOnline;
-      // Default behavior: only show online buses to users
-      return bus.isOnline;
+      // If not filtering by online status, show all active buses
+      return true;
     });
 
     res.json({ buses: busLocations });
