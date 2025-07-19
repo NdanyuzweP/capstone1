@@ -4,10 +4,10 @@ import { Platform } from 'react-native';
 export const API_CONFIG = {
   // Backend API URL - same as passenger app since it's the same backend
   BASE_URL: Platform.select({
-    ios: 'http://localhost:3001/api',
-    android: 'http://10.0.2.2:3001/api', // Android emulator localhost
-    web: 'http://localhost:3001/api',
-    default: 'http://localhost:3001/api',
+    ios: 'https://capstone1-60ax.onrender.com/api',
+    android: 'https://capstone1-60ax.onrender.com/api',
+    web: 'https://capstone1-60ax.onrender.com/api',
+    default: 'https://capstone1-60ax.onrender.com/api',
   }),
   
   // Request timeout in milliseconds
@@ -20,9 +20,8 @@ export const API_CONFIG = {
 
 // Environment-specific configurations
 export const getApiUrl = () => {
-  // Always use production URL for now since backend is deployed
-  // You can change this back to __DEV__ logic when you want to run local backend
-  return 'http://localhost:5001/api';
+  // Always use production URL since backend is deployed
+  return 'https://capstone1-60ax.onrender.com/api';
   
   // Original logic (commented out):
   // if (__DEV__) {

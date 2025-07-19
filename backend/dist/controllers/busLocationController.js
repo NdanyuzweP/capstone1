@@ -172,7 +172,7 @@ const getNearbyBuses = async (req, res) => {
             return res.status(400).json({ error: 'Latitude and longitude are required' });
         }
         const radiusInDegrees = Number(radius) / 111;
-        const buses = await Bus_1.default.find({
+        let buses = await Bus_1.default.find({
             isActive: true,
             'currentLocation.latitude': {
                 $gte: Number(latitude) - radiusInDegrees,
@@ -187,6 +187,51 @@ const getNearbyBuses = async (req, res) => {
             },
         }).populate('driverId', 'name email phone')
             .populate('routeId', 'name description');
+        if (buses.length === 0) {
+            console.log('No recent buses found, trying with 24-hour filter...');
+            buses = await Bus_1.default.find({
+                isActive: true,
+                'currentLocation.latitude': {
+                    $gte: Number(latitude) - radiusInDegrees,
+                    $lte: Number(latitude) + radiusInDegrees,
+                },
+                'currentLocation.longitude': {
+                    $gte: Number(longitude) - radiusInDegrees,
+                    $lte: Number(longitude) + radiusInDegrees,
+                },
+                'currentLocation.lastUpdated': {
+                    $gte: new Date(Date.now() - 24 * 60 * 60 * 1000),
+                },
+            }).populate('driverId', 'name email phone')
+                .populate('routeId', 'name description');
+        }
+        if (buses.length === 0) {
+            console.log('No buses found with time filter, trying any buses with location data...');
+            buses = await Bus_1.default.find({
+                isActive: true,
+                $and: [
+                    {
+                        'currentLocation.latitude': {
+                            $gte: Number(latitude) - radiusInDegrees,
+                            $lte: Number(latitude) + radiusInDegrees,
+                        }
+                    },
+                    {
+                        'currentLocation.longitude': {
+                            $gte: Number(longitude) - radiusInDegrees,
+                            $lte: Number(longitude) + radiusInDegrees,
+                        }
+                    },
+                    {
+                        'currentLocation.latitude': { $ne: null }
+                    },
+                    {
+                        'currentLocation.longitude': { $ne: null }
+                    }
+                ]
+            }).populate('driverId', 'name email phone')
+                .populate('routeId', 'name description');
+        }
         const nearbyBuses = buses.map(bus => {
             const distance = calculateDistance(Number(latitude), Number(longitude), bus.currentLocation.latitude, bus.currentLocation.longitude);
             const isLocationRecent = bus.currentLocation.lastUpdated &&

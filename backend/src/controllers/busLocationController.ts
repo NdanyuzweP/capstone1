@@ -213,7 +213,8 @@ export const getNearbyBuses = async (req: Request, res: Response): Promise<any> 
     // Convert radius from km to degrees (approximate)
     const radiusInDegrees = Number(radius) / 111;
 
-    const buses = await Bus.find({
+    // First try to find buses with recent location updates (within 15 minutes)
+    let buses = await Bus.find({
       isActive: true,
       'currentLocation.latitude': {
         $gte: Number(latitude) - radiusInDegrees,
@@ -224,10 +225,59 @@ export const getNearbyBuses = async (req: Request, res: Response): Promise<any> 
         $lte: Number(longitude) + radiusInDegrees,
       },
       'currentLocation.lastUpdated': {
-        $gte: new Date(Date.now() - 15 * 60 * 1000), // Within last 15 minutes (more lenient)
+        $gte: new Date(Date.now() - 15 * 60 * 1000), // Within last 15 minutes
       },
     }).populate('driverId', 'name email phone')
       .populate('routeId', 'name description');
+
+    // If no recent buses found, try with a more lenient time filter (within 24 hours)
+    if (buses.length === 0) {
+      console.log('No recent buses found, trying with 24-hour filter...');
+      buses = await Bus.find({
+        isActive: true,
+        'currentLocation.latitude': {
+          $gte: Number(latitude) - radiusInDegrees,
+          $lte: Number(latitude) + radiusInDegrees,
+        },
+        'currentLocation.longitude': {
+          $gte: Number(longitude) - radiusInDegrees,
+          $lte: Number(longitude) + radiusInDegrees,
+        },
+        'currentLocation.lastUpdated': {
+          $gte: new Date(Date.now() - 24 * 60 * 60 * 1000), // Within last 24 hours
+        },
+      }).populate('driverId', 'name email phone')
+        .populate('routeId', 'name description');
+    }
+
+    // If still no buses found, try with any buses that have location data (no time filter)
+    if (buses.length === 0) {
+      console.log('No buses found with time filter, trying any buses with location data...');
+      buses = await Bus.find({
+        isActive: true,
+        $and: [
+          {
+            'currentLocation.latitude': {
+              $gte: Number(latitude) - radiusInDegrees,
+              $lte: Number(latitude) + radiusInDegrees,
+            }
+          },
+          {
+            'currentLocation.longitude': {
+              $gte: Number(longitude) - radiusInDegrees,
+              $lte: Number(longitude) + radiusInDegrees,
+            }
+          },
+          {
+            'currentLocation.latitude': { $ne: null }
+          },
+          {
+            'currentLocation.longitude': { $ne: null }
+          }
+        ]
+      }).populate('driverId', 'name email phone')
+        .populate('routeId', 'name description');
+    }
 
     // Calculate actual distances and filter
     const nearbyBuses = buses.map(bus => {

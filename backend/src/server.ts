@@ -10,6 +10,7 @@ import connectDB from './config/database';
 import { specs, swaggerUi } from './config/swagger';
 import { createAdminUser } from './utils/createAdmin';
 import { seedDatabase } from './utils/seedData';
+import { updateBusLocations } from './utils/updateBusLocations';
 import { startLocationScheduler, startLocationHistoryCleanup } from './utils/locationScheduler';
 import socketService from './services/socketService';
 
@@ -157,6 +158,17 @@ app.get('/api/stats', async (req, res) => {
   }
 });
 
+// Update bus locations endpoint (for testing)
+app.post('/api/update-bus-locations', async (req, res) => {
+  try {
+    await updateBusLocations();
+    res.json({ message: 'Bus locations updated successfully' });
+  } catch (error) {
+    console.error('Update bus locations error:', error);
+    res.status(500).json({ error: 'Failed to update bus locations' });
+  }
+});
+
 // 404 handler
 app.use('*', (req, res) => {
   res.status(404).json({
@@ -184,8 +196,11 @@ const startServer = async () => {
     // Create admin user if not exists
     await createAdminUser();
     
-    // Database seeding disabled - using real data only
-    // await seedDatabase();
+    // Enable database seeding to ensure we have test data
+    await seedDatabase();
+    
+    // Update bus locations to be recent and in Rwanda
+    await updateBusLocations();
     
     // Check existing data in database
     const Bus = (await import('./models/Bus')).default;
@@ -214,6 +229,7 @@ const startServer = async () => {
     server.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
       console.log(`📚 API Documentation: http://localhost:${PORT}/api-docs`);
+      console.log(`📚 Production API Documentation: https://capstone1-60ax.onrender.com/api-docs`);
       console.log(`🔍 Health Check: http://localhost:${PORT}/health`);
       console.log(`📊 Stats endpoint: http://localhost:${PORT}/api/stats`);
       console.log(`🌍 Environment: ${process.env.NODE_ENV}`);

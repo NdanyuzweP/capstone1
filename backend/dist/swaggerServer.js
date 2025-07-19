@@ -15,4 +15,5 @@ app.get('/', (req, res) => {
 });
 app.listen(SWAGGER_PORT, () => {
     console.log(`Swagger docs available at http://localhost:${SWAGGER_PORT}/api-docs`);
+    console.log(`Production docs available at https://capstone1-60ax.onrender.com/api-docs`);
 });
