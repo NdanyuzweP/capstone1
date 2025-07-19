@@ -36,12 +36,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const busScheduleSchema = new mongoose_1.Schema({
     busId: {
-        type: String,
+        type: mongoose_1.default.Schema.Types.ObjectId,
         ref: 'Bus',
         required: true,
     },
     routeId: {
-        type: String,
+        type: mongoose_1.default.Schema.Types.ObjectId,
         ref: 'Route',
         required: true,
     },
@@ -52,7 +52,7 @@ const busScheduleSchema = new mongoose_1.Schema({
     estimatedArrivalTimes: [
         {
             pickupPointId: {
-                type: String,
+                type: mongoose_1.default.Schema.Types.ObjectId,
                 ref: 'PickupPoint',
                 required: true,
             },

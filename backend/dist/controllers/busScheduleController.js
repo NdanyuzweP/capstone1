@@ -62,7 +62,8 @@ const getAllBusSchedules = async (req, res) => {
         res.json({ schedules });
     }
     catch (error) {
-        res.status(500).json({ error: 'Server error' });
+        console.log(error);
+        res.status(500).json({ error: 'Server error: ' + error.message });
     }
 };
 exports.getAllBusSchedules = getAllBusSchedules;

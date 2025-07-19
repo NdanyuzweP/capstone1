@@ -66,7 +66,11 @@ export function useDriverData() {
 
       // Get all buses and find the one assigned to this driver
       const busesResponse = await apiService.getBuses();
-      const driverBus = busesResponse.buses.find(b => b.driverId?._id === user.id || b.driverId?.id === user.id);
+      const driverBus = busesResponse.buses.find(b => 
+        (b.driverId?._id === user.id) || 
+        (b.driverId?.id === user.id) ||
+        (b.driverId === user.id)
+      );
       
       if (!driverBus) {
         setError('No bus assigned to you. Please contact your administrator.');
@@ -98,17 +102,17 @@ export function useDriverData() {
       // Get schedules for this bus
       const schedulesResponse = await apiService.getBusSchedules();
       const busSchedules = schedulesResponse.schedules
-        .filter(schedule => 
-          schedule.busId?._id === driverBus._id || 
-          schedule.busId?.id === driverBus._id ||
-          schedule.busId === driverBus._id
-        )
+        .filter(schedule => {
+          const scheduleBusId = schedule.busId?._id || schedule.busId?.id || schedule.busId;
+          const driverBusId = driverBus._id;
+          return scheduleBusId === driverBusId;
+        })
         .map(schedule => ({
           id: schedule._id,
           departureTime: new Date(schedule.departureTime),
           status: schedule.status,
-          estimatedArrivalTimes: schedule.estimatedArrivalTimes.map(arrival => ({
-            pickupPointId: typeof arrival.pickupPointId === 'string' ? arrival.pickupPointId : arrival.pickupPointId._id,
+          estimatedArrivalTimes: (schedule.estimatedArrivalTimes || []).map(arrival => ({
+            pickupPointId: typeof arrival.pickupPointId === 'string' ? arrival.pickupPointId : (arrival.pickupPointId?._id || arrival.pickupPointId?.id || 'unknown'),
             estimatedTime: new Date(arrival.estimatedTime),
             actualTime: arrival.actualTime ? new Date(arrival.actualTime) : undefined,
           })),
@@ -121,16 +125,16 @@ export function useDriverData() {
       for (const schedule of busSchedules) {
         try {
           const passengersResponse = await apiService.getInterestedPassengers(schedule.id);
-          const schedulePassengers = passengersResponse.interests.map(interest => ({
+          const schedulePassengers = (passengersResponse.interests || []).map(interest => ({
             id: interest._id,
             user: interest.userId ? {
-              id: interest.userId._id || interest.userId.id,
+              id: interest.userId._id || interest.userId.id || 'unknown',
               name: interest.userId.name || 'Unknown User',
               email: interest.userId.email || '',
               phone: interest.userId.phone || '',
             } : null,
             pickupPoint: interest.pickupPointId ? {
-              id: interest.pickupPointId._id || interest.pickupPointId.id,
+              id: interest.pickupPointId._id || interest.pickupPointId.id || 'unknown',
               name: interest.pickupPointId.name || 'Unknown Stop',
               description: interest.pickupPointId.description || '',
             } : null,

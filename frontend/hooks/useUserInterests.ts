@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { apiService } from '@/services/api';
 
 interface UserInterest {
@@ -92,7 +93,22 @@ export function useUserInterests() {
   };
 
   useEffect(() => {
-    fetchInterests();
+    // Only fetch interests if we have a valid auth token
+    const checkAuthAndFetch = async () => {
+      try {
+        const token = await AsyncStorage.getItem('authToken');
+        if (token) {
+          fetchInterests();
+        } else {
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('Error checking auth token:', error);
+        setLoading(false);
+      }
+    };
+    
+    checkAuthAndFetch();
   }, []);
 
   const refetch = () => {

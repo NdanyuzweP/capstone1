@@ -22,7 +22,7 @@ export const API_CONFIG = {
 export const getApiUrl = () => {
   // Always use production URL for now since backend is deployed
   // You can change this back to __DEV__ logic when you want to run local backend
-  return 'https://capstone1-60ax.onrender.com/api';
+  return 'http://localhost:5001/api';
   
   // Original logic (commented out):
   // if (__DEV__) {

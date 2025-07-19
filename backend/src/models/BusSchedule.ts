@@ -1,15 +1,15 @@
 import mongoose, { Schema } from 'mongoose';
 import { IBusSchedule } from '../types';
 
-const busScheduleSchema = new Schema<IBusSchedule>(
+const busScheduleSchema = new Schema(
   {
     busId: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
       ref: 'Bus',
       required: true,
     },
     routeId: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
       ref: 'Route',
       required: true,
     },
@@ -20,7 +20,7 @@ const busScheduleSchema = new Schema<IBusSchedule>(
     estimatedArrivalTimes: [
       {
         pickupPointId: {
-          type: String,
+          type: mongoose.Schema.Types.ObjectId,
           ref: 'PickupPoint',
           required: true,
         },
