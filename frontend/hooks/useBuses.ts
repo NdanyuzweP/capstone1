@@ -115,6 +115,8 @@ export function useBuses(userLocation?: { latitude: number; longitude: number },
       fare: apiBus.route?.fare || 400, // Get fare from route
       schedule: '05:00–23:00',
       distance: apiBus.distance,
+      // Note: Nearby buses from getNearbyBuses don't have scheduleId/pickupPointId
+      // These will be undefined, which means interest functionality won't work for nearby buses
     };
   };
 
@@ -131,10 +133,41 @@ export function useBuses(userLocation?: { latitude: number; longitude: number },
           const response = await apiService.getNearbyBuses(
             userLocation.latitude,
             userLocation.longitude,
-            10 // 10km radius for nearby
+            2 // 2km radius for nearby
           );
           console.log('Found nearby buses:', response.buses.length);
-          const transformedBuses = response.buses.map(transformApiBusToFrontendBus);
+          
+          // Get schedules to add schedule information to nearby buses
+          const schedulesResponse = await apiService.getBusSchedules();
+          const schedules = schedulesResponse.schedules;
+          
+          const transformedBuses = response.buses.map(apiBus => {
+            // Find the next/active schedule for this bus
+            const busSchedules = schedules.filter(s => {
+              if (typeof s.busId === 'string') return s.busId === apiBus.id;
+              if (s.busId && s.busId._id) return s.busId._id === apiBus.id;
+              return false;
+            });
+            const schedule = busSchedules[0];
+            let scheduleId: string | undefined = undefined;
+            let pickupPointId: string | undefined = undefined;
+            if (schedule) {
+              scheduleId = schedule._id;
+              if (schedule.estimatedArrivalTimes && schedule.estimatedArrivalTimes.length > 0) {
+                const pickup = schedule.estimatedArrivalTimes[0];
+                if (pickup && pickup.pickupPointId) {
+                  pickupPointId = typeof pickup.pickupPointId === 'string' ? pickup.pickupPointId : pickup.pickupPointId._id;
+                }
+              }
+            }
+            
+            return {
+              ...transformApiBusToFrontendBus(apiBus),
+              scheduleId,
+              pickupPointId,
+            };
+          });
+          
           setBuses(transformedBuses);
           return;
         } catch (nearbyError) {

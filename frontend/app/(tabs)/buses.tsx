@@ -5,22 +5,32 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useLocation } from '@/contexts/LocationContext';
 import { useBuses } from '@/hooks/useBuses';
-import { useUserInterests } from '@/hooks/useUserInterests';
+
 import { useState, useEffect } from 'react';
 import { Bus as BusType } from '@/types/bus';
-import { Bus, MapPin, Clock, Users, Heart, Filter, Navigation, CircleAlert as AlertCircle } from 'lucide-react-native';
+import { Bus, MapPin, Clock, Users, Filter, Navigation, CircleAlert as AlertCircle } from 'lucide-react-native';
 import { LocationPermissionModal } from '@/components/LocationPermissionModal';
 
 export default function Buses() {
   const { theme } = useTheme();
-  
   const { t } = useLanguage();
   const { location, loading: locationLoading, requestLocation, hasPermission } = useLocation();
   const { buses, loading: busesLoading, error: busesError, refetch } = useBuses(location || undefined, false); // false = all buses
-  const { interests, showInterest, removeInterest } = useUserInterests();
+
   const [filteredBuses, setFilteredBuses] = useState<BusType[]>([]);
   const [filter, setFilter] = useState<'all' | 'active' | 'nearby' | 'affordable'>('all');
   const [showLocationModal, setShowLocationModal] = useState(false);
+
+  // Safety check to prevent rendering before contexts are ready
+  if (!theme) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#ffffff' }}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Text>Loading...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   useEffect(() => {
     applyFilter();
@@ -57,32 +67,14 @@ export default function Buses() {
     setFilteredBuses(filtered);
   };
 
-  const handleShowInterest = async (busId: string) => {
-    const bus = buses.find(b => b.id === busId);
-    if (!bus || !bus.scheduleId || !bus.pickupPointId) {
-      // Optionally show an error or fallback
-      return;
-    }
-    const existingInterest = interests.find(interest => 
-      interest.busScheduleId === bus.scheduleId
-    );
-    if (existingInterest) {
-      await removeInterest(existingInterest.id);
-    } else {
-      await showInterest(bus.scheduleId, bus.pickupPointId);
-    }
-  };
+
 
   const handleLocationRequest = async () => {
     setShowLocationModal(false);
     await requestLocation();
   };
 
-  const isInterestedInBus = (busId: string) => {
-    const bus = buses.find(b => b.id === busId);
-    if (!bus || !bus.scheduleId) return false;
-    return interests.some(interest => interest.busScheduleId === bus.scheduleId);
-  };
+
 
   const getStatusColor = (bus: BusType) => {
     if (!bus.isActive) return theme.textSecondary;
@@ -136,7 +128,7 @@ export default function Buses() {
           </View>
           {bus.distance && (
             <Text style={[styles.distanceText, { color: theme.primary }]}>
-              {`${bus.distance.toFixed(1)} km away`}
+              {`${(bus.distance || 0).toFixed(1)} km away`}
             </Text>
           )}
         </View>
@@ -152,11 +144,11 @@ export default function Buses() {
         <View style={styles.detailItem}>
           <Clock size={16} color={theme.primary} />
           <Text style={[styles.detailLabel, { color: theme.textSecondary }]}>
-            {t('eta')}:
+            ETA:
           </Text>
-          <Text style={[styles.detailValue, { color: theme.text }]}>
-            {bus.eta} min
-          </Text>
+                      <Text style={[styles.detailValue, { color: theme.text }]}>
+              {bus.eta || 0} min
+            </Text>
         </View>
         
         <View style={styles.detailItem}>
@@ -164,9 +156,9 @@ export default function Buses() {
           <Text style={[styles.detailLabel, { color: theme.textSecondary }]}>
             Capacity:
           </Text>
-          <Text style={[styles.detailValue, { color: theme.text }]}>
-            {`${bus.currentPassengers}/${bus.capacity}`}
-          </Text>
+                      <Text style={[styles.detailValue, { color: theme.text }]}>
+              {`${bus.currentPassengers || 0}/${bus.capacity || 0}`}
+            </Text>
         </View>
 
         {bus.fare && (
@@ -175,7 +167,7 @@ export default function Buses() {
               Fare:
             </Text>
             <Text style={[styles.detailValue, { color: theme.primary }]}>
-              {bus.fare} RWF
+              {bus.fare || 0} RWF
             </Text>
           </View>
         )}
@@ -195,29 +187,6 @@ export default function Buses() {
             </Text>
           )}
         </View>
-        
-        <Pressable
-          style={[
-            styles.interestButton,
-            { 
-              backgroundColor: isInterestedInBus(bus.id) ? theme.primary : 'transparent',
-              borderColor: theme.primary 
-            }
-          ]}
-          onPress={() => handleShowInterest(bus.id)}
-        >
-          <Heart
-            size={16}
-            color={isInterestedInBus(bus.id) ? theme.background : theme.primary}
-            fill={isInterestedInBus(bus.id) ? theme.background : 'none'}
-          />
-          <Text style={[
-            styles.interestButtonText,
-            { color: isInterestedInBus(bus.id) ? theme.background : theme.primary }
-          ]}>
-            {`${bus.interested + (isInterestedInBus(bus.id) ? 1 : 0)}`}
-          </Text>
-        </Pressable>
       </View>
     </View>
   );
@@ -464,19 +433,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
     marginTop: 2,
   },
-  interestButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    borderWidth: 1,
-    gap: 4,
-  },
-  interestButtonText: {
-    fontSize: 12,
-    fontFamily: 'Inter-SemiBold',
-  },
+
   emptyState: {
     padding: 32,
     borderRadius: 12,

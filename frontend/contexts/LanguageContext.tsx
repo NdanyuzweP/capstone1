@@ -90,7 +90,6 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const t = (key: string): string => {
     const translation = translations[key];
     if (!translation) {
-      console.warn(`Translation not found for key: ${key}`);
       return key;
     }
     return translation[language];

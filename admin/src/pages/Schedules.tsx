@@ -87,6 +87,7 @@ export default function Schedules() {
       if (dateFilter) params.date = dateFilter;
       
       const response = await apiService.getBusSchedules(params);
+      console.log(response);
       setSchedules(response.schedules);
     } catch (err: any) {
       console.error('Error fetching schedules:', err);

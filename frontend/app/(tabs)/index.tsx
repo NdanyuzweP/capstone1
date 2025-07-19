@@ -13,15 +13,55 @@ import { MapPin, Clock, Users, Heart, Navigation, CircleAlert as AlertCircle, Bu
 import { LocationPermissionModal } from '@/components/LocationPermissionModal';
 
 export default function Home() {
-  const { theme } = useTheme();
-  const { t } = useLanguage();
-  const { user } = useAuth();
-  const { location, loading: locationLoading, requestLocation, hasPermission } = useLocation();
-  const { buses, loading: busesLoading, error: busesError, refetch } = useBuses(location || undefined, true); // true = nearby only
-  const { interests, showInterest, removeInterest } = useUserInterests();
+  // Wrap all context hooks in a try-catch to handle initialization errors
+  let theme, t, user, location, locationLoading, requestLocation, hasPermission, buses, busesLoading, busesError, refetch, interests, showInterest, removeInterest;
+  
+  try {
+    const themeContext = useTheme();
+    const languageContext = useLanguage();
+    const authContext = useAuth();
+    const locationContext = useLocation();
+    const busesContext = useBuses(locationContext.location || undefined, true);
+    const interestsContext = useUserInterests();
+    
+    theme = themeContext.theme;
+    t = languageContext.t;
+    user = authContext.user;
+    location = locationContext.location;
+    locationLoading = locationContext.loading;
+    requestLocation = locationContext.requestLocation;
+    hasPermission = locationContext.hasPermission;
+    buses = busesContext.buses;
+    busesLoading = busesContext.loading;
+    busesError = busesContext.error;
+    refetch = busesContext.refetch;
+    interests = interestsContext.interests;
+    showInterest = interestsContext.showInterest;
+    removeInterest = interestsContext.removeInterest;
+  } catch (error) {
+    console.error('Error initializing contexts:', error);
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#ffffff' }}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Text>Loading...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+  
   const [showLocationModal, setShowLocationModal] = useState(false);
 
-  console.log(buses.length)
+  // Safety check to prevent rendering before contexts are ready
+  if (!theme || !user) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#ffffff' }}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Text>Loading...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
 
 
   useEffect(() => {
@@ -32,12 +72,11 @@ export default function Home() {
 
   const handleShowInterest = async (busId: string) => {
     const bus = buses.find(b => b.id === busId);
-    if (!bus || !bus.scheduleId || !bus.pickupPointId) {
+    if (!bus || !bus.scheduleId || !bus.pickupPointId || !interests) {
       console.error('Missing real schedule or pickup point ID:', bus);
       alert('This bus is missing schedule or pickup point information. Please try another bus.');
       return;
     }
-    console.log('Showing interest:', { scheduleId: bus.scheduleId, pickupPointId: bus.pickupPointId });
     const existingInterest = interests.find(interest => 
       interest.busScheduleId === bus.scheduleId
     );
@@ -54,13 +93,14 @@ export default function Home() {
   };
 
   const isInterestedInBus = (busId: string) => {
-    const mockScheduleId = `schedule_${busId}`;
-    return interests.some(interest => interest.busScheduleId === mockScheduleId);
+    const bus = buses.find(b => b.id === busId);
+    if (!bus || !bus.scheduleId || !interests) {
+      return false;
+    }
+    return interests.some(interest => interest.busScheduleId === bus.scheduleId);
   };
 
-  const onGetNearbyBuses = async () => {
-    
-  }
+
 
   const renderBusCard = ({ item: bus }: { item: Bus }) => (
     <View style={[styles.busCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
@@ -79,7 +119,7 @@ export default function Home() {
           </View>
           {bus.distance && (
             <Text style={[styles.distanceText, { color: theme.primary }]}>
-              {bus.distance.toFixed(1)} km away
+              {(bus.distance || 0).toFixed(1)} km away
             </Text>
           )}
         </View>
@@ -126,7 +166,7 @@ export default function Home() {
             styles.interestText,
             { color: isInterestedInBus(bus.id) ? theme.background : theme.primary }
           ]}>
-            {isInterestedInBus(bus.id) ? 'Interested' : t('showInterest')}
+            {isInterestedInBus(bus.id) ? 'Interested' : 'Show Interest'}
           </Text>
         </Pressable>
       </View>
@@ -163,7 +203,7 @@ export default function Home() {
               Welcome back,
             </Text>
             <Text style={[styles.userName, { color: theme.text }]}>
-              {user?.name}
+              {user?.name || 'User'}
             </Text>
           </View>
           <Pressable
@@ -200,7 +240,7 @@ export default function Home() {
           </View>
           <View style={[styles.statCard, { backgroundColor: theme.surface }]}>
             <Text style={[styles.statNumber, { color: theme.primary }]}>
-              {buses.length > 0 ? Math.min(...buses.map(b => b.eta)) : 0}m
+              {buses.length > 0 ? Math.min(...buses.map(b => b.eta || 0)) : 0}m
             </Text>
             <Text style={[styles.statLabel, { color: theme.textSecondary }]}>
               Nearest Bus
@@ -208,7 +248,7 @@ export default function Home() {
           </View>
           <View style={[styles.statCard, { backgroundColor: theme.surface }]}>
             <Text style={[styles.statNumber, { color: theme.primary }]}>
-              {interests.length}
+              {interests?.length || 0}
             </Text>
             <Text style={[styles.statLabel, { color: theme.textSecondary }]}>
               Interested
