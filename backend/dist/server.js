@@ -46,6 +46,8 @@ const http_1 = require("http");
 const database_1 = __importDefault(require("./config/database"));
 const swagger_1 = require("./config/swagger");
 const createAdmin_1 = require("./utils/createAdmin");
+const seedData_1 = require("./utils/seedData");
+const updateBusLocations_1 = require("./utils/updateBusLocations");
 const locationScheduler_1 = require("./utils/locationScheduler");
 const socketService_1 = __importDefault(require("./services/socketService"));
 const auth_1 = __importDefault(require("./routes/auth"));
@@ -163,6 +165,16 @@ app.get('/api/stats', async (req, res) => {
         res.status(500).json({ error: 'Failed to get stats' });
     }
 });
+app.post('/api/update-bus-locations', async (req, res) => {
+    try {
+        await (0, updateBusLocations_1.updateBusLocations)();
+        res.json({ message: 'Bus locations updated successfully' });
+    }
+    catch (error) {
+        console.error('Update bus locations error:', error);
+        res.status(500).json({ error: 'Failed to update bus locations' });
+    }
+});
 app.use('*', (req, res) => {
     res.status(404).json({
         error: 'Route not found',
@@ -180,6 +192,8 @@ const startServer = async () => {
     try {
         await (0, database_1.default)();
         await (0, createAdmin_1.createAdminUser)();
+        await (0, seedData_1.seedDatabase)();
+        await (0, updateBusLocations_1.updateBusLocations)();
         const Bus = (await Promise.resolve().then(() => __importStar(require('./models/Bus')))).default;
         const Route = (await Promise.resolve().then(() => __importStar(require('./models/Route')))).default;
         const User = (await Promise.resolve().then(() => __importStar(require('./models/User')))).default;
@@ -199,6 +213,7 @@ const startServer = async () => {
         server.listen(PORT, () => {
             console.log(`🚀 Server running on port ${PORT}`);
             console.log(`📚 API Documentation: http://localhost:${PORT}/api-docs`);
+            console.log(`📚 Production API Documentation: https://capstone1-60ax.onrender.com/api-docs`);
             console.log(`🔍 Health Check: http://localhost:${PORT}/health`);
             console.log(`📊 Stats endpoint: http://localhost:${PORT}/api/stats`);
             console.log(`🌍 Environment: ${process.env.NODE_ENV}`);
