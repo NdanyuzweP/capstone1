@@ -89,6 +89,7 @@ export function useBuses(userLocation?: { latitude: number; longitude: number },
       capacity: backendBus.capacity, // Use actual capacity from database
       currentPassengers: Math.floor(Math.random() * (backendBus.capacity || 25)),
       isActive: backendBus.isActive && backendBus.isOnline,
+      isOnline: backendBus.isOnline, // Include online status
       interested: Math.floor(Math.random() * 10),
       fare: backendBus.routeId?.fare || 400, // Get fare from route only
       schedule: '05:00–23:00', // You can enhance this with actual schedule data
@@ -111,6 +112,7 @@ export function useBuses(userLocation?: { latitude: number; longitude: number },
       capacity: 30,
       currentPassengers: Math.floor(Math.random() * 25),
       isActive: apiBus.isOnline,
+      isOnline: apiBus.isOnline, // Include online status
       interested: Math.floor(Math.random() * 10),
       fare: apiBus.route?.fare || 400, // Get fare from route
       schedule: '05:00–23:00',
@@ -128,14 +130,14 @@ export function useBuses(userLocation?: { latitude: number; longitude: number },
       console.log('Fetching buses from your database...');
 
       if (userLocation && showNearbyOnly) {
-        // For nearby buses only (home page)
+        // For nearby buses only (home page) - only online buses
         try {
           const response = await apiService.getNearbyBuses(
             userLocation.latitude,
             userLocation.longitude,
             2 // 2km radius for nearby
           );
-          console.log('Found nearby buses:', response.buses.length);
+          console.log('Found nearby online buses:', response.buses.length);
           
           // Get schedules to add schedule information to nearby buses
           const schedulesResponse = await apiService.getBusSchedules();
@@ -175,18 +177,18 @@ export function useBuses(userLocation?: { latitude: number; longitude: number },
         }
       }
 
-      // Fetch all buses from your database
-      const response = await apiService.getBuses();
+      // Fetch all buses from your database - only online buses for users
+      const response = await apiService.getAllBusLocations(); // This now only returns online buses
       const schedulesResponse = await apiService.getBusSchedules();
       const schedules = schedulesResponse.schedules;
 
       let transformedBuses = response.buses
-        .filter(bus => bus.isActive) // Show all active buses, not just online ones
+        .filter(bus => bus.isOnline) // Double-check: only show online buses
         .map(bus => {
           // Find the next/active schedule for this bus
           const busSchedules = schedules.filter(s => {
-            if (typeof s.busId === 'string') return s.busId === bus._id;
-            if (s.busId && s.busId._id) return s.busId._id === bus._id;
+            if (typeof s.busId === 'string') return s.busId === bus.id;
+            if (s.busId && s.busId._id) return s.busId._id === bus.id;
             return false;
           });
           const schedule = busSchedules[0];
@@ -211,9 +213,17 @@ export function useBuses(userLocation?: { latitude: number; longitude: number },
             );
           }
           // Remove the fare handling from bus mapping since buses don't have fare anymore
-          const backendBusData = bus as BackendBus;
           return {
-            ...transformBackendBusToFrontendBus(backendBusData, distance),
+            ...transformBackendBusToFrontendBus({
+              _id: bus.id,
+              plateNumber: bus.plateNumber,
+              capacity: 30, // Default capacity
+              driverId: bus.driver,
+              routeId: bus.route,
+              currentLocation: bus.currentLocation,
+              isActive: true,
+              isOnline: bus.isOnline,
+            } as BackendBus, distance),
             scheduleId,
             pickupPointId,
           };
@@ -226,14 +236,14 @@ export function useBuses(userLocation?: { latitude: number; longitude: number },
           .sort((a, b) => (a.distance || 999) - (b.distance || 999))
           .slice(0, 8); // Limit to 8 buses for home page
       } else {
-        // For buses page, show all buses but sort by distance if location available
+        // For buses page, show all online buses but sort by distance if location available
         if (userLocation) {
           transformedBuses = transformedBuses
             .sort((a, b) => (a.distance || 999) - (b.distance || 999));
         }
       }
 
-      console.log(`Transformed ${transformedBuses.length} buses`);
+      console.log(`Transformed ${transformedBuses.length} online buses`);
       setBuses(transformedBuses);
     } catch (err: any) {
       console.error('Error fetching buses:', err);

@@ -12,6 +12,7 @@ export interface Bus {
   capacity: number;
   currentPassengers: number;
   isActive: boolean;
+  isOnline: boolean; // Added online status
   interested: number; // number of people interested
   fare?: number; // in RWF
   schedule?: string;

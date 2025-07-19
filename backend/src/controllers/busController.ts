@@ -46,12 +46,30 @@ export const createBus = async (req: Request, res: Response): Promise<any> => {
 
 export const getAllBuses = async (req: Request, res: Response): Promise<any> => {
   try {
+    // For regular users, only return online buses
+    const buses = await Bus.find({ 
+      isActive: true,
+      isOnline: true // Only return online buses for users
+    })
+      .populate('driverId', 'name email phone')
+      .populate('routeId', 'name description fare');
+
+    res.json({ buses });
+  } catch (error) {
+    console.error('Error in getAllBuses:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+export const getAllBusesForAdmin = async (req: Request, res: Response): Promise<any> => {
+  try {
     const buses = await Bus.find({ isActive: true })
       .populate('driverId', 'name email phone')
       .populate('routeId', 'name description fare');
 
     res.json({ buses });
   } catch (error) {
+    console.error('Error in getAllBusesForAdmin:', error);
     res.status(500).json({ error: 'Server error' });
   }
 };

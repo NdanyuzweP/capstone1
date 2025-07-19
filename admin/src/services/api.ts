@@ -210,14 +210,13 @@ class ApiService {
     }>(`/users/drivers${query}`);
   }
 
-  // Buses Management
+  // Buses - using your existing database data
   async getBuses() {
     return this.request<{
       buses: Array<{
         _id: string;
         plateNumber: string;
         capacity: number;
-        fare: number;
         driverId: any;
         routeId: any;
         currentLocation: {
@@ -229,9 +228,8 @@ class ApiService {
         };
         isActive: boolean;
         isOnline: boolean;
-        createdAt: string;
       }>;
-    }>('/buses');
+    }>('/buses/admin/all'); // Use admin endpoint to get all buses including offline
   }
 
   async createBus(data: {
