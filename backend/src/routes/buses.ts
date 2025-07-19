@@ -8,6 +8,7 @@ import {
   getDriverBus,
   checkDriverBusAssignment,
   reassignBusToDriver,
+  getAllBusesForAdmin,
 } from '../controllers/busController';
 import { authenticate, authorize } from '../middleware/auth';
 import { validateBus } from '../middleware/validation';
@@ -56,6 +57,20 @@ router.post('/', authenticate, authorize('admin'), validateBus, createBus);
  *         description: List of all buses
  */
 router.get('/', getAllBuses);
+
+/**
+ * @swagger
+ * /api/buses/admin/all:
+ *   get:
+ *     summary: Get all buses for admin (including offline)
+ *     tags: [Buses]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: All buses retrieved successfully
+ */
+router.get('/admin/all', authenticate, authorize('admin'), getAllBusesForAdmin);
 
 /**
  * @swagger

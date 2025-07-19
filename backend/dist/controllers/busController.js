@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.reassignBusToDriver = exports.checkDriverBusAssignment = exports.deleteBus = exports.updateBus = exports.getDriverBus = exports.getBusById = exports.getAllBuses = exports.createBus = void 0;
+exports.reassignBusToDriver = exports.checkDriverBusAssignment = exports.deleteBus = exports.updateBus = exports.getDriverBus = exports.getBusById = exports.getAllBusesForAdmin = exports.getAllBuses = exports.createBus = void 0;
 const Bus_1 = __importDefault(require("../models/Bus"));
 const User_1 = __importDefault(require("../models/User"));
 const Route_1 = __importDefault(require("../models/Route"));
@@ -43,16 +43,33 @@ const createBus = async (req, res) => {
 exports.createBus = createBus;
 const getAllBuses = async (req, res) => {
     try {
+        const buses = await Bus_1.default.find({
+            isActive: true,
+            isOnline: true
+        })
+            .populate('driverId', 'name email phone')
+            .populate('routeId', 'name description fare');
+        res.json({ buses });
+    }
+    catch (error) {
+        console.error('Error in getAllBuses:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+exports.getAllBuses = getAllBuses;
+const getAllBusesForAdmin = async (req, res) => {
+    try {
         const buses = await Bus_1.default.find({ isActive: true })
             .populate('driverId', 'name email phone')
             .populate('routeId', 'name description fare');
         res.json({ buses });
     }
     catch (error) {
+        console.error('Error in getAllBusesForAdmin:', error);
         res.status(500).json({ error: 'Server error' });
     }
 };
-exports.getAllBuses = getAllBuses;
+exports.getAllBusesForAdmin = getAllBusesForAdmin;
 const getBusById = async (req, res) => {
     try {
         const bus = await Bus_1.default.findById(req.params.id)

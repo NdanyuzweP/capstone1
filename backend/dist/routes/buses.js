@@ -10,6 +10,7 @@ const validation_1 = require("../middleware/validation");
 const router = express_1.default.Router();
 router.post('/', auth_1.authenticate, (0, auth_1.authorize)('admin'), validation_1.validateBus, busController_1.createBus);
 router.get('/', busController_1.getAllBuses);
+router.get('/admin/all', auth_1.authenticate, (0, auth_1.authorize)('admin'), busController_1.getAllBusesForAdmin);
 router.get('/driver/my-bus', auth_1.authenticate, (0, auth_1.authorize)('driver'), busController_1.getDriverBus);
 router.get('/driver/check-assignment', auth_1.authenticate, (0, auth_1.authorize)('driver'), busController_1.checkDriverBusAssignment);
 router.post('/reassign', auth_1.authenticate, (0, auth_1.authorize)('admin'), busController_1.reassignBusToDriver);

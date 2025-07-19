@@ -17,7 +17,7 @@ export const updateBusLocation = async (req: Request, res: Response): Promise<an
       return res.status(404).json({ error: 'Bus not found or not assigned to you' });
     }
 
-    // Update bus current location
+    // Update bus current location (but don't change online status automatically)
     const updatedBus = await Bus.findByIdAndUpdate(
       busId,
       {
@@ -28,7 +28,7 @@ export const updateBusLocation = async (req: Request, res: Response): Promise<an
           speed,
           heading,
         },
-        isOnline: true,
+        // Remove automatic isOnline setting - drivers must control this manually
       },
       { new: true }
     ).populate('driverId', 'name email phone')
@@ -51,7 +51,7 @@ export const updateBusLocation = async (req: Request, res: Response): Promise<an
       longitude,
       speed,
       heading,
-      isOnline: true,
+      isOnline: updatedBus.isOnline, // Use current online status
     });
 
     res.json({
@@ -113,7 +113,7 @@ export const getAllBusLocations = async (req: Request, res: Response): Promise<a
     const busLocations = buses.map(bus => {
       // Check if bus is online - consider it online if:
       // 1. isOnline is true AND
-      // 2. Has recent location update (within last 10 minutes instead of 5)
+      // 2. Has recent location update (within last 10 minutes)
       const isLocationRecent = bus.currentLocation.lastUpdated && 
         (new Date().getTime() - bus.currentLocation.lastUpdated.getTime()) < 10 * 60 * 1000;
       
@@ -168,11 +168,11 @@ export const getAllBusLocations = async (req: Request, res: Response): Promise<a
         distance: Math.round(distance * 10) / 10, // Round to 1 decimal place
       };
     }).filter(bus => {
-      // Only filter by online status if explicitly requested
+      // For user-facing API, only show online buses unless explicitly filtering
       if (isOnline === 'true') return bus.isOnline;
       if (isOnline === 'false') return !bus.isOnline;
-      // If not filtering by online status, show all active buses
-      return true;
+      // Default behavior: only show online buses to users
+      return bus.isOnline;
     });
 
     res.json({ buses: busLocations });
@@ -213,9 +213,10 @@ export const getNearbyBuses = async (req: Request, res: Response): Promise<any> 
     // Convert radius from km to degrees (approximate)
     const radiusInDegrees = Number(radius) / 111;
 
-    // First try to find buses with recent location updates (within 15 minutes)
+    // First try to find buses with recent location updates (within 15 minutes) that are online
     let buses = await Bus.find({
       isActive: true,
+      isOnline: true, // Only get online buses
       'currentLocation.latitude': {
         $gte: Number(latitude) - radiusInDegrees,
         $lte: Number(latitude) + radiusInDegrees,
@@ -230,11 +231,12 @@ export const getNearbyBuses = async (req: Request, res: Response): Promise<any> 
     }).populate('driverId', 'name email phone')
       .populate('routeId', 'name description');
 
-    // If no recent buses found, try with a more lenient time filter (within 24 hours)
+    // If no recent online buses found, try with a more lenient time filter (within 24 hours)
     if (buses.length === 0) {
-      console.log('No recent buses found, trying with 24-hour filter...');
+      console.log('No recent online buses found, trying with 24-hour filter...');
       buses = await Bus.find({
         isActive: true,
+        isOnline: true, // Only get online buses
         'currentLocation.latitude': {
           $gte: Number(latitude) - radiusInDegrees,
           $lte: Number(latitude) + radiusInDegrees,
@@ -250,11 +252,12 @@ export const getNearbyBuses = async (req: Request, res: Response): Promise<any> 
         .populate('routeId', 'name description');
     }
 
-    // If still no buses found, try with any buses that have location data (no time filter)
+    // If still no online buses found, try with any online buses that have location data (no time filter)
     if (buses.length === 0) {
-      console.log('No buses found with time filter, trying any buses with location data...');
+      console.log('No online buses found with time filter, trying any online buses with location data...');
       buses = await Bus.find({
         isActive: true,
+        isOnline: true, // Only get online buses
         $and: [
           {
             'currentLocation.latitude': {
@@ -306,7 +309,7 @@ export const getNearbyBuses = async (req: Request, res: Response): Promise<any> 
     }).filter(bus => bus.distance <= Number(radius))
       .sort((a, b) => a.distance - b.distance);
 
-    console.log(`Found ${nearbyBuses.length} nearby buses within ${radius}km`);
+    console.log(`Found ${nearbyBuses.length} nearby online buses within ${radius}km`);
     res.json({ buses: nearbyBuses });
   } catch (error) {
     console.error('Error in getNearbyBuses:', error);

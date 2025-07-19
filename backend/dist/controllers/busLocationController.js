@@ -25,7 +25,6 @@ const updateBusLocation = async (req, res) => {
                 speed,
                 heading,
             },
-            isOnline: true,
         }, { new: true }).populate('driverId', 'name email phone')
             .populate('routeId', 'name description');
         const locationHistory = new BusLocationHistory_1.default({
@@ -42,7 +41,7 @@ const updateBusLocation = async (req, res) => {
             longitude,
             speed,
             heading,
-            isOnline: true,
+            isOnline: updatedBus.isOnline,
         });
         res.json({
             message: 'Location updated successfully',
@@ -138,7 +137,7 @@ const getAllBusLocations = async (req, res) => {
                 return bus.isOnline;
             if (isOnline === 'false')
                 return !bus.isOnline;
-            return true;
+            return bus.isOnline;
         });
         res.json({ buses: busLocations });
     }
@@ -174,6 +173,7 @@ const getNearbyBuses = async (req, res) => {
         const radiusInDegrees = Number(radius) / 111;
         let buses = await Bus_1.default.find({
             isActive: true,
+            isOnline: true,
             'currentLocation.latitude': {
                 $gte: Number(latitude) - radiusInDegrees,
                 $lte: Number(latitude) + radiusInDegrees,
@@ -188,9 +188,10 @@ const getNearbyBuses = async (req, res) => {
         }).populate('driverId', 'name email phone')
             .populate('routeId', 'name description');
         if (buses.length === 0) {
-            console.log('No recent buses found, trying with 24-hour filter...');
+            console.log('No recent online buses found, trying with 24-hour filter...');
             buses = await Bus_1.default.find({
                 isActive: true,
+                isOnline: true,
                 'currentLocation.latitude': {
                     $gte: Number(latitude) - radiusInDegrees,
                     $lte: Number(latitude) + radiusInDegrees,
@@ -206,9 +207,10 @@ const getNearbyBuses = async (req, res) => {
                 .populate('routeId', 'name description');
         }
         if (buses.length === 0) {
-            console.log('No buses found with time filter, trying any buses with location data...');
+            console.log('No online buses found with time filter, trying any online buses with location data...');
             buses = await Bus_1.default.find({
                 isActive: true,
+                isOnline: true,
                 $and: [
                     {
                         'currentLocation.latitude': {
@@ -249,7 +251,7 @@ const getNearbyBuses = async (req, res) => {
             };
         }).filter(bus => bus.distance <= Number(radius))
             .sort((a, b) => a.distance - b.distance);
-        console.log(`Found ${nearbyBuses.length} nearby buses within ${radius}km`);
+        console.log(`Found ${nearbyBuses.length} nearby online buses within ${radius}km`);
         res.json({ buses: nearbyBuses });
     }
     catch (error) {
