@@ -107,7 +107,7 @@ router.get('/', getAllBusSchedules);
  *       200:
  *         description: Interest status updated successfully
  */
-router.put('/interests/:interestId', authenticate, authorize('driver'), updateUserInterestStatus);
+router.put('/interests/:interestId', authorize('driver'), updateUserInterestStatus);
 
 router.get('/:id', getBusScheduleById);
 router.put('/:id', authenticate, authorize('admin', 'driver'), updateBusSchedule);
