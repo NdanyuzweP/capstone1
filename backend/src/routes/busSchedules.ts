@@ -9,7 +9,7 @@ import {
   updateUserInterestStatus,
   deleteBusSchedule,
 } from '../controllers/busScheduleController';
-import { authenticate, authorize } from '../middleware/auth';
+import {  authorize } from '../middleware/auth';
 import { validateBusSchedule } from '../middleware/validation';
 
 const router = express.Router();
@@ -50,7 +50,7 @@ const router = express.Router();
  *       201:
  *         description: Bus schedule created successfully
  */
-router.post('/', authenticate, authorize('admin', 'driver'), validateBusSchedule, createBusSchedule);
+router.post('/',  authorize('admin', 'driver'), validateBusSchedule, createBusSchedule);
 
 /**
  * @swagger
@@ -107,10 +107,10 @@ router.get('/', getAllBusSchedules);
  *       200:
  *         description: Interest status updated successfully
  */
-router.put('/interests/:interestId', authenticate, authorize('driver'), updateUserInterestStatus);
+router.put('/interests/:interestId',  authorize('driver'), updateUserInterestStatus);
 
 router.get('/:id', getBusScheduleById);
-router.put('/:id', authenticate, authorize('admin', 'driver'), updateBusSchedule);
+router.put('/:id',  authorize('admin', 'driver'), updateBusSchedule);
 
 /**
  * @swagger
@@ -142,7 +142,7 @@ router.put('/:id', authenticate, authorize('admin', 'driver'), updateBusSchedule
  *       200:
  *         description: Arrival time updated successfully
  */
-router.patch('/:id/arrival', authenticate, authorize('driver'), updateArrivalTime);
+router.patch('/:id/arrival',  authorize('driver'), updateArrivalTime);
 
 /**
  * @swagger
@@ -162,8 +162,8 @@ router.patch('/:id/arrival', authenticate, authorize('driver'), updateArrivalTim
  *       200:
  *         description: List of interested users
  */
-router.get('/:id/interested-users', authenticate, authorize('driver', 'admin'), getInterestedUsers);
+router.get('/:id/interested-users',  authorize('driver', 'admin'), getInterestedUsers);
 
-router.delete('/:id', authenticate, authorize('admin'), deleteBusSchedule);
+router.delete('/:id',  authorize('admin'), deleteBusSchedule);
 
 export default router;
