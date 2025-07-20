@@ -1,14 +1,44 @@
-import { View, Text, StyleSheet, FlatList, Pressable } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Pressable, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useDriverData } from '@/hooks/useDriverData';
 import { useState } from 'react';
 import { Users, MapPin, Clock, Filter, CheckCircle, XCircle } from 'lucide-react-native';
+import { apiService } from '@/services/api';
 
 export default function Passengers() {
   const { theme } = useTheme();
-  const { passengers, schedules, loading } = useDriverData();
+  const { passengers, schedules, loading, refetch } = useDriverData();
   const [filter, setFilter] = useState<'all' | 'interested' | 'confirmed'>('all');
+  const [updatingInterest, setUpdatingInterest] = useState<string | null>(null);
+
+  const handleConfirmInterest = async (interestId: string, passengerName: string) => {
+    try {
+      setUpdatingInterest(interestId);
+      await apiService.updateUserInterestStatus(interestId, 'confirmed');
+      Alert.alert('Success', `${passengerName} has been confirmed!`);
+      refetch(); // Refresh the data
+    } catch (error: any) {
+      console.error('Error confirming interest:', error);
+      Alert.alert('Error', error.message || 'Failed to confirm passenger');
+    } finally {
+      setUpdatingInterest(null);
+    }
+  };
+
+  const handleDenyInterest = async (interestId: string, passengerName: string) => {
+    try {
+      setUpdatingInterest(interestId);
+      await apiService.updateUserInterestStatus(interestId, 'cancelled');
+      Alert.alert('Success', `${passengerName} has been denied.`);
+      refetch(); // Refresh the data
+    } catch (error: any) {
+      console.error('Error denying interest:', error);
+      Alert.alert('Error', error.message || 'Failed to deny passenger');
+    } finally {
+      setUpdatingInterest(null);
+    }
+  };
 
   const filteredPassengers = passengers.filter(passenger => {
     if (filter === 'all') return true;
@@ -88,6 +118,73 @@ export default function Passengers() {
           </Text>
         </View>
       </View>
+
+      {/* Action Buttons for Interested Passengers */}
+      {passenger.status === 'interested' && (
+        <View style={styles.actionButtons}>
+          <Pressable
+            style={[
+              styles.confirmButton, 
+              { 
+                backgroundColor: updatingInterest === passenger.id ? theme.textSecondary : theme.success,
+                opacity: updatingInterest === passenger.id ? 0.6 : 1
+              }
+            ]}
+            onPress={() => {
+              Alert.alert(
+                'Confirm Passenger',
+                `Are you sure you want to confirm ${passenger.user?.name || 'this passenger'}?`,
+                [
+                  { text: 'Cancel', style: 'cancel' },
+                  { 
+                    text: 'Confirm', 
+                    onPress: () => handleConfirmInterest(passenger.id, passenger.user?.name || 'this passenger')
+                  }
+                ]
+              );
+            }}
+            disabled={updatingInterest === passenger.id}
+          >
+            <CheckCircle size={16} color={theme.background} />
+            <Text style={[styles.actionButtonText, { color: theme.background }]}>
+              {updatingInterest === passenger.id ? 'Confirming...' : 'Confirm'}
+            </Text>
+          </Pressable>
+          
+          <Pressable
+            style={[
+              styles.denyButton, 
+              { 
+                backgroundColor: updatingInterest === passenger.id ? theme.textSecondary : theme.error,
+                opacity: updatingInterest === passenger.id ? 0.6 : 1
+              }
+            ]}
+            onPress={() => {
+              Alert.alert(
+                'Deny Passenger',
+                `Are you sure you want to deny ${passenger.user?.name || 'this passenger'}?`,
+                [
+                  { text: 'Cancel', style: 'cancel' },
+                  { 
+                    text: 'Deny', 
+                    onPress: () => handleDenyInterest(passenger.id, passenger.user?.name || 'this passenger')
+                  }
+                ]
+              );
+            }}
+            disabled={updatingInterest === passenger.id}
+          >
+            <XCircle size={16} color={theme.background} />
+            <Text style={[styles.actionButtonText, { color: theme.background }]}>
+              {updatingInterest === passenger.id ? 'Denying...' : 'Deny'}
+            </Text>
+          </Pressable>
+        </View>
+      )}
+      
+
+      
+
     </View>
   );
 
@@ -321,4 +418,34 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
     textAlign: 'center',
   },
+  actionButtons: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 16,
+  },
+  confirmButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    gap: 8,
+  },
+  denyButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    gap: 8,
+  },
+  actionButtonText: {
+    fontSize: 14,
+    fontFamily: 'Inter-SemiBold',
+  },
+
 });

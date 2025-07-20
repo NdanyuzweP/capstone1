@@ -156,6 +156,62 @@ export const getInterestedUsers = async (req: Request, res: Response): Promise<a
   }
 };
 
+export const updateUserInterestStatus = async (req: Request, res: Response): Promise<any> => {
+  try {
+    const { interestId } = req.params;
+    const { status } = req.body; // 'confirmed' or 'cancelled'
+
+    // Validate status
+    if (!['confirmed', 'cancelled'].includes(status)) {
+      return res.status(400).json({ error: 'Invalid status. Must be "confirmed" or "cancelled"' });
+    }
+
+    // Find the interest and verify it belongs to a schedule that this driver can manage
+    const interest = await UserInterest.findById(interestId)
+      .populate({
+        path: 'busScheduleId',
+        populate: {
+          path: 'busId',
+          select: 'driverId'
+        }
+      });
+
+    if (!interest) {
+      return res.status(404).json({ error: 'Interest not found' });
+    }
+
+    // Check if the current user is the driver of this bus
+    const busSchedule = interest.busScheduleId as any;
+    const bus = busSchedule?.busId;
+    const driverId = (req as any).user.id;
+
+    if (!bus || bus.driverId?.toString() !== driverId) {
+      return res.status(403).json({ error: 'Not authorized to manage this interest' });
+    }
+
+    // Update the interest status
+    const updatedInterest = await UserInterest.findByIdAndUpdate(
+      interestId,
+      { status },
+      { new: true }
+    ).populate('userId', 'name email phone')
+     .populate('pickupPointId', 'name description')
+     .populate('busScheduleId', 'departureTime status');
+
+    if (!updatedInterest) {
+      return res.status(404).json({ error: 'Interest not found' });
+    }
+
+    res.json({
+      message: `Interest ${status} successfully`,
+      interest: updatedInterest,
+    });
+  } catch (error) {
+    console.error('Error updating user interest status:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
 export const deleteBusSchedule = async (req: Request, res: Response): Promise<any> => {
   try {
     const schedule = await BusSchedule.findByIdAndUpdate(

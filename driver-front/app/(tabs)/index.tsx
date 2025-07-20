@@ -265,17 +265,17 @@ export default function Dashboard() {
             >
               <Navigation size={20} color={theme.background} />
               <Text style={[styles.actionButtonText, { color: theme.background }]}>
-                Update Location
+                Start Trip
               </Text>
             </Pressable>
 
             <Pressable
               style={[styles.actionButton, { backgroundColor: theme.success }]}
-              onPress={() => Alert.alert('Feature', 'Start trip functionality coming soon!')}
+              onPress={() => Alert.alert('Feature', 'End trip functionality coming soon!')}
             >
               <CheckCircle size={20} color={theme.background} />
               <Text style={[styles.actionButtonText, { color: theme.background }]}>
-                Start Trip
+                End Trip
               </Text>
             </Pressable>
           </View>

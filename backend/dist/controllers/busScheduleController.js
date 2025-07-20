@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteBusSchedule = exports.getInterestedUsers = exports.updateArrivalTime = exports.updateBusSchedule = exports.getBusScheduleById = exports.getAllBusSchedules = exports.createBusSchedule = void 0;
+exports.deleteBusSchedule = exports.updateUserInterestStatus = exports.getInterestedUsers = exports.updateArrivalTime = exports.updateBusSchedule = exports.getBusScheduleById = exports.getAllBusSchedules = exports.createBusSchedule = void 0;
 const BusSchedule_1 = __importDefault(require("../models/BusSchedule"));
 const Bus_1 = __importDefault(require("../models/Bus"));
 const Route_1 = __importDefault(require("../models/Route"));
@@ -140,6 +140,47 @@ const getInterestedUsers = async (req, res) => {
     }
 };
 exports.getInterestedUsers = getInterestedUsers;
+const updateUserInterestStatus = async (req, res) => {
+    try {
+        const { interestId } = req.params;
+        const { status } = req.body;
+        if (!['confirmed', 'cancelled'].includes(status)) {
+            return res.status(400).json({ error: 'Invalid status. Must be "confirmed" or "cancelled"' });
+        }
+        const interest = await UserInterest_1.default.findById(interestId)
+            .populate({
+            path: 'busScheduleId',
+            populate: {
+                path: 'busId',
+                select: 'driverId'
+            }
+        });
+        if (!interest) {
+            return res.status(404).json({ error: 'Interest not found' });
+        }
+        const busSchedule = interest.busScheduleId;
+        const bus = busSchedule?.busId;
+        const driverId = req.user.id;
+        if (!bus || bus.driverId?.toString() !== driverId) {
+            return res.status(403).json({ error: 'Not authorized to manage this interest' });
+        }
+        const updatedInterest = await UserInterest_1.default.findByIdAndUpdate(interestId, { status }, { new: true }).populate('userId', 'name email phone')
+            .populate('pickupPointId', 'name description')
+            .populate('busScheduleId', 'departureTime status');
+        if (!updatedInterest) {
+            return res.status(404).json({ error: 'Interest not found' });
+        }
+        res.json({
+            message: `Interest ${status} successfully`,
+            interest: updatedInterest,
+        });
+    }
+    catch (error) {
+        console.error('Error updating user interest status:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+exports.updateUserInterestStatus = updateUserInterestStatus;
 const deleteBusSchedule = async (req, res) => {
     try {
         const schedule = await BusSchedule_1.default.findByIdAndUpdate(req.params.id, { status: 'cancelled' }, { new: true });
