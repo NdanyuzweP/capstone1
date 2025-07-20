@@ -40,6 +40,8 @@ export default function Passengers() {
     }
   };
 
+
+
   const filteredPassengers = passengers.filter(passenger => {
     if (filter === 'all') return true;
     return passenger.status === filter;

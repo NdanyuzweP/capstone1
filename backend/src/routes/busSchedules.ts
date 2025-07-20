@@ -79,6 +79,36 @@ router.post('/', authenticate, authorize('admin', 'driver'), validateBusSchedule
  */
 router.get('/', getAllBusSchedules);
 
+/**
+ * @swagger
+ * /api/bus-schedules/interests/{interestId}:
+ *   put:
+ *     summary: Update user interest status (confirm/deny)
+ *     tags: [Bus Schedules]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: interestId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [confirmed, cancelled]
+ *     responses:
+ *       200:
+ *         description: Interest status updated successfully
+ */
+router.put('/interests/:interestId', authenticate, authorize('driver'), updateUserInterestStatus);
+
 router.get('/:id', getBusScheduleById);
 router.put('/:id', authenticate, authorize('admin', 'driver'), updateBusSchedule);
 
@@ -133,36 +163,6 @@ router.patch('/:id/arrival', authenticate, authorize('driver'), updateArrivalTim
  *         description: List of interested users
  */
 router.get('/:id/interested-users', authenticate, authorize('driver', 'admin'), getInterestedUsers);
-
-/**
- * @swagger
- * /api/bus-schedules/interests/{interestId}:
- *   put:
- *     summary: Update user interest status (confirm/deny)
- *     tags: [Bus Schedules]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: interestId
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               status:
- *                 type: string
- *                 enum: [confirmed, cancelled]
- *     responses:
- *       200:
- *         description: Interest status updated successfully
- */
-router.put('/interests/:interestId', authenticate, authorize('driver'), updateUserInterestStatus);
 
 router.delete('/:id', authenticate, authorize('admin'), deleteBusSchedule);
 
