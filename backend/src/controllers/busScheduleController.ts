@@ -185,8 +185,44 @@ export const updateUserInterestStatus = async (req: Request, res: Response): Pro
     const bus = busSchedule?.busId;
     const driverId = (req as any).user.id;
 
-    if (!bus || bus.driverId?.toString() !== driverId) {
-      return res.status(403).json({ error: 'Not authorized to manage this interest' });
+    console.log('Authorization check:', {
+      interestId,
+      driverId,
+      busDriverId: bus?.driverId,
+      busDriverIdString: bus?.driverId?.toString(),
+      busScheduleId: busSchedule?._id,
+      busId: bus?._id,
+      isMatch: bus?.driverId?.toString() === driverId
+    });
+
+    // More flexible authorization check to handle different ID formats
+    const busDriverId = bus?.driverId;
+    const isAuthorized = busDriverId && (
+      busDriverId.toString() === driverId ||
+      busDriverId === driverId ||
+      (typeof busDriverId === 'object' && busDriverId._id?.toString() === driverId) ||
+      (typeof busDriverId === 'object' && busDriverId.toString() === driverId)
+    );
+
+    if (!bus || !isAuthorized) {
+      console.log('Authorization failed:', {
+        driverId,
+        busDriverId: busDriverId?.toString(),
+        busId: bus?._id,
+        isAuthorized,
+        busDriverIdType: typeof busDriverId,
+        driverIdType: typeof driverId
+      });
+      return res.status(403).json({ 
+        error: 'Not authorized to manage this interest',
+        debug: {
+          driverId,
+          busDriverId: busDriverId?.toString(),
+          busId: bus?._id,
+          driverIdType: typeof driverId,
+          busDriverIdType: typeof busDriverId
+        }
+      });
     }
 
     // Update the interest status
@@ -229,3 +265,4 @@ export const deleteBusSchedule = async (req: Request, res: Response): Promise<an
     res.status(500).json({ error: 'Server error' });
   }
 };
+
