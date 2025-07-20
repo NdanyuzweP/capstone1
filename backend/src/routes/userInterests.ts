@@ -77,7 +77,7 @@ router.get('/', authenticate, getUserInterests);
  *       200:
  *         description: Interest updated successfully
  */
-router.put('/:id', authenticate, validateInterestStatus, updateUserInterest);
+router.put('/:id', validateInterestStatus, updateUserInterest);
 
 router.delete('/:id', authenticate, deleteUserInterest);
 
