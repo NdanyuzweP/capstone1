@@ -14,5 +14,6 @@ router.get('/:id', busScheduleController_1.getBusScheduleById);
 router.put('/:id', auth_1.authenticate, (0, auth_1.authorize)('admin', 'driver'), busScheduleController_1.updateBusSchedule);
 router.patch('/:id/arrival', auth_1.authenticate, (0, auth_1.authorize)('driver'), busScheduleController_1.updateArrivalTime);
 router.get('/:id/interested-users', auth_1.authenticate, (0, auth_1.authorize)('driver', 'admin'), busScheduleController_1.getInterestedUsers);
+router.put('/interests/:interestId', auth_1.authenticate, (0, auth_1.authorize)('driver'), busScheduleController_1.updateUserInterestStatus);
 router.delete('/:id', auth_1.authenticate, (0, auth_1.authorize)('admin'), busScheduleController_1.deleteBusSchedule);
 exports.default = router;

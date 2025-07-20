@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.driverUpdateUserInterest = exports.deleteUserInterest = exports.updateUserInterest = exports.getUserInterests = exports.createUserInterest = void 0;
+exports.deleteUserInterest = exports.updateUserInterest = exports.getUserInterests = exports.createUserInterest = void 0;
 const UserInterest_1 = __importDefault(require("../models/UserInterest"));
 const BusSchedule_1 = __importDefault(require("../models/BusSchedule"));
 const PickupPoint_1 = __importDefault(require("../models/PickupPoint"));
@@ -126,53 +126,3 @@ const deleteUserInterest = async (req, res) => {
     }
 };
 exports.deleteUserInterest = deleteUserInterest;
-const driverUpdateUserInterest = async (req, res) => {
-    try {
-        const driverId = req.user.id;
-        const { status } = req.body;
-        const interestId = req.params.id;
-        const interest = await UserInterest_1.default.findById(interestId)
-            .populate({
-            path: 'busScheduleId',
-            populate: { path: 'busId', select: 'driverId plateNumber' }
-        })
-            .populate('userId', 'name email phone')
-            .populate('pickupPointId', 'name description');
-        if (!interest) {
-            return res.status(404).json({ error: 'Interest not found' });
-        }
-        const busSchedule = interest.busScheduleId;
-        const bus = busSchedule?.busId;
-        if (!bus || bus.driverId !== driverId) {
-            return res.status(403).json({ error: 'Not authorized to manage this interest' });
-        }
-        const updatedInterest = await UserInterest_1.default.findByIdAndUpdate(interestId, { status }, { new: true }).populate('userId', 'name email phone')
-            .populate('pickupPointId', 'name description')
-            .populate({
-            path: 'busScheduleId',
-            populate: { path: 'busId', select: 'plateNumber' }
-        });
-        const user = updatedInterest.userId;
-        const pickupPoint = updatedInterest.pickupPointId;
-        if (user && pickupPoint) {
-            socketService_1.default.emitUserInterestUpdate({
-                busId: bus._id.toString(),
-                userId: user._id.toString(),
-                userName: user.name,
-                pickupPointId: pickupPoint._id.toString(),
-                pickupPointName: pickupPoint.name,
-                action: status === 'confirmed' ? 'confirmed' : 'denied',
-                status: status,
-            });
-        }
-        res.json({
-            message: `Interest ${status} successfully`,
-            interest: updatedInterest,
-        });
-    }
-    catch (error) {
-        console.error('Error updating user interest by driver:', error);
-        res.status(500).json({ error: 'Server error' });
-    }
-};
-exports.driverUpdateUserInterest = driverUpdateUserInterest;

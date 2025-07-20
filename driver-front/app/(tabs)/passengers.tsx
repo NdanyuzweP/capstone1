@@ -4,11 +4,41 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useDriverData } from '@/hooks/useDriverData';
 import { useState } from 'react';
 import { Users, MapPin, Clock, Filter, CheckCircle, XCircle } from 'lucide-react-native';
+import { apiService } from '@/services/api';
 
 export default function Passengers() {
   const { theme } = useTheme();
-  const { passengers, schedules, loading } = useDriverData();
+  const { passengers, schedules, loading, refetch } = useDriverData();
   const [filter, setFilter] = useState<'all' | 'interested' | 'confirmed'>('all');
+  const [updatingInterest, setUpdatingInterest] = useState<string | null>(null);
+
+  const handleConfirmInterest = async (interestId: string, passengerName: string) => {
+    try {
+      setUpdatingInterest(interestId);
+      await apiService.updateUserInterestStatus(interestId, 'confirmed');
+      Alert.alert('Success', `${passengerName} has been confirmed!`);
+      refetch(); // Refresh the data
+    } catch (error: any) {
+      console.error('Error confirming interest:', error);
+      Alert.alert('Error', error.message || 'Failed to confirm passenger');
+    } finally {
+      setUpdatingInterest(null);
+    }
+  };
+
+  const handleDenyInterest = async (interestId: string, passengerName: string) => {
+    try {
+      setUpdatingInterest(interestId);
+      await apiService.updateUserInterestStatus(interestId, 'cancelled');
+      Alert.alert('Success', `${passengerName} has been denied.`);
+      refetch(); // Refresh the data
+    } catch (error: any) {
+      console.error('Error denying interest:', error);
+      Alert.alert('Error', error.message || 'Failed to deny passenger');
+    } finally {
+      setUpdatingInterest(null);
+    }
+  };
 
   const filteredPassengers = passengers.filter(passenger => {
     if (filter === 'all') return true;
@@ -93,22 +123,60 @@ export default function Passengers() {
       {passenger.status === 'interested' && (
         <View style={styles.actionButtons}>
           <Pressable
-            style={[styles.confirmButton, { backgroundColor: theme.success }]}
-            onPress={() => Alert.alert('Confirm', `Confirm ${passenger.user?.name || 'this passenger'}?`)}
+            style={[
+              styles.confirmButton, 
+              { 
+                backgroundColor: updatingInterest === passenger.id ? theme.textSecondary : theme.success,
+                opacity: updatingInterest === passenger.id ? 0.6 : 1
+              }
+            ]}
+            onPress={() => {
+              Alert.alert(
+                'Confirm Passenger',
+                `Are you sure you want to confirm ${passenger.user?.name || 'this passenger'}?`,
+                [
+                  { text: 'Cancel', style: 'cancel' },
+                  { 
+                    text: 'Confirm', 
+                    onPress: () => handleConfirmInterest(passenger.id, passenger.user?.name || 'this passenger')
+                  }
+                ]
+              );
+            }}
+            disabled={updatingInterest === passenger.id}
           >
             <CheckCircle size={16} color={theme.background} />
             <Text style={[styles.actionButtonText, { color: theme.background }]}>
-              Confirm
+              {updatingInterest === passenger.id ? 'Confirming...' : 'Confirm'}
             </Text>
           </Pressable>
           
           <Pressable
-            style={[styles.denyButton, { backgroundColor: theme.error }]}
-            onPress={() => Alert.alert('Deny', `Deny ${passenger.user?.name || 'this passenger'}?`)}
+            style={[
+              styles.denyButton, 
+              { 
+                backgroundColor: updatingInterest === passenger.id ? theme.textSecondary : theme.error,
+                opacity: updatingInterest === passenger.id ? 0.6 : 1
+              }
+            ]}
+            onPress={() => {
+              Alert.alert(
+                'Deny Passenger',
+                `Are you sure you want to deny ${passenger.user?.name || 'this passenger'}?`,
+                [
+                  { text: 'Cancel', style: 'cancel' },
+                  { 
+                    text: 'Deny', 
+                    onPress: () => handleDenyInterest(passenger.id, passenger.user?.name || 'this passenger')
+                  }
+                ]
+              );
+            }}
+            disabled={updatingInterest === passenger.id}
           >
             <XCircle size={16} color={theme.background} />
             <Text style={[styles.actionButtonText, { color: theme.background }]}>
-              Deny
+              {updatingInterest === passenger.id ? 'Denying...' : 'Deny'}
             </Text>
           </Pressable>
         </View>

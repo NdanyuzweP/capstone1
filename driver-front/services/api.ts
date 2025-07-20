@@ -161,6 +161,16 @@ class ApiService {
     }>(`/bus-schedules/${scheduleId}/interested-users`);
   }
 
+  async updateUserInterestStatus(interestId: string, status: 'confirmed' | 'cancelled') {
+    return this.request<{
+      message: string;
+      interest: any;
+    }>(`/bus-schedules/interests/${interestId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ status }),
+    });
+  }
+
   async updateArrivalTime(scheduleId: string, pickupPointId: string, actualTime: Date) {
     return this.request<{
       message: string;
