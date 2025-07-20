@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, FlatList, Pressable } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Pressable, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useDriverData } from '@/hooks/useDriverData';
@@ -88,6 +88,35 @@ export default function Passengers() {
           </Text>
         </View>
       </View>
+
+      {/* Action Buttons for Interested Passengers */}
+      {passenger.status === 'interested' && (
+        <View style={styles.actionButtons}>
+          <Pressable
+            style={[styles.confirmButton, { backgroundColor: theme.success }]}
+            onPress={() => Alert.alert('Confirm', `Confirm ${passenger.user?.name || 'this passenger'}?`)}
+          >
+            <CheckCircle size={16} color={theme.background} />
+            <Text style={[styles.actionButtonText, { color: theme.background }]}>
+              Confirm
+            </Text>
+          </Pressable>
+          
+          <Pressable
+            style={[styles.denyButton, { backgroundColor: theme.error }]}
+            onPress={() => Alert.alert('Deny', `Deny ${passenger.user?.name || 'this passenger'}?`)}
+          >
+            <XCircle size={16} color={theme.background} />
+            <Text style={[styles.actionButtonText, { color: theme.background }]}>
+              Deny
+            </Text>
+          </Pressable>
+        </View>
+      )}
+      
+
+      
+
     </View>
   );
 
@@ -321,4 +350,34 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
     textAlign: 'center',
   },
+  actionButtons: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 16,
+  },
+  confirmButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    gap: 8,
+  },
+  denyButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    gap: 8,
+  },
+  actionButtonText: {
+    fontSize: 14,
+    fontFamily: 'Inter-SemiBold',
+  },
+
 });

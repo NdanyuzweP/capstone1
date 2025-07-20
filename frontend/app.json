@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "",
-    "slug": "ridra-bus-app",
+    "name": "ridra",
+    "slug": "ridra",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/logo1.png",
@@ -19,22 +19,44 @@
         "googleMaps": {
           "apiKey": "AIzaSyBym8ra9Gj5Yxhef0BSkuNzyAHJq5lyH5A"
         }
-      }
+      },
+      "permissions": [
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
     },
     "web": {
       "bundler": "metro",
       "output": "single",
       "favicon": "./assets/images/logo1.png"
     },
-    "plugins": ["expo-router", "expo-font", "expo-web-browser", 
-     [
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-web-browser",
+      [
         "expo-location",
         {
           "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
-        } ]
-  ],
+        }
+      ]
+    ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "53458e2e-487a-4590-8a65-79b0cfd81c03"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/53458e2e-487a-4590-8a65-79b0cfd81c03"
     }
   }
 }

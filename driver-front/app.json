@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Ridra Driver",
-    "slug": "ridra-driver-app",
+    "slug": "ridra-driver",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/driver-icon.png",
@@ -19,7 +19,13 @@
         "googleMaps": {
           "apiKey": "AIzaSyBym8ra9Gj5Yxhef0BSkuNzyAHJq5lyH5A"
         }
-      }
+      },
+      "permissions": [
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -27,7 +33,7 @@
       "favicon": "./assets/images/driver-icon.png"
     },
     "plugins": [
-      "expo-router", 
+      "expo-router",
       "expo-font",
       [
         "expo-location",
@@ -38,6 +44,19 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "38ebb97a-6b61-4ac3-8df7-80e44631f5d7"
+      }
+    },
+    "owner": "prince_n",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/38ebb97a-6b61-4ac3-8df7-80e44631f5d7"
     }
   }
 }

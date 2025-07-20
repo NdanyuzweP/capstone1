@@ -228,21 +228,21 @@ export default function MyBus() {
           <View style={styles.actionGrid}>
             <Pressable
               style={[styles.actionButton, { backgroundColor: theme.primary }]}
-              onPress={() => Alert.alert('Feature', 'Update location functionality')}
+              onPress={() => Alert.alert('Feature', 'Start trip functionality')}
             >
               <Navigation size={24} color={theme.background} />
               <Text style={[styles.actionButtonText, { color: theme.background }]}>
-                Update Location
+                Start Trip
               </Text>
             </Pressable>
 
             <Pressable
               style={[styles.actionButton, { backgroundColor: theme.success }]}
-              onPress={() => Alert.alert('Feature', 'Start trip functionality')}
+              onPress={() => Alert.alert('Feature', 'End trip functionality')}
             >
               <CheckCircle size={24} color={theme.background} />
               <Text style={[styles.actionButtonText, { color: theme.background }]}>
-                Start Trip
+                End Trip
               </Text>
             </Pressable>
 

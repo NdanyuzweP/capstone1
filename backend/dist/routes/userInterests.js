@@ -11,5 +11,6 @@ const router = express_1.default.Router();
 router.post('/', auth_1.authenticate, validation_1.validateUserInterest, userInterestController_1.createUserInterest);
 router.get('/', auth_1.authenticate, userInterestController_1.getUserInterests);
 router.put('/:id', auth_1.authenticate, validation_1.validateInterestStatus, userInterestController_1.updateUserInterest);
+router.put('/:id/driver', auth_1.authenticate, (0, auth_1.authorize)('driver'), validation_1.validateInterestStatus, userInterestController_1.driverUpdateUserInterest);
 router.delete('/:id', auth_1.authenticate, userInterestController_1.deleteUserInterest);
 exports.default = router;
