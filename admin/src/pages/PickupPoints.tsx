@@ -445,20 +445,34 @@ export default function PickupPoints() {
                         </span>
                       </td>
                       <td>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center justify-center gap-3">
                           <button
                             onClick={() => handleEditPickupPoint(pickup)}
-                            className="admin-btn admin-btn-secondary p-2"
+                            className="admin-btn p-3 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
                             title="Edit Pickup Point"
+                            style={{ 
+                              minWidth: 44, 
+                              minHeight: 44,
+                              backgroundColor: theme.secondary + '15',
+                              color: theme.secondary,
+                              border: `1px solid ${theme.secondary + '25'}`
+                            }}
                           >
-                            <Edit size={14} />
+                            <Edit size={16} />
                           </button>
                           <button
                             onClick={() => handleDeletePickupPoint(pickup)}
-                            className="admin-btn admin-btn-danger p-2"
+                            className="admin-btn p-3 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
                             title="Delete Pickup Point"
+                            style={{ 
+                              minWidth: 44, 
+                              minHeight: 44,
+                              backgroundColor: theme.error + '15',
+                              color: theme.error,
+                              border: `1px solid ${theme.error + '25'}`
+                            }}
                           >
-                            <Trash2 size={14} />
+                            <Trash2 size={16} />
                           </button>
                         </div>
                       </td>

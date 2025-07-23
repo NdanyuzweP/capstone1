@@ -1,16 +1,20 @@
-import { View, Text, StyleSheet, Pressable, Alert, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Alert, ScrollView, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLocation } from '@/contexts/LocationContext';
 import { useDriverData } from '@/hooks/useDriverData';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { useState, useEffect } from 'react';
-import { MapPin, Navigation, Clock, Wifi, WifiOff, RefreshCw } from 'lucide-react-native';
+import { MapPin, Navigation, Clock, Wifi, WifiOff, RefreshCw, Target, Activity } from 'lucide-react-native';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+
+const { width } = Dimensions.get('window');
 
 export default function Location() {
   const { theme } = useTheme();
   const { location, requestLocation, loading: locationLoading } = useLocation();
   const { bus, updateBusLocation } = useDriverData();
+  const { t } = useLanguage();
   const [isTracking, setIsTracking] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
@@ -48,12 +52,12 @@ export default function Location() {
 
   const toggleTracking = async () => {
     if (!bus) {
-      Alert.alert('Error', 'No bus assigned to you');
+      Alert.alert(t('common.error'), t('bus.no.assigned'));
       return;
     }
 
     if (!location) {
-      Alert.alert('Location Required', 'Please enable location first');
+      Alert.alert(t('location.title'), t('location.enable.services'));
       await requestLocation();
       return;
     }
@@ -63,9 +67,9 @@ export default function Location() {
     if (!isTracking) {
       // Start tracking
       await handleLocationUpdate();
-      Alert.alert('Tracking Started', 'Your location is now being shared with passengers');
+      Alert.alert(t('location.tracking.started'), t('location.sharing.enabled'));
     } else {
-      Alert.alert('Tracking Stopped', 'Location sharing has been disabled');
+      Alert.alert(t('location.tracking.stopped'), t('location.sharing.disabled'));
     }
   };
 
@@ -83,10 +87,17 @@ export default function Location() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        {/* Header Section */}
         <View style={styles.header}>
-          <Text style={[styles.title, { color: theme.text }]}>
-            Location Tracking
-          </Text>
+          <View style={styles.headerLeft}>
+            <Text style={[styles.title, { color: theme.text }]}>
+              {t('location.title')}
+            </Text>
+            <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
+              {t('location.subtitle')}
+            </Text>
+          </View>
+          
           <Pressable
             style={[styles.refreshButton, { backgroundColor: theme.primary + '20' }]}
             onPress={refreshLocation}
@@ -102,88 +113,104 @@ export default function Location() {
 
         {/* Status Cards */}
         <View style={styles.statusSection}>
-          <View style={[styles.statusCard, { backgroundColor: theme.surface }]}>
-            <View style={[styles.statusIcon, { backgroundColor: isTracking ? theme.success + '20' : theme.error + '20' }]}>
-              {isTracking ? (
-                <Wifi size={24} color={theme.success} />
-              ) : (
-                <WifiOff size={24} color={theme.error} />
-              )}
+          <View style={[styles.statusCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+                          <View style={[styles.statusIcon, { backgroundColor: isTracking ? '#4CAF50' + '15' : '#d90429' + '15' }]}>
+                {isTracking ? (
+                  <Wifi size={24} color="#4CAF50" />
+                ) : (
+                  <WifiOff size={24} color="#d90429" />
+                )}
             </View>
-            <Text style={[styles.statusLabel, { color: theme.textSecondary }]}>
-              Tracking Status
-            </Text>
-            <Text style={[styles.statusValue, { color: isTracking ? theme.success : theme.error }]}>
-              {isTracking ? 'Active' : 'Inactive'}
-            </Text>
+            <View style={styles.statusContent}>
+              <Text style={[styles.statusLabel, { color: theme.textSecondary }]}>
+                {t('location.tracking.status')}
+              </Text>
+                              <Text style={[styles.statusValue, { color: isTracking ? '#4CAF50' : '#d90429' }]}>
+                  {isTracking ? t('location.status.active') : t('location.status.inactive')}
+                </Text>
+            </View>
           </View>
 
-          <View style={[styles.statusCard, { backgroundColor: theme.surface }]}>
-            <View style={[styles.statusIcon, { backgroundColor: theme.primary + '20' }]}>
+          <View style={[styles.statusCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+            <View style={[styles.statusIcon, { backgroundColor: theme.primary + '15' }]}>
               <MapPin size={24} color={theme.primary} />
             </View>
-            <Text style={[styles.statusLabel, { color: theme.textSecondary }]}>
-              Location Status
-            </Text>
-            <Text style={[styles.statusValue, { color: location ? theme.success : theme.error }]}>
-              {location ? 'Available' : 'Unavailable'}
-            </Text>
+            <View style={styles.statusContent}>
+              <Text style={[styles.statusLabel, { color: theme.textSecondary }]}>
+                {t('location.current.location')}
+              </Text>
+              <Text style={[styles.statusValue, { color: location ? '#4CAF50' : '#d90429' }]}>
+                {location ? t('location.status.available') : t('location.status.unavailable')}
+              </Text>
+            </View>
           </View>
 
-          <View style={[styles.statusCard, { backgroundColor: theme.surface }]}>
-            <View style={[styles.statusIcon, { backgroundColor: theme.warning + '20' }]}>
-              <Clock size={24} color={theme.warning} />
+          <View style={[styles.statusCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+            <View style={[styles.statusIcon, { backgroundColor: '#d90429' + '15' }]}>
+              <Clock size={24} color="#d90429" />
             </View>
-            <Text style={[styles.statusLabel, { color: theme.textSecondary }]}>
-              Last Update
-            </Text>
-            <Text style={[styles.statusValue, { color: theme.text }]}>
-              {lastUpdate ? lastUpdate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Never'}
-            </Text>
+            <View style={styles.statusContent}>
+              <Text style={[styles.statusLabel, { color: theme.textSecondary }]}>
+                {t('location.last.update')}
+              </Text>
+              <Text style={[styles.statusValue, { color: theme.text }]}>
+                {lastUpdate ? lastUpdate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : t('location.never')}
+              </Text>
+            </View>
           </View>
         </View>
 
-        {/* Map */}
-        <View style={[styles.mapContainer, { backgroundColor: theme.surface }]}>
-          <Text style={[styles.mapTitle, { color: theme.text }]}>
-            Current Location
-          </Text>
+        {/* Map Section */}
+        <View style={[styles.mapSection, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+          <View style={styles.sectionHeader}>
+            <View style={[styles.sectionIcon, { backgroundColor: theme.primary + '15' }]}>
+              <Target size={20} color={theme.primary} />
+            </View>
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>
+              {t('location.current.location')}
+            </Text>
+          </View>
+          
           {location ? (
-            <MapView
-              style={styles.map}
-              provider={PROVIDER_GOOGLE}
-              region={{
-                latitude: location.latitude,
-                longitude: location.longitude,
-                latitudeDelta: 0.01,
-                longitudeDelta: 0.01,
-              }}
-              showsUserLocation={true}
-              showsMyLocationButton={false}
-            >
-              <Marker
-                coordinate={{
+            <View style={styles.mapContainer}>
+              <MapView
+                style={styles.map}
+                provider={PROVIDER_GOOGLE}
+                region={{
                   latitude: location.latitude,
                   longitude: location.longitude,
+                  latitudeDelta: 0.01,
+                  longitudeDelta: 0.01,
                 }}
-                title="Your Bus"
-                description={bus?.plateNumber || 'Bus Location'}
+                showsUserLocation={true}
+                showsMyLocationButton={false}
               >
-                <View style={[styles.busMarker, { backgroundColor: theme.primary }]}>
-                  <Text style={[styles.busMarkerText, { color: theme.background }]}>
-                    🚌
-                  </Text>
-                </View>
-              </Marker>
-            </MapView>
+                <Marker
+                  coordinate={{
+                    latitude: location.latitude,
+                    longitude: location.longitude,
+                  }}
+                  title={t('location.your.bus')}
+                  description={bus?.plateNumber || t('location.bus.location')}
+                >
+                  <View style={[styles.busMarker, { backgroundColor: theme.primary }]}>
+                    <Text style={styles.busMarkerText}>
+                      🚌
+                    </Text>
+                  </View>
+                </Marker>
+              </MapView>
+            </View>
           ) : (
             <View style={[styles.noLocationContainer, { backgroundColor: theme.background }]}>
-              <MapPin size={48} color={theme.textSecondary} />
+              <View style={[styles.noLocationIcon, { backgroundColor: theme.textSecondary + '15' }]}>
+                <MapPin size={40} color={theme.textSecondary} />
+              </View>
               <Text style={[styles.noLocationText, { color: theme.textSecondary }]}>
-                Location not available
+                {t('location.not.available')}
               </Text>
               <Text style={[styles.noLocationSubtext, { color: theme.textSecondary }]}>
-                Please enable location services
+                {t('location.enable.services')}
               </Text>
             </View>
           )}
@@ -191,36 +218,44 @@ export default function Location() {
 
         {/* Location Details */}
         {location && (
-          <View style={[styles.locationDetails, { backgroundColor: theme.surface }]}>
-            <Text style={[styles.detailsTitle, { color: theme.text }]}>
-              Location Details
+          <View style={[styles.locationDetails, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+            <View style={styles.sectionHeader}>
+              <View style={[styles.sectionIcon, { backgroundColor: '#9C27B0' + '15' }]}>
+                <Activity size={20} color="#9C27B0" />
+              </View>
+                          <Text style={[styles.sectionTitle, { color: theme.text }]}>
+              {t('location.details')}
             </Text>
-            <View style={styles.detailRow}>
-              <Text style={[styles.detailLabel, { color: theme.textSecondary }]}>
-                Latitude:
-              </Text>
-              <Text style={[styles.detailValue, { color: theme.text }]}>
-                {location.latitude.toFixed(6)}
-              </Text>
             </View>
-            <View style={styles.detailRow}>
-              <Text style={[styles.detailLabel, { color: theme.textSecondary }]}>
-                Longitude:
-              </Text>
-              <Text style={[styles.detailValue, { color: theme.text }]}>
-                {location.longitude.toFixed(6)}
-              </Text>
-            </View>
-            {location.accuracy && (
+            
+            <View style={styles.detailsContent}>
               <View style={styles.detailRow}>
                 <Text style={[styles.detailLabel, { color: theme.textSecondary }]}>
-                  Accuracy:
+                  {t('location.latitude')}
                 </Text>
                 <Text style={[styles.detailValue, { color: theme.text }]}>
-                  ±{Math.round(location.accuracy)}m
+                  {location.latitude.toFixed(6)}
                 </Text>
               </View>
-            )}
+              <View style={styles.detailRow}>
+                <Text style={[styles.detailLabel, { color: theme.textSecondary }]}>
+                  {t('location.longitude')}
+                </Text>
+                <Text style={[styles.detailValue, { color: theme.text }]}>
+                  {location.longitude.toFixed(6)}
+                </Text>
+              </View>
+              {location.accuracy && (
+                <View style={styles.detailRow}>
+                                  <Text style={[styles.detailLabel, { color: theme.textSecondary }]}>
+                  {t('location.accuracy')}
+                </Text>
+                  <Text style={[styles.detailValue, { color: theme.text }]}>
+                    ±{Math.round(location.accuracy)}m
+                  </Text>
+                </View>
+              )}
+            </View>
           </View>
         )}
 
@@ -229,13 +264,13 @@ export default function Location() {
           <Pressable
             style={[
               styles.trackingButton,
-              { backgroundColor: isTracking ? theme.error : theme.success }
+              { backgroundColor: isTracking ? '#d90429' : '#4CAF50' }
             ]}
             onPress={toggleTracking}
           >
-            <Navigation size={20} color={theme.background} />
-            <Text style={[styles.trackingButtonText, { color: theme.background }]}>
-              {isTracking ? 'Stop Tracking' : 'Start Tracking'}
+            <Navigation size={20} color="#FFFFFF" />
+            <Text style={styles.trackingButtonText}>
+                              {isTracking ? t('location.stop.tracking') : t('location.start.tracking')}
             </Text>
           </Pressable>
         </View>
@@ -252,26 +287,40 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 24,
     paddingBottom: 24,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
+    paddingHorizontal: 24,
     paddingTop: 20,
-    paddingBottom: 16,
+    paddingBottom: 24,
+  },
+  headerLeft: {
+    flex: 1,
   },
   title: {
     fontSize: 24,
     fontFamily: 'Inter-Bold',
+    marginBottom: 4,
+  },
+  subtitle: {
+    fontSize: 16,
+    fontFamily: 'Inter-Regular',
   },
   refreshButton: {
-    padding: 8,
+    padding: 12,
     borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   statusSection: {
     flexDirection: 'row',
+    paddingHorizontal: 24,
     marginBottom: 24,
     gap: 12,
   },
@@ -279,36 +328,65 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     borderRadius: 12,
-    alignItems: 'center',
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
   },
   statusIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 8,
+    marginBottom: 12,
+  },
+  statusContent: {
+    flex: 1,
   },
   statusLabel: {
     fontSize: 12,
     fontFamily: 'Inter-Regular',
     marginBottom: 4,
-    textAlign: 'center',
   },
   statusValue: {
-    fontSize: 14,
+    fontSize: 16,
+    fontFamily: 'Inter-Bold',
+  },
+  mapSection: {
+    marginHorizontal: 24,
+    marginBottom: 24,
+    padding: 20,
+    borderRadius: 12,
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  sectionIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  sectionTitle: {
+    fontSize: 18,
     fontFamily: 'Inter-Bold',
   },
   mapContainer: {
-    borderRadius: 12,
+    borderRadius: 10,
     overflow: 'hidden',
-    marginBottom: 24,
-  },
-  mapTitle: {
-    fontSize: 16,
-    fontFamily: 'Inter-SemiBold',
-    padding: 16,
-    paddingBottom: 8,
   },
   map: {
     height: 200,
@@ -317,16 +395,24 @@ const styles = StyleSheet.create({
     height: 200,
     justifyContent: 'center',
     alignItems: 'center',
+    borderRadius: 10,
+  },
+  noLocationIcon: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
   },
   noLocationText: {
     fontSize: 16,
     fontFamily: 'Inter-SemiBold',
-    marginTop: 12,
+    marginBottom: 4,
   },
   noLocationSubtext: {
     fontSize: 14,
     fontFamily: 'Inter-Regular',
-    marginTop: 4,
   },
   busMarker: {
     width: 40,
@@ -336,24 +422,37 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 3,
     borderColor: 'white',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
   },
   busMarkerText: {
     fontSize: 16,
   },
   locationDetails: {
-    padding: 16,
-    borderRadius: 12,
+    marginHorizontal: 24,
     marginBottom: 24,
+    padding: 20,
+    borderRadius: 12,
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
   },
-  detailsTitle: {
-    fontSize: 16,
-    fontFamily: 'Inter-SemiBold',
-    marginBottom: 12,
+  detailsContent: {
+    gap: 16,
   },
   detailRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    alignItems: 'center',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,0,0,0.05)',
   },
   detailLabel: {
     fontSize: 14,
@@ -364,6 +463,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-SemiBold',
   },
   controlSection: {
+    paddingHorizontal: 24,
     paddingBottom: 24,
   },
   trackingButton: {
@@ -373,9 +473,15 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 12,
     gap: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   trackingButtonText: {
     fontSize: 16,
     fontFamily: 'Inter-SemiBold',
+    color: '#FFFFFF',
   },
 });

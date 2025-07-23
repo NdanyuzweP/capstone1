@@ -1,73 +1,73 @@
-import { View, Text, StyleSheet, Pressable, ScrollView, Alert, Linking } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@/contexts/ThemeContext';
-import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useRouter } from 'expo-router';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useState } from 'react';
 import { 
-  Settings as SettingsIcon, 
   User, 
-  Globe, 
-  Moon, 
-  Sun, 
+  Shield, 
+  HelpCircle, 
   LogOut, 
-  ChevronRight,
-  Phone,
-  Mail,
-  HelpCircle,
-  MessageCircle,
-  Shield,
-  FileText,
-  Bell,
-  Star,
-  Share2,
+  Settings as SettingsIcon,
+  Moon,
+  Sun,
   Info,
-  Lock,
-  Download,
-  Trash2
+  ChevronRight,
+  Globe,
+  Phone,
+  Star
 } from 'lucide-react-native';
 
 export default function Settings() {
   const { theme, isDark, toggleTheme } = useTheme();
+  const { logout, user } = useAuth();
   const { language, setLanguage, t } = useLanguage();
-  const { user, logout } = useAuth();
-  const router = useRouter();
 
   const handleLogout = () => {
     Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
+      t('logout'),
+      t('logoutConfirm'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('cancel'), style: 'cancel' },
         { 
-          text: 'Logout', 
+          text: t('logout'), 
           style: 'destructive',
-          onPress: async () => {
-            await logout();
-            router.replace('/auth');
-          }
+          onPress: logout
         }
       ]
     );
   };
 
-  const handleLanguageToggle = () => {
-    setLanguage(language === 'en' ? 'rw' : 'en');
+  const handleContactSupport = () => {
+    Alert.alert(
+      t('contactSupport'),
+      t('supportInfo'),
+      [{ text: t('ok') }]
+    );
   };
 
-  const handleSupport = () => {
+  const handleAbout = () => {
     Alert.alert(
-      'Contact Support',
-      'How would you like to contact us?',
+      t('aboutRidra'),
+      t('aboutDescription'),
+      [{ text: t('ok') }]
+    );
+  };
+
+  const handleLanguageChange = () => {
+    Alert.alert(
+      t('language'),
+      t('selectLanguage'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('cancel'), style: 'cancel' },
         { 
-          text: 'WhatsApp', 
-          onPress: () => Linking.openURL('https://wa.me/250788123456')
+          text: t('english'), 
+          onPress: () => setLanguage('en')
         },
         { 
-          text: 'Email', 
-          onPress: () => Linking.openURL('mailto:support@ridra.rw')
+          text: t('kinyarwanda'), 
+          onPress: () => setLanguage('rw')
         }
       ]
     );
@@ -75,280 +75,208 @@ export default function Settings() {
 
   const handleRateApp = () => {
     Alert.alert(
-      'Rate Ridra',
-      'Thank you for using Ridra! Would you like to rate us on the App Store?',
-      [
-        { text: 'Later', style: 'cancel' },
-        { 
-          text: 'Rate Now', 
-          onPress: () => {
-            // Open app store rating
-            Alert.alert('Success', 'Thank you for your feedback!');
-          }
-        }
-      ]
+      t('rateApp'),
+      t('thankYou'),
+      [{ text: t('ok') }]
     );
   };
-
-  const handleShareApp = () => {
-    Alert.alert(
-      'Share Ridra',
-      'Help others discover Ridra by sharing the app!',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Share', 
-          onPress: () => {
-            // Share functionality
-            Alert.alert('Shared', 'Thanks for sharing Ridra!');
-          }
-        }
-      ]
-    );
-  };
-
-  const handleDeleteAccount = () => {
-    Alert.alert(
-      'Delete Account',
-      'This action cannot be undone. All your data will be permanently deleted.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Delete', 
-          style: 'destructive',
-          onPress: () => {
-            Alert.alert('Account Deleted', 'Your account has been deleted successfully.');
-          }
-        }
-      ]
-    );
-  };
-
-  const SettingItem = ({ 
-    icon, 
-    title, 
-    subtitle, 
-    onPress, 
-    rightElement,
-    danger = false 
-  }: {
-    icon: React.ReactNode;
-    title: string;
-    subtitle?: string;
-    onPress?: () => void;
-    rightElement?: React.ReactNode;
-    danger?: boolean;
-  }) => (
-    <Pressable
-      style={[styles.settingItem, { backgroundColor: theme.surface }]}
-      onPress={onPress}
-    >
-      <View style={styles.settingLeft}>
-        <View style={[styles.iconContainer, { backgroundColor: danger ? theme.error + '20' : theme.primary + '20' }]}>
-          {icon}
-        </View>
-        <View style={styles.settingText}>
-          <Text style={[styles.settingTitle, { color: danger ? theme.error : theme.text }]}>
-            {title}
-          </Text>
-          {subtitle && (
-            <Text style={[styles.settingSubtitle, { color: theme.textSecondary }]}>
-              {subtitle}
-            </Text>
-          )}
-        </View>
-      </View>
-      <View style={styles.settingRight}>
-        {rightElement || <ChevronRight size={20} color={theme.textSecondary} />}
-      </View>
-    </Pressable>
-  );
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header Section */}
         <View style={styles.header}>
-          <Text style={[styles.title, { color: theme.text }]}>
-            {t('settings')}
-          </Text>
+          <View style={styles.headerLeft}>
+            <Text style={[styles.title, { color: theme.text }]}>
+              {t('settings')}
+            </Text>
+            <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
+              {t('manageAccount')}
+            </Text>
+          </View>
         </View>
 
         {/* Profile Section */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>
-            {t('profile')}
-          </Text>
+        <View style={[styles.section, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+          <View style={styles.sectionHeader}>
+            <View style={[styles.sectionIcon, { backgroundColor: theme.primary + '15' }]}>
+              <User size={20} color={theme.primary} />
+            </View>
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>
+              {t('profile')}
+            </Text>
+          </View>
           
-          <View style={[styles.profileCard, { backgroundColor: theme.surface }]}>
+          <View style={styles.profileCard}>
             <View style={[styles.profileAvatar, { backgroundColor: theme.primary }]}>
-              <User size={24} color={theme.background} />
+              <Text style={styles.profileInitial}>
+                {user?.name?.charAt(0) || 'P'}
+              </Text>
             </View>
             <View style={styles.profileInfo}>
               <Text style={[styles.profileName, { color: theme.text }]}>
-                {user?.name}
+                {user?.name || 'Passenger Name'}
               </Text>
-              <View style={styles.profileDetail}>
-                <Mail size={14} color={theme.textSecondary} />
-                <Text style={[styles.profileDetailText, { color: theme.textSecondary }]}>
-                  {user?.email}
-                </Text>
-              </View>
-              <View style={styles.profileDetail}>
-                <Phone size={14} color={theme.textSecondary} />
-                <Text style={[styles.profileDetailText, { color: theme.textSecondary }]}>
-                  {user?.phone}
-                </Text>
-              </View>
+              <Text style={[styles.profileEmail, { color: theme.textSecondary }]}>
+                {user?.email || 'passenger@example.com'}
+              </Text>
             </View>
           </View>
         </View>
 
-        {/* Preferences Section */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>
-            Preferences
-          </Text>
+        {/* Preferences */}
+        <View style={[styles.section, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+          <View style={styles.sectionHeader}>
+            <View style={[styles.sectionIcon, { backgroundColor: theme.primary + '15' }]}>
+              <SettingsIcon size={20} color={theme.primary} />
+            </View>
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>
+              {t('preferences')}
+            </Text>
+          </View>
           
-          <SettingItem
-            icon={<Globe size={20} color={theme.primary} />}
-            title={t('language')}
-            subtitle={language === 'en' ? 'English' : 'Kinyarwanda'}
-            onPress={handleLanguageToggle}
-            rightElement={
-              <View style={styles.languageToggle}>
-                <Text style={[styles.languageOption, { 
-                  color: language === 'en' ? theme.primary : theme.textSecondary 
-                }]}>
-                  EN
-                </Text>
-                <Text style={[styles.languageSeparator, { color: theme.textSecondary }]}>
-                  |
-                </Text>
-                <Text style={[styles.languageOption, { 
-                  color: language === 'rw' ? theme.primary : theme.textSecondary 
-                }]}>
-                  RW
-                </Text>
+          <View style={styles.settingItems}>
+            <Pressable
+              style={styles.settingItem}
+              onPress={toggleTheme}
+            >
+              <View style={styles.settingLeft}>
+                <View style={[styles.settingIcon, { backgroundColor: theme.primary + '15' }]}>
+                  {isDark ? <Moon size={18} color={theme.primary} /> : <Sun size={18} color={theme.primary} />}
+                </View>
+                <View style={styles.settingContent}>
+                  <Text style={[styles.settingLabel, { color: theme.text }]}>
+                    {t('darkMode')}
+                  </Text>
+                  <Text style={[styles.settingDescription, { color: theme.textSecondary }]}>
+                    {isDark ? t('darkModeEnabled') : t('lightModeEnabled')}
+                  </Text>
+                </View>
               </View>
-            }
-          />
-          
-          <SettingItem
-            icon={isDark ? <Moon size={20} color={theme.primary} /> : <Sun size={20} color={theme.primary} />}
-            title={t('darkMode')}
-            subtitle={isDark ? 'Dark theme enabled' : 'Light theme enabled'}
-            onPress={toggleTheme}
-            rightElement={
-              <View style={[
-                styles.toggle,
-                { backgroundColor: isDark ? theme.primary : theme.border }
-              ]}>
-                <View style={[
-                  styles.toggleIndicator,
-                  { 
-                    backgroundColor: theme.background,
-                    transform: [{ translateX: isDark ? 18 : 2 }]
-                  }
-                ]} />
+              <ChevronRight size={18} color={theme.textSecondary} />
+            </Pressable>
+
+            <Pressable
+              style={styles.settingItem}
+              onPress={handleLanguageChange}
+            >
+              <View style={styles.settingLeft}>
+                <View style={[styles.settingIcon, { backgroundColor: theme.primary + '15' }]}>
+                  <Globe size={18} color={theme.primary} />
+                </View>
+                <View style={styles.settingContent}>
+                  <Text style={[styles.settingLabel, { color: theme.text }]}>
+                    {t('language')}
+                  </Text>
+                  <Text style={[styles.settingDescription, { color: theme.textSecondary }]}>
+                    {language === 'en' ? t('english') : t('kinyarwanda')}
+                  </Text>
+                </View>
               </View>
-            }
-          />
-
-          <SettingItem
-            icon={<Bell size={20} color={theme.primary} />}
-            title="Notifications"
-            subtitle="Manage your notification preferences"
-            onPress={() => Alert.alert('Notifications', 'Notification settings coming soon!')}
-          />
+              <ChevronRight size={18} color={theme.textSecondary} />
+            </Pressable>
+          </View>
         </View>
 
-        {/* Privacy & Security Section */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>
-            Privacy & Security
-          </Text>
+        {/* Support */}
+        <View style={[styles.section, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+          <View style={styles.sectionHeader}>
+            <View style={[styles.sectionIcon, { backgroundColor: theme.primary + '15' }]}>
+              <HelpCircle size={20} color={theme.primary} />
+            </View>
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>
+              {t('support')}
+            </Text>
+          </View>
           
-          <SettingItem
-            icon={<Shield size={20} color={theme.primary} />}
-            title="Privacy Policy"
-            subtitle="Read our privacy policy"
-            onPress={() => Linking.openURL('https://ridra.rw/privacy')}
-          />
+          <View style={styles.settingItems}>
+            <Pressable
+              style={styles.settingItem}
+              onPress={handleContactSupport}
+            >
+              <View style={styles.settingLeft}>
+                <View style={[styles.settingIcon, { backgroundColor: theme.primary + '15' }]}>
+                  <Phone size={18} color={theme.primary} />
+                </View>
+                <View style={styles.settingContent}>
+                  <Text style={[styles.settingLabel, { color: theme.text }]}>
+                    {t('contactSupport')}
+                  </Text>
+                  <Text style={[styles.settingDescription, { color: theme.textSecondary }]}>
+                    {t('getHelp')}
+                  </Text>
+                </View>
+              </View>
+              <ChevronRight size={18} color={theme.textSecondary} />
+            </Pressable>
 
-          <SettingItem
-            icon={<FileText size={20} color={theme.primary} />}
-            title="Terms of Service"
-            subtitle="Read our terms and conditions"
-            onPress={() => Linking.openURL('https://ridra.rw/terms')}
-          />
+            <Pressable
+              style={styles.settingItem}
+              onPress={handleRateApp}
+            >
+              <View style={styles.settingLeft}>
+                <View style={[styles.settingIcon, { backgroundColor: theme.primary + '15' }]}>
+                  <Star size={18} color={theme.primary} />
+                </View>
+                <View style={styles.settingContent}>
+                  <Text style={[styles.settingLabel, { color: theme.text }]}>
+                    {t('rateApp')}
+                  </Text>
+                  <Text style={[styles.settingDescription, { color: theme.textSecondary }]}>
+                    {t('helpImprove')}
+                  </Text>
+                </View>
+              </View>
+              <ChevronRight size={18} color={theme.textSecondary} />
+            </Pressable>
 
-          <SettingItem
-            icon={<Lock size={20} color={theme.primary} />}
-            title="Change Password"
-            subtitle="Update your account password"
-            onPress={() => Alert.alert('Change Password', "can't access this now")}
-          />
+            <Pressable
+              style={styles.settingItem}
+              onPress={handleAbout}
+            >
+              <View style={styles.settingLeft}>
+                <View style={[styles.settingIcon, { backgroundColor: theme.primary + '15' }]}>
+                  <Info size={18} color={theme.primary} />
+                </View>
+                <View style={styles.settingContent}>
+                  <Text style={[styles.settingLabel, { color: theme.text }]}>
+                    {t('aboutRidra')}
+                  </Text>
+                  <Text style={[styles.settingDescription, { color: theme.textSecondary }]}>
+                    {t('learnMore')}
+                  </Text>
+                </View>
+              </View>
+              <ChevronRight size={18} color={theme.textSecondary} />
+            </Pressable>
+          </View>
         </View>
 
-        {/* Support Section */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>
-            Support & Feedback
-          </Text>
-          
-
-          <SettingItem
-            icon={<MessageCircle size={20} color={theme.primary} />}
-            title="Contact Support"
-            subtitle="Get in touch with our team"
-            onPress={handleSupport}
-          />
-
-          <SettingItem
-            icon={<Star size={20} color={theme.primary} />}
-            title="Rate App"
-            subtitle="Help us improve by rating"
-            onPress={handleRateApp}
-          />
-
-          <SettingItem
-            icon={<Share2 size={20} color={theme.primary} />}
-            title="Share App"
-            subtitle="Tell your friends about Ridra"
-            onPress={handleShareApp}
-          />
-        </View>
-
-        {/* About Section */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>
-            About
-          </Text>
-          
-          <SettingItem
-            icon={<Info size={20} color={theme.primary} />}
-            title="About Ridra"
-            subtitle="Learn more about our app"
-            onPress={() => Alert.alert('About Ridra', 'Ridra - Your trusted ride-sharing companion in Rwanda.\n\nVersion: 1.0.0\nBuild: 2024.1')}
-          />
-        </View>
-        {/* Actions Section */}
-        <View style={styles.section}>
-          <SettingItem
-            icon={<LogOut size={20} color={theme.error} />}
-            title={t('logout')}
-            subtitle="Sign out your account"
+        {/* Logout */}
+        <View style={styles.logoutSection}>
+          <Pressable
+            style={[styles.logoutButton, { backgroundColor: '#d90429' }]}
             onPress={handleLogout}
-            danger={true}
-          />
+          >
+            <LogOut size={20} color="#FFFFFF" />
+            <Text style={styles.logoutButtonText}>
+              {t('logout')}
+            </Text>
+          </Pressable>
         </View>
 
-
+        {/* Footer */}
         <View style={styles.footer}>
           <Text style={[styles.footerText, { color: theme.textSecondary }]}>
-            Ridra v1.0.0
+            {t('ridraPassengerApp')}
           </Text>
-          
+          <Text style={[styles.footerSubtext, { color: theme.textSecondary }]}>
+            {t('allRightsReserved')}
+          </Text>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -362,32 +290,61 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
+  scrollContent: {
+    paddingBottom: 24,
+  },
   header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
     paddingHorizontal: 24,
     paddingTop: 20,
     paddingBottom: 24,
   },
+  headerLeft: {
+    flex: 1,
+  },
   title: {
     fontSize: 24,
     fontFamily: 'Inter-Bold',
+    marginBottom: 4,
+  },
+  subtitle: {
+    fontSize: 16,
+    fontFamily: 'Inter-Regular',
   },
   section: {
-    marginBottom: 32,
+    marginHorizontal: 24,
+    marginBottom: 24,
+    padding: 20,
+    borderRadius: 12,
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  sectionIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
   },
   sectionTitle: {
-    fontSize: 14,
-    fontFamily: 'Inter-SemiBold',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    paddingHorizontal: 24,
-    marginBottom: 12,
+    fontSize: 18,
+    fontFamily: 'Inter-Bold',
   },
   profileCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 20,
-    marginHorizontal: 24,
-    borderRadius: 12,
   },
   profileAvatar: {
     width: 60,
@@ -397,98 +354,96 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginRight: 16,
   },
+  profileInitial: {
+    fontSize: 24,
+    fontFamily: 'Inter-Bold',
+    color: '#FFFFFF',
+  },
   profileInfo: {
     flex: 1,
   },
   profileName: {
     fontSize: 18,
     fontFamily: 'Inter-Bold',
-    marginBottom: 8,
-  },
-  profileDetail: {
-    flexDirection: 'row',
-    alignItems: 'center',
     marginBottom: 4,
   },
-  profileDetailText: {
+  profileEmail: {
     fontSize: 14,
     fontFamily: 'Inter-Regular',
-    marginLeft: 8,
+    marginBottom: 4,
+  },
+  profileRole: {
+    fontSize: 14,
+    fontFamily: 'Inter-SemiBold',
+  },
+  settingItems: {
+    gap: 16,
   },
   settingItem: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-    marginBottom: 2,
+    paddingVertical: 12,
   },
   settingLeft: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
   },
-  iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+  settingIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
   },
-  settingText: {
+  settingContent: {
     flex: 1,
   },
-  settingTitle: {
+  settingLabel: {
     fontSize: 16,
     fontFamily: 'Inter-SemiBold',
+    marginBottom: 2,
   },
-  settingSubtitle: {
+  settingDescription: {
     fontSize: 14,
     fontFamily: 'Inter-Regular',
-    marginTop: 2,
   },
-  settingRight: {
-    marginLeft: 12,
+  logoutSection: {
+    paddingHorizontal: 24,
+    marginBottom: 24,
   },
-  languageToggle: {
+  logoutButton: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  languageOption: {
-    fontSize: 14,
-    fontFamily: 'Inter-SemiBold',
-  },
-  languageSeparator: {
-    fontSize: 14,
-    marginHorizontal: 8,
-  },
-  toggle: {
-    width: 40,
-    height: 24,
-    borderRadius: 12,
     justifyContent: 'center',
-    paddingHorizontal: 2,
-  },
-  toggleIndicator: {
-    width: 20,
-    height: 20,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
     borderRadius: 10,
+    gap: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  logoutButtonText: {
+    fontSize: 17,
+    fontFamily: 'Inter-SemiBold',
+    color: '#FFFFFF',
   },
   footer: {
     alignItems: 'center',
     paddingHorizontal: 24,
-    paddingVertical: 32,
   },
   footerText: {
-    fontSize: 12,
+    fontSize: 14,
     fontFamily: 'Inter-Regular',
-    textAlign: 'center',
     marginBottom: 4,
   },
   footerSubtext: {
-    fontSize: 11,
+    fontSize: 12,
     fontFamily: 'Inter-Regular',
-    textAlign: 'center',
   },
 });

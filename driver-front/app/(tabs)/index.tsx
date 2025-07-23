@@ -1,9 +1,10 @@
-import { View, Text, StyleSheet, ScrollView, Pressable, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Alert, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLocation } from '@/contexts/LocationContext';
 import { useDriverData } from '@/hooks/useDriverData';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { useState, useEffect } from 'react';
 import { 
   Bus, 
@@ -16,14 +17,20 @@ import {
   AlertCircle,
   CheckCircle,
   DollarSign,
-  Route
+  Route,
+  TrendingUp,
+  Calendar,
+  Star
 } from 'lucide-react-native';
+
+const { width } = Dimensions.get('window');
 
 export default function Dashboard() {
   const { theme } = useTheme();
   const { user } = useAuth();
   const { location, requestLocation } = useLocation();
   const { bus, passengers, schedules, loading, error, updateOnlineStatus, updateBusLocation } = useDriverData();
+  const { t } = useLanguage();
   const [isOnline, setIsOnline] = useState(false);
 
   useEffect(() => {
@@ -93,13 +100,13 @@ export default function Dashboard() {
     .filter(schedule => new Date(schedule.departureTime) > new Date())
     .sort((a, b) => new Date(a.departureTime).getTime() - new Date(b.departureTime).getTime())[0];
 
-
-
   if (error) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
         <View style={styles.errorContainer}>
-          <AlertCircle size={48} color={theme.error} />
+          <View style={[styles.errorIconContainer, { backgroundColor: theme.error + '15' }]}>
+            <AlertCircle size={48} color={theme.error} />
+          </View>
           <Text style={[styles.errorText, { color: theme.error }]}>
             {error}
           </Text>
@@ -111,125 +118,148 @@ export default function Dashboard() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        {/* Header Section */}
         <View style={styles.header}>
-          <View>
+          <View style={styles.headerLeft}>
             <Text style={[styles.greeting, { color: theme.textSecondary }]}>
-              Good {new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 18 ? 'Afternoon' : 'Evening'},
+              {new Date().getHours() < 12 ? t('dashboard.greeting.morning') : new Date().getHours() < 18 ? t('dashboard.greeting.afternoon') : t('dashboard.greeting.evening')},
             </Text>
             <Text style={[styles.driverName, { color: theme.text }]}>
               {user?.name}
             </Text>
+            <View style={styles.statusIndicator}>
+              <View style={[styles.statusDot, { backgroundColor: isOnline ? '#4CAF50' : '#d90429' }]} />
+                              <Text style={[styles.statusText, { color: theme.textSecondary }]}>
+                  {isOnline ? t('dashboard.status.online') : t('dashboard.status.offline')}
+                </Text>
+            </View>
           </View>
           
           <Pressable
             style={[
               styles.onlineToggle,
-              { backgroundColor: isOnline ? theme.success : theme.error }
+              { backgroundColor: isOnline ? '#4CAF50' : '#d90429' }
             ]}
             onPress={handleToggleOnline}
           >
             {isOnline ? (
-              <Power size={20} color={theme.background} />
+              <Power size={20} color="#FFFFFF" />
             ) : (
-              <PowerOff size={20} color={theme.background} />
+              <PowerOff size={20} color="#FFFFFF" />
             )}
-            <Text style={[styles.onlineText, { color: theme.background }]}>
-              {isOnline ? 'Online' : 'Offline'}
+            <Text style={styles.onlineText}>
+              {isOnline ? t('dashboard.online') : t('dashboard.offline')}
             </Text>
           </Pressable>
         </View>
 
-        {/* Status Cards */}
-        <View style={styles.statusCards}>
-          <View style={[styles.statusCard, { backgroundColor: theme.surface }]}>
-            <View style={[styles.statusIcon, { backgroundColor: theme.primary + '20' }]}>
+        {/* Stats Cards */}
+        <View style={styles.statsContainer}>
+          <View style={[styles.statsCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+            <View style={[styles.statsIcon, { backgroundColor: theme.primary + '15' }]}>
               <Bus size={24} color={theme.primary} />
             </View>
-            <Text style={[styles.statusLabel, { color: theme.textSecondary }]}>
-              Bus Status
-            </Text>
-            <Text style={[styles.statusValue, { color: theme.text }]}>
-              {bus ? bus.plateNumber : 'No Bus'}
-            </Text>
+            <View style={styles.statsContent}>
+              <Text style={[styles.statsLabel, { color: theme.textSecondary }]}>
+                {t('dashboard.bus.status')}
+              </Text>
+              <Text style={[styles.statsValue, { color: theme.text }]}>
+                {bus ? bus.plateNumber : t('bus.no.assigned')}
+              </Text>
+            </View>
           </View>
 
-          <View style={[styles.statusCard, { backgroundColor: theme.surface }]}>
-            <View style={[styles.statusIcon, { backgroundColor: theme.success + '20' }]}>
-              <Users size={24} color={theme.success} />
+          <View style={[styles.statsCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+            <View style={[styles.statsIcon, { backgroundColor: '#4CAF50' + '15' }]}>
+              <Users size={24} color="#4CAF50" />
             </View>
-            <Text style={[styles.statusLabel, { color: theme.textSecondary }]}>
-              Interested
-            </Text>
-            <Text style={[styles.statusValue, { color: theme.text }]}>
-              {passengers.length}
-            </Text>
+            <View style={styles.statsContent}>
+              <Text style={[styles.statsLabel, { color: theme.textSecondary }]}>
+                {t('dashboard.interested')}
+              </Text>
+              <Text style={[styles.statsValue, { color: theme.text }]}>
+                {passengers.length}
+              </Text>
+            </View>
           </View>
 
-          <View style={[styles.statusCard, { backgroundColor: theme.surface }]}>
-            <View style={[styles.statusIcon, { backgroundColor: theme.warning + '20' }]}>
-              <Clock size={24} color={theme.warning} />
+          <View style={[styles.statsCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+            <View style={[styles.statsIcon, { backgroundColor: '#d90429' + '15' }]}>
+              <Clock size={24} color="#d90429" />
             </View>
-            <Text style={[styles.statusLabel, { color: theme.textSecondary }]}>
-              Today's Trips
-            </Text>
-            <Text style={[styles.statusValue, { color: theme.text }]}>
-              {todaySchedules.length}
-            </Text>
+            <View style={styles.statsContent}>
+              <Text style={[styles.statsLabel, { color: theme.textSecondary }]}>
+                {t('dashboard.today.trips')}
+              </Text>
+              <Text style={[styles.statsValue, { color: theme.text }]}>
+                {todaySchedules.length}
+              </Text>
+            </View>
           </View>
         </View>
 
-        {/* Bus Information */}
+        {/* Bus Information Card */}
         {bus && (
-          <View style={[styles.section, { backgroundColor: theme.surface }]}>
-            <Text style={[styles.sectionTitle, { color: theme.text }]}>
-              Your Bus
+          <View style={[styles.section, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+            <View style={styles.sectionHeader}>
+              <View style={[styles.sectionIcon, { backgroundColor: theme.primary + '15' }]}>
+                <Bus size={20} color={theme.primary} />
+              </View>
+                          <Text style={[styles.sectionTitle, { color: theme.text }]}>
+              {t('dashboard.bus.details')}
             </Text>
+            </View>
             <View style={styles.busInfo}>
               <View style={styles.busDetail}>
-                <Text style={[styles.busDetailLabel, { color: theme.textSecondary }]}>
-                  Plate Number
-                </Text>
+                              <Text style={[styles.busDetailLabel, { color: theme.textSecondary }]}>
+                {t('dashboard.plate.number')}
+              </Text>
                 <Text style={[styles.busDetailValue, { color: theme.text }]}>
                   {bus.plateNumber}
                 </Text>
               </View>
               <View style={styles.busDetail}>
-                <Text style={[styles.busDetailLabel, { color: theme.textSecondary }]}>
-                  Capacity
-                </Text>
-                <Text style={[styles.busDetailValue, { color: theme.text }]}>
-                  {bus.capacity} passengers
-                </Text>
+                              <Text style={[styles.busDetailLabel, { color: theme.textSecondary }]}>
+                {t('dashboard.capacity')}
+              </Text>
+              <Text style={[styles.busDetailValue, { color: theme.text }]}>
+                {bus.capacity} {t('dashboard.passengers')}
+              </Text>
               </View>
               <View style={styles.busDetail}>
-                <Text style={[styles.busDetailLabel, { color: theme.textSecondary }]}>
-                  Route
-                </Text>
-                <Text style={[styles.busDetailValue, { color: theme.text }]}>
-                  {bus.route?.name || 'No Route Assigned'}
-                </Text>
+                              <Text style={[styles.busDetailLabel, { color: theme.textSecondary }]}>
+                {t('dashboard.route')}
+              </Text>
+              <Text style={[styles.busDetailValue, { color: theme.text }]}>
+                {bus.route?.name || t('dashboard.no.route')}
+              </Text>
               </View>
               <View style={styles.busDetail}>
-                <Text style={[styles.busDetailLabel, { color: theme.textSecondary }]}>
-                  Fare
-                </Text>
-                <Text style={[styles.busDetailValue, { color: theme.primary }]}>
-                  {bus.fare} RWF
-                </Text>
+                              <Text style={[styles.busDetailLabel, { color: theme.textSecondary }]}>
+                {t('dashboard.fare')}
+              </Text>
+              <Text style={[styles.busDetailValue, { color: theme.primary }]}>
+                {bus.fare} {t('dashboard.rwf')}
+              </Text>
               </View>
             </View>
           </View>
         )}
 
-        {/* Next Schedule */}
+        {/* Next Schedule Card */}
         {nextSchedule && (
-          <View style={[styles.section, { backgroundColor: theme.surface }]}>
-            <Text style={[styles.sectionTitle, { color: theme.text }]}>
-              Next Schedule
+          <View style={[styles.section, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+            <View style={styles.sectionHeader}>
+              <View style={[styles.sectionIcon, { backgroundColor: '#d90429' + '15' }]}>
+                <Calendar size={20} color="#d90429" />
+              </View>
+                          <Text style={[styles.sectionTitle, { color: theme.text }]}>
+              {t('dashboard.next.schedule')}
             </Text>
+            </View>
             <View style={styles.scheduleCard}>
               <View style={styles.scheduleHeader}>
-                <View style={[styles.scheduleIcon, { backgroundColor: theme.primary + '20' }]}>
+                <View style={[styles.scheduleIcon, { backgroundColor: theme.primary + '15' }]}>
                   <Clock size={20} color={theme.primary} />
                 </View>
                 <View style={styles.scheduleInfo}>
@@ -243,8 +273,8 @@ export default function Dashboard() {
                     {bus?.route?.name}
                   </Text>
                 </View>
-                <View style={[styles.scheduleStatus, { backgroundColor: theme.warning + '20' }]}>
-                  <Text style={[styles.scheduleStatusText, { color: theme.warning }]}>
+                <View style={[styles.scheduleStatus, { backgroundColor: '#d90429' + '15' }]}>
+                  <Text style={[styles.scheduleStatusText, { color: '#d90429' }]}>
                     {nextSchedule.status}
                   </Text>
                 </View>
@@ -255,69 +285,85 @@ export default function Dashboard() {
 
         {/* Quick Actions */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.text }]}>
-            Quick Actions
-          </Text>
+          <View style={styles.sectionHeader}>
+            <View style={[styles.sectionIcon, { backgroundColor: '#4CAF50' + '15' }]}>
+              <Navigation size={20} color="#4CAF50" />
+            </View>
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>
+              {t('dashboard.quick.actions')}
+            </Text>
+          </View>
           <View style={styles.quickActions}>
             <Pressable
               style={[styles.actionButton, { backgroundColor: theme.primary }]}
               onPress={() => requestLocation()}
             >
-              <Navigation size={20} color={theme.background} />
-              <Text style={[styles.actionButtonText, { color: theme.background }]}>
-                Start Trip
+              <Navigation size={20} color="#FFFFFF" />
+              <Text style={styles.actionButtonText}>
+                {t('dashboard.start.trip')}
               </Text>
             </Pressable>
 
             <Pressable
-              style={[styles.actionButton, { backgroundColor: theme.success }]}
+              style={[styles.actionButton, { backgroundColor: '#4CAF50' }]}
               onPress={() => Alert.alert('Feature', 'End trip functionality coming soon!')}
             >
-              <CheckCircle size={20} color={theme.background} />
-              <Text style={[styles.actionButtonText, { color: theme.background }]}>
-                End Trip
+              <CheckCircle size={20} color="#FFFFFF" />
+              <Text style={styles.actionButtonText}>
+                {t('dashboard.end.trip')}
               </Text>
             </Pressable>
           </View>
         </View>
 
-        {/* Today's Summary
-        <View style={[styles.section, { backgroundColor: theme.surface }]}>
-          <Text style={[styles.sectionTitle, { color: theme.text }]}>
-            Today's Summary
-          </Text>
-          <View style={styles.summaryGrid}>
-            <View style={styles.summaryItem}>
-              <Route size={20} color={theme.primary} />
-              <Text style={[styles.summaryLabel, { color: theme.textSecondary }]}>
-                Trips Completed
+        {/* Performance Summary */}
+        <View style={[styles.section, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+          <View style={styles.sectionHeader}>
+            <View style={[styles.sectionIcon, { backgroundColor: '#9C27B0' + '15' }]}>
+              <TrendingUp size={20} color="#9C27B0" />
+            </View>
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>
+              {t('dashboard.performance')}
+            </Text>
+          </View>
+          <View style={styles.performanceGrid}>
+            <View style={styles.performanceItem}>
+              <View style={[styles.performanceIcon, { backgroundColor: theme.primary + '15' }]}>
+                <Route size={16} color={theme.primary} />
+              </View>
+              <Text style={[styles.performanceLabel, { color: theme.textSecondary }]}>
+                {t('dashboard.trips.completed')}
               </Text>
-              <Text style={[styles.summaryValue, { color: theme.text }]}>
+              <Text style={[styles.performanceValue, { color: theme.text }]}>
                 {todaySchedules.filter(s => s.status === 'completed').length}
               </Text>
             </View>
             
-            <View style={styles.summaryItem}>
-              <Users size={20} color={theme.success} />
-              <Text style={[styles.summaryLabel, { color: theme.textSecondary }]}>
-                Total Passengers
+            <View style={styles.performanceItem}>
+              <View style={[styles.performanceIcon, { backgroundColor: '#4CAF50' + '15' }]}>
+                <Users size={16} color="#4CAF50" />
+              </View>
+              <Text style={[styles.performanceLabel, { color: theme.textSecondary }]}>
+                {t('dashboard.total.passengers')}
               </Text>
-              <Text style={[styles.summaryValue, { color: theme.text }]}>
+              <Text style={[styles.performanceValue, { color: theme.text }]}>
                 {passengers.length}
               </Text>
             </View>
             
-            <View style={styles.summaryItem}>
-              <DollarSign size={20} color={theme.warning} />
-              <Text style={[styles.summaryLabel, { color: theme.textSecondary }]}>
-                Estimated Earnings
+            <View style={styles.performanceItem}>
+                          <View style={[styles.performanceIcon, { backgroundColor: '#d90429' + '15' }]}>
+              <DollarSign size={16} color="#d90429" />
+              </View>
+              <Text style={[styles.performanceLabel, { color: theme.textSecondary }]}>
+                {t('dashboard.estimated.earnings')}
               </Text>
-              <Text style={[styles.summaryValue, { color: theme.text }]}>
-                {(passengers.length * (bus?.fare || 400)).toLocaleString()} RWF
+              <Text style={[styles.performanceValue, { color: theme.text }]}>
+                {(passengers.length * (bus?.fare || 400)).toLocaleString()} {t('dashboard.rwf')}
               </Text>
             </View>
           </View>
-        </View> */}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -330,73 +376,113 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
-
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 24,
   },
+  errorIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
   errorText: {
     fontSize: 16,
     fontFamily: 'Inter-Regular',
     textAlign: 'center',
-    marginTop: 16,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     paddingHorizontal: 24,
     paddingTop: 20,
     paddingBottom: 24,
   },
+  headerLeft: {
+    flex: 1,
+  },
   greeting: {
-    fontSize: 14,
+    fontSize: 16,
     fontFamily: 'Inter-Regular',
+    marginBottom: 4,
   },
   driverName: {
     fontSize: 24,
     fontFamily: 'Inter-Bold',
+    marginBottom: 8,
+  },
+  statusIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 8,
+  },
+  statusText: {
+    fontSize: 14,
+    fontFamily: 'Inter-Medium',
   },
   onlineToggle: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,
-    gap: 8,
+    gap: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   onlineText: {
     fontSize: 14,
     fontFamily: 'Inter-SemiBold',
+    color: '#FFFFFF',
   },
-  statusCards: {
+  statsContainer: {
     flexDirection: 'row',
     paddingHorizontal: 24,
     marginBottom: 24,
     gap: 12,
   },
-  statusCard: {
+  statsCard: {
     flex: 1,
     padding: 16,
     borderRadius: 12,
-    alignItems: 'center',
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
   },
-  statusIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+  statsIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 8,
+    marginBottom: 12,
   },
-  statusLabel: {
+  statsContent: {
+    flex: 1,
+  },
+  statsLabel: {
     fontSize: 12,
     fontFamily: 'Inter-Regular',
     marginBottom: 4,
   },
-  statusValue: {
+  statsValue: {
     fontSize: 16,
     fontFamily: 'Inter-Bold',
   },
@@ -405,19 +491,40 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     padding: 20,
     borderRadius: 12,
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  sectionIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
   },
   sectionTitle: {
     fontSize: 18,
     fontFamily: 'Inter-Bold',
-    marginBottom: 16,
   },
   busInfo: {
-    gap: 12,
+    gap: 16,
   },
   busDetail: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,0,0,0.05)',
   },
   busDetailLabel: {
     fontSize: 14,
@@ -428,7 +535,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-SemiBold',
   },
   scheduleCard: {
-    borderRadius: 8,
+    borderRadius: 10,
   },
   scheduleHeader: {
     flexDirection: 'row',
@@ -440,22 +547,23 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
+    marginRight: 16,
   },
   scheduleInfo: {
     flex: 1,
   },
   scheduleTime: {
-    fontSize: 16,
+    fontSize: 18,
     fontFamily: 'Inter-Bold',
   },
   scheduleRoute: {
     fontSize: 14,
     fontFamily: 'Inter-Regular',
+    marginTop: 4,
   },
   scheduleStatus: {
     paddingHorizontal: 12,
-    paddingVertical: 4,
+    paddingVertical: 6,
     borderRadius: 12,
   },
   scheduleStatusText: {
@@ -473,29 +581,42 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 12,
-    borderRadius: 8,
-    gap: 8,
+    borderRadius: 10,
+    gap: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   actionButtonText: {
     fontSize: 14,
     fontFamily: 'Inter-SemiBold',
+    color: '#FFFFFF',
   },
-  summaryGrid: {
+  performanceGrid: {
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  summaryItem: {
+  performanceItem: {
     alignItems: 'center',
     flex: 1,
   },
-  summaryLabel: {
+  performanceIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  performanceLabel: {
     fontSize: 12,
     fontFamily: 'Inter-Regular',
     textAlign: 'center',
-    marginTop: 8,
     marginBottom: 4,
   },
-  summaryValue: {
+  performanceValue: {
     fontSize: 16,
     fontFamily: 'Inter-Bold',
   },

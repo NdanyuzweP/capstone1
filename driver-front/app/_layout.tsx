@@ -6,6 +6,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { LocationProvider } from '@/contexts/LocationContext';
+import { LanguageProvider } from '@/contexts/LanguageContext';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -27,17 +28,19 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider>
-      <LocationProvider>
-        <AuthProvider>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="+not-found" />
-            <Stack.Screen name="auth" />
-            <Stack.Screen name="(tabs)" />
-          </Stack>
-          <StatusBar style="auto" />
-        </AuthProvider>
-      </LocationProvider>
-    </ThemeProvider>
+    <LanguageProvider>
+      <ThemeProvider>
+        <LocationProvider>
+          <AuthProvider>
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="+not-found" />
+              <Stack.Screen name="auth" />
+              <Stack.Screen name="(tabs)" />
+            </Stack>
+            <StatusBar style="auto" />
+          </AuthProvider>
+        </LocationProvider>
+      </ThemeProvider>
+    </LanguageProvider>
   );
 }
