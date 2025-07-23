@@ -225,3 +225,46 @@ export const reassignBusToDriver = async (req: Request, res: Response): Promise<
     res.status(500).json({ error: 'Server error' });
   }
 };
+
+export const debugDriverInfo = async (req: Request, res: Response): Promise<any> => {
+  try {
+    const driverId = (req as any).user.id;
+    const userRole = (req as any).user.role;
+    
+    console.log('Debug driver info:', { driverId, userRole });
+    
+    // Get driver's bus
+    const bus = await Bus.findOne({ driverId, isActive: true })
+      .populate('driverId', 'name email phone role')
+      .populate('routeId', 'name description');
+
+    // Get all buses for comparison
+    const allBuses = await Bus.find({ isActive: true })
+      .populate('driverId', 'name email phone')
+      .select('_id plateNumber driverId');
+
+    res.json({
+      debug: {
+        driverId,
+        userRole,
+        hasBus: !!bus,
+        bus: bus ? {
+          _id: bus._id,
+          plateNumber: bus.plateNumber,
+          driverId: (bus.driverId as any)?._id,
+          driverName: (bus.driverId as any)?.name,
+          driverRole: (bus.driverId as any)?.role
+        } : null,
+        allBuses: allBuses.map(b => ({
+          _id: b._id,
+          plateNumber: b.plateNumber,
+          driverId: (b.driverId as any)?._id,
+          driverName: (b.driverId as any)?.name
+        }))
+      }
+    });
+  } catch (error) {
+    console.error('Error in debugDriverInfo:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};

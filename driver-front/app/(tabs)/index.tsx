@@ -22,6 +22,7 @@ import {
   Calendar,
   Star
 } from 'lucide-react-native';
+import { apiService } from '@/services/api';
 
 const { width } = Dimensions.get('window');
 
@@ -90,6 +91,17 @@ export default function Dashboard() {
     }
   };
 
+  const handleDebugAuth = async () => {
+    try {
+      const result = await apiService.debugDriverInfo();
+      console.log('Debug result:', result);
+      Alert.alert('Debug Info', JSON.stringify(result.debug, null, 2));
+    } catch (error: any) {
+      console.error('Debug error:', error);
+      Alert.alert('Debug Error', error.message);
+    }
+  };
+
   const todaySchedules = schedules.filter(schedule => {
     const today = new Date();
     const scheduleDate = new Date(schedule.departureTime);
@@ -127,30 +139,34 @@ export default function Dashboard() {
             <Text style={[styles.driverName, { color: theme.text }]}>
               {user?.name}
             </Text>
-            <View style={styles.statusIndicator}>
-              <View style={[styles.statusDot, { backgroundColor: isOnline ? '#4CAF50' : '#d90429' }]} />
-                              <Text style={[styles.statusText, { color: theme.textSecondary }]}>
-                  {isOnline ? t('dashboard.status.online') : t('dashboard.status.offline')}
-                </Text>
-            </View>
+
           </View>
           
-          <Pressable
-            style={[
-              styles.onlineToggle,
-              { backgroundColor: isOnline ? '#4CAF50' : '#d90429' }
-            ]}
-            onPress={handleToggleOnline}
-          >
-            {isOnline ? (
-              <Power size={20} color="#FFFFFF" />
-            ) : (
-              <PowerOff size={20} color="#FFFFFF" />
-            )}
-            <Text style={styles.onlineText}>
-              {isOnline ? t('dashboard.online') : t('dashboard.offline')}
-            </Text>
-          </Pressable>
+          <View style={styles.headerButtons}>
+            <Pressable
+              style={[
+                styles.onlineToggle,
+                { backgroundColor: isOnline ? '#4CAF50' : '#d90429' }
+              ]}
+              onPress={handleToggleOnline}
+            >
+              {isOnline ? (
+                <Power size={20} color="#FFFFFF" />
+              ) : (
+                <PowerOff size={20} color="#FFFFFF" />
+              )}
+              <Text style={styles.onlineText}>
+                {isOnline ? t('dashboard.online') : t('dashboard.offline')}
+              </Text>
+            </Pressable>
+            
+            <Pressable
+              style={[styles.debugButton, { backgroundColor: theme.primary }]}
+              onPress={handleDebugAuth}
+            >
+              <Text style={styles.debugButtonText}>Debug</Text>
+            </Pressable>
+          </View>
         </View>
 
         {/* Stats Cards */}
@@ -284,7 +300,7 @@ export default function Dashboard() {
         )}
 
         {/* Quick Actions */}
-        <View style={styles.section}>
+        <View style={[styles.section, { borderColor: theme.border + '20' }]}>
           <View style={styles.sectionHeader}>
             <View style={[styles.sectionIcon, { backgroundColor: '#4CAF50' + '15' }]}>
               <Navigation size={20} color="#4CAF50" />
@@ -446,6 +462,20 @@ const styles = StyleSheet.create({
   },
   onlineText: {
     fontSize: 14,
+    fontFamily: 'Inter-SemiBold',
+    color: '#FFFFFF',
+  },
+  headerButtons: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  debugButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  debugButtonText: {
+    fontSize: 12,
     fontFamily: 'Inter-SemiBold',
     color: '#FFFFFF',
   },
