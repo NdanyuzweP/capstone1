@@ -9,7 +9,16 @@ import {
   RefreshCw,
   AlertCircle,
   CheckCircle,
-  Server
+  Server,
+  Palette,
+  Shield,
+  Bell,
+  Globe,
+  Key,
+  Trash2,
+  Download,
+  Upload,
+  Activity
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -28,6 +37,8 @@ export default function Settings() {
     siteName: 'Ridra Bus Tracking',
     supportEmail: 'support@ridra.rw',
     maintenanceMode: false,
+    notifications: true,
+    autoBackup: true,
   });
 
   const handleProfileSave = async () => {
@@ -79,16 +90,18 @@ export default function Settings() {
         </div>
       </div>
 
+
+
       <div className="admin-grid admin-grid-2 admin-mb-8">
         {/* Profile Settings */}
         <div className="admin-card">
           <div className="admin-card-header">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
               <div 
-                className="w-10 h-10 rounded-lg flex items-center justify-center"
-                style={{ backgroundColor: theme.primary + '20' }}
+                className="w-14 h-14 rounded-xl flex items-center justify-center shadow-sm"
+                style={{ backgroundColor: theme.primary + '15' }}
               >
-                <User size={20} style={{ color: theme.primary }} />
+                <User size={24} style={{ color: theme.primary }} />
               </div>
               <div>
                 <h3 className="admin-card-title">Profile Settings</h3>
@@ -97,9 +110,9 @@ export default function Settings() {
             </div>
           </div>
           <div className="admin-card-body">
-            <div className="admin-space-y-4">
+            <div className="admin-space-y-6">
               <div>
-                <label className="block text-sm font-medium mb-2" style={{ color: theme.text }}>
+                <label className="block text-sm font-medium mb-3" style={{ color: theme.text }}>
                   Full Name
                 </label>
                 <input
@@ -112,7 +125,7 @@ export default function Settings() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2" style={{ color: theme.text }}>
+                <label className="block text-sm font-medium mb-3" style={{ color: theme.text }}>
                   Email Address
                 </label>
                 <input
@@ -125,7 +138,7 @@ export default function Settings() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2" style={{ color: theme.text }}>
+                <label className="block text-sm font-medium mb-3" style={{ color: theme.text }}>
                   Phone Number
                 </label>
                 <input
@@ -140,17 +153,17 @@ export default function Settings() {
               <button
                 onClick={handleProfileSave}
                 disabled={loading}
-                className="admin-btn admin-btn-primary w-full"
+                className="admin-btn admin-btn-primary w-full py-3"
               >
                 {loading ? (
-                  <div className="flex items-center justify-center gap-2">
+                  <div className="flex items-center justify-center gap-3">
                     <div className="spinner"></div>
-                    Saving...
+                    <span>Saving...</span>
                   </div>
                 ) : (
-                  <div className="flex items-center justify-center gap-2">
-                    <Save size={16} />
-                    Save Profile
+                  <div className="flex items-center justify-center gap-3">
+                    <Save size={18} />
+                    <span>Save Profile</span>
                   </div>
                 )}
               </button>
@@ -158,17 +171,15 @@ export default function Settings() {
           </div>
         </div>
 
-
-
         {/* System Settings */}
         <div className="admin-card">
           <div className="admin-card-header">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
               <div 
-                className="w-10 h-10 rounded-lg flex items-center justify-center"
-                style={{ backgroundColor: theme.success + '20' }}
+                className="w-14 h-14 rounded-xl flex items-center justify-center shadow-sm"
+                style={{ backgroundColor: theme.success + '15' }}
               >
-                <SettingsIcon size={20} style={{ color: theme.success }} />
+                <SettingsIcon size={24} style={{ color: theme.success }} />
               </div>
               <div>
                 <h3 className="admin-card-title">System Settings</h3>
@@ -177,9 +188,9 @@ export default function Settings() {
             </div>
           </div>
           <div className="admin-card-body">
-            <div className="admin-space-y-4">
+            <div className="admin-space-y-6">
               <div>
-                <label className="block text-sm font-medium mb-2" style={{ color: theme.text }}>
+                <label className="block text-sm font-medium mb-3" style={{ color: theme.text }}>
                   Site Name
                 </label>
                 <input
@@ -192,7 +203,7 @@ export default function Settings() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2" style={{ color: theme.text }}>
+                <label className="block text-sm font-medium mb-3" style={{ color: theme.text }}>
                   Support Email
                 </label>
                 <input
@@ -204,50 +215,89 @@ export default function Settings() {
                 />
               </div>
 
-
-
-              <div className="flex items-center justify-between p-4 rounded-lg" style={{ backgroundColor: theme.background }}>
-                <div>
-                  <p className="font-medium flex items-center gap-2" style={{ color: theme.text }}>
-                    <AlertCircle size={16} style={{ color: theme.error }} />
-                    Maintenance Mode
-                  </p>
-                  <p className="text-sm" style={{ color: theme.textSecondary }}>
-                    Temporarily disable the platform
-                  </p>
+              <div className="admin-space-y-4">
+                <div className="flex items-center justify-between p-4 rounded-xl" style={{ backgroundColor: theme.surface }}>
+                  <div className="flex items-center gap-3">
+                    <div 
+                      className="w-10 h-10 rounded-lg flex items-center justify-center"
+                      style={{ backgroundColor: theme.error + '15' }}
+                    >
+                      <AlertCircle size={18} style={{ color: theme.error }} />
+                    </div>
+                    <div>
+                      <p className="font-medium" style={{ color: theme.text }}>
+                        Maintenance Mode
+                      </p>
+                      <p className="text-sm" style={{ color: theme.textSecondary }}>
+                        Temporarily disable the platform
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setSystemSettings({
+                      ...systemSettings,
+                      maintenanceMode: !systemSettings.maintenanceMode
+                    })}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors shadow-sm`}
+                    style={{ 
+                      backgroundColor: systemSettings.maintenanceMode ? theme.error : '#d1d5db' 
+                    }}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm ${
+                        systemSettings.maintenanceMode ? 'translate-x-6' : 'translate-x-1'
+                      }`}
+                    />
+                  </button>
                 </div>
-                <button
-                  onClick={() => setSystemSettings({
-                    ...systemSettings,
-                    maintenanceMode: !systemSettings.maintenanceMode
-                  })}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
-                  style={{ 
-                    backgroundColor: systemSettings.maintenanceMode ? theme.error : '#d1d5db' 
-                  }}
-                >
-                  <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      systemSettings.maintenanceMode ? 'translate-x-6' : 'translate-x-1'
-                    }`}
-                  />
-                </button>
+
+                <div className="flex items-center justify-between p-4 rounded-xl" style={{ backgroundColor: theme.surface }}>
+                  <div className="flex items-center gap-3">
+                    <div 
+                      className="w-10 h-10 rounded-lg flex items-center justify-center"
+                      style={{ backgroundColor: theme.warning + '15' }}
+                    >
+                      <Palette size={18} style={{ color: theme.warning }} />
+                    </div>
+                    <div>
+                      <p className="font-medium" style={{ color: theme.text }}>
+                        Dark Mode
+                      </p>
+                      <p className="text-sm" style={{ color: theme.textSecondary }}>
+                        Switch between light and dark themes
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={toggleTheme}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors shadow-sm`}
+                    style={{ 
+                      backgroundColor: isDark ? theme.primary : '#d1d5db' 
+                    }}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm ${
+                        isDark ? 'translate-x-6' : 'translate-x-1'
+                      }`}
+                    />
+                  </button>
+                </div>
               </div>
 
               <button
                 onClick={handleSystemSave}
                 disabled={loading}
-                className="admin-btn admin-btn-primary w-full"
+                className="admin-btn admin-btn-primary w-full py-3"
               >
                 {loading ? (
-                  <div className="flex items-center justify-center gap-2">
+                  <div className="flex items-center justify-center gap-3">
                     <div className="spinner"></div>
-                    Saving...
+                    <span>Saving...</span>
                   </div>
                 ) : (
-                  <div className="flex items-center justify-center gap-2">
-                    <Save size={16} />
-                    Save System Settings
+                  <div className="flex items-center justify-center gap-3">
+                    <Save size={18} />
+                    <span>Save System Settings</span>
                   </div>
                 )}
               </button>
@@ -259,12 +309,12 @@ export default function Settings() {
       {/* Database Management */}
       <div className="admin-card">
         <div className="admin-card-header">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <div 
-              className="w-10 h-10 rounded-lg flex items-center justify-center"
-              style={{ backgroundColor: theme.primary + '20' }}
+              className="w-14 h-14 rounded-xl flex items-center justify-center shadow-sm"
+              style={{ backgroundColor: theme.primary + '15' }}
             >
-              <Database size={20} style={{ color: theme.primary }} />
+              <Database size={24} style={{ color: theme.primary }} />
             </div>
             <div>
               <h3 className="admin-card-title">Database Management</h3>
@@ -274,14 +324,14 @@ export default function Settings() {
         </div>
         <div className="admin-card-body">
           <div className="admin-grid admin-grid-3">
-            <div className="flex flex-col items-center p-6 text-center rounded-lg" style={{ backgroundColor: theme.background }}>
+            <div className="flex flex-col items-center p-6 text-center rounded-xl shadow-sm" style={{ backgroundColor: theme.surface }}>
               <div 
-                className="w-12 h-12 rounded-lg flex items-center justify-center mb-3"
-                style={{ backgroundColor: theme.primary + '20' }}
+                className="w-16 h-16 rounded-xl flex items-center justify-center mb-4 shadow-sm"
+                style={{ backgroundColor: theme.primary + '15' }}
               >
-                <Database size={24} style={{ color: theme.primary }} />
+                <Download size={28} style={{ color: theme.primary }} />
               </div>
-              <h4 className="font-semibold mb-2" style={{ color: theme.text }}>
+              <h4 className="font-semibold mb-2 text-base" style={{ color: theme.text }}>
                 Database Backup
               </h4>
               <p className="text-sm mb-4" style={{ color: theme.textSecondary }}>
@@ -295,51 +345,67 @@ export default function Settings() {
                 {loading ? (
                   <div className="flex items-center gap-2">
                     <div className="spinner"></div>
-                    Backing up...
+                    <span>Backing up...</span>
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
                     <RefreshCw size={14} />
-                    Start Backup
+                    <span>Start Backup</span>
                   </div>
                 )}
               </button>
             </div>
 
-            <div className="flex flex-col items-center p-6 text-center rounded-lg" style={{ backgroundColor: theme.background }}>
+            <div className="flex flex-col items-center p-6 text-center rounded-xl shadow-sm" style={{ backgroundColor: theme.surface }}>
               <div 
-                className="w-12 h-12 rounded-lg flex items-center justify-center mb-3"
-                style={{ backgroundColor: theme.success + '20' }}
+                className="w-16 h-16 rounded-xl flex items-center justify-center mb-4 shadow-sm"
+                style={{ backgroundColor: theme.success + '15' }}
               >
-                <CheckCircle size={24} style={{ color: theme.success }} />
+                <CheckCircle size={28} style={{ color: theme.success }} />
               </div>
-              <h4 className="font-semibold mb-2" style={{ color: theme.text }}>
+              <h4 className="font-semibold mb-2 text-base" style={{ color: theme.text }}>
                 System Health
               </h4>
               <p className="text-sm mb-4" style={{ color: theme.textSecondary }}>
                 All systems are running normally
               </p>
-              <span className="admin-badge admin-badge-success">
+              <div 
+                className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium"
+                style={{ 
+                  backgroundColor: theme.success + '15',
+                  color: theme.success,
+                  border: `1px solid ${theme.success + '25'}`
+                }}
+              >
+                <div className="w-2 h-2 rounded-full mr-2" style={{ backgroundColor: theme.success }} />
                 Healthy
-              </span>
+              </div>
             </div>
 
-            <div className="flex flex-col items-center p-6 text-center rounded-lg" style={{ backgroundColor: theme.background }}>
+            <div className="flex flex-col items-center p-6 text-center rounded-xl shadow-sm" style={{ backgroundColor: theme.surface }}>
               <div 
-                className="w-12 h-12 rounded-lg flex items-center justify-center mb-3"
-                style={{ backgroundColor: theme.warning + '20' }}
+                className="w-16 h-16 rounded-xl flex items-center justify-center mb-4 shadow-sm"
+                style={{ backgroundColor: theme.warning + '15' }}
               >
-                <Server size={24} style={{ color: theme.warning }} />
+                <Activity size={28} style={{ color: theme.warning }} />
               </div>
-              <h4 className="font-semibold mb-2" style={{ color: theme.text }}>
+              <h4 className="font-semibold mb-2 text-base" style={{ color: theme.text }}>
                 Server Status
               </h4>
               <p className="text-sm mb-4" style={{ color: theme.textSecondary }}>
                 Server uptime: 99.9%
               </p>
-              <span className="admin-badge admin-badge-success">
+              <div 
+                className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium"
+                style={{ 
+                  backgroundColor: theme.success + '15',
+                  color: theme.success,
+                  border: `1px solid ${theme.success + '25'}`
+                }}
+              >
+                <div className="w-2 h-2 rounded-full mr-2" style={{ backgroundColor: theme.success }} />
                 Online
-              </span>
+              </div>
             </div>
           </div>
         </div>

@@ -158,32 +158,35 @@ export const getInterestedUsers = async (req: Request, res: Response): Promise<a
 
 export const updateUserInterestStatus = async (req: Request, res: Response): Promise<any> => {
   try {
+    const { status } = req.body;
     const { interestId } = req.params;
-    const { status } = req.body; // 'confirmed' or 'cancelled'
+    const driverId = (req as any).user.id;
 
-    // Validate status
-    if (!['confirmed', 'cancelled'].includes(status)) {
-      return res.status(400).json({ error: 'Invalid status. Must be "confirmed" or "cancelled"' });
-    }
+    console.log('updateUserInterestStatus called with:', {
+      interestId,
+      status,
+      driverId,
+      userRole: (req as any).user.role,
+      headers: req.headers
+    });
 
-    // Find the interest and verify it belongs to a schedule that this driver can manage
     const interest = await UserInterest.findById(interestId)
       .populate({
         path: 'busScheduleId',
         populate: {
           path: 'busId',
-          select: 'driverId'
+          select: 'driverId plateNumber'
         }
       });
 
     if (!interest) {
+      console.log('Interest not found for ID:', interestId);
       return res.status(404).json({ error: 'Interest not found' });
     }
 
     // Check if the current user is the driver of this bus
     const busSchedule = interest.busScheduleId as any;
     const bus = busSchedule?.busId;
-    const driverId = (req as any).user.id;
 
     console.log('Authorization check:', {
       interestId,
@@ -237,6 +240,12 @@ export const updateUserInterestStatus = async (req: Request, res: Response): Pro
     if (!updatedInterest) {
       return res.status(404).json({ error: 'Interest not found' });
     }
+
+    console.log('Interest updated successfully:', {
+      interestId,
+      newStatus: status,
+      driverId
+    });
 
     res.json({
       message: `Interest ${status} successfully`,

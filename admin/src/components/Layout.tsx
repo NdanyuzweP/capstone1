@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import {
   LayoutDashboard,
   Users,
@@ -28,6 +29,7 @@ const navigation = [
 
 export default function Layout() {
   const { user, logout } = useAuth();
+  const { theme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -79,9 +81,15 @@ export default function Layout() {
           </div>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-error text-white font-semibold text-base hover:bg-error/90 transition-colors shadow-md"
+            className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
+            style={{ 
+              backgroundColor: theme.error + '15',
+              color: theme.error,
+              border: `1px solid ${theme.error + '25'}`
+            }}
           >
-            <LogOut size={18} /> Logout
+            <LogOut size={18} />
+            <span className="font-medium">Logout</span>
           </button>
         </div>
       </aside>
@@ -132,9 +140,15 @@ export default function Layout() {
               </div>
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-error text-white font-semibold text-base hover:bg-error/90 transition-colors shadow-md"
+                className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
+                style={{ 
+                  backgroundColor: theme.error + '15',
+                  color: theme.error,
+                  border: `1px solid ${theme.error + '25'}`
+                }}
               >
-                <LogOut size={18} /> Logout
+                <LogOut size={18} />
+                <span className="font-medium">Logout</span>
               </button>
             </div>
           </aside>

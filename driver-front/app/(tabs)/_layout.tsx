@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { useTheme } from '@/contexts/ThemeContext';
-import { Home, MapPin, Users, Settings, Bus } from 'lucide-react-native';
+import { Home, MapPin, Users, Settings } from 'lucide-react-native';
 import { Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -19,7 +19,12 @@ export default function TabLayout() {
           paddingBottom: insets.bottom > 0 ? insets.bottom : Platform.OS === 'ios' ? 20 : 8,
           paddingTop: 8,
           height: (Platform.OS === 'ios' ? 88 : 64) + (insets.bottom > 0 ? insets.bottom : 0),
-          paddingHorizontal: 7,
+          paddingHorizontal: 8,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 8,
+          elevation: 8,
         },
         tabBarActiveTintColor: theme.primary,
         tabBarInactiveTintColor: theme.textSecondary,
@@ -27,9 +32,13 @@ export default function TabLayout() {
           fontSize: 12,
           fontFamily: 'Inter-SemiBold',
           marginBottom: Platform.OS === 'ios' ? 4 : 4,
+          marginTop: 4,
         },
         tabBarIconStyle: {
           marginTop: 4,
+        },
+        tabBarItemStyle: {
+          paddingVertical: 6,
         },
       }}
     >
@@ -60,15 +69,7 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="bus"
-        options={{
-          title: 'My Bus',
-          tabBarIcon: ({ size, color }) => (
-            <Bus size={size} color={color} />
-          ),
-        }}
-      />
+
       <Tabs.Screen
         name="settings"
         options={{

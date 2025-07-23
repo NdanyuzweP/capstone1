@@ -375,17 +375,29 @@ export default function Routes() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   <button
                     onClick={() => handleEditRoute(route)}
-                    className="admin-btn admin-btn-secondary p-2"
+                    className="admin-btn p-3 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
                     title="Edit Route"
-                    style={{ minWidth: 36, minHeight: 36, borderRadius: 8 }}
+                    style={{ 
+                      minWidth: 44, 
+                      minHeight: 44,
+                      backgroundColor: theme.secondary + '15',
+                      color: theme.secondary,
+                      border: `1px solid ${theme.secondary + '25'}`
+                    }}
                   >
                     <Edit size={16} />
                   </button>
                   <button
                     onClick={() => handleDeleteRoute(route)}
-                    className="admin-btn admin-btn-danger p-2"
+                    className="admin-btn p-3 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
                     title="Delete Route"
-                    style={{ minWidth: 36, minHeight: 36, borderRadius: 8 }}
+                    style={{ 
+                      minWidth: 44, 
+                      minHeight: 44,
+                      backgroundColor: theme.error + '15',
+                      color: theme.error,
+                      border: `1px solid ${theme.error + '25'}`
+                    }}
                   >
                     <Trash2 size={16} />
                   </button>

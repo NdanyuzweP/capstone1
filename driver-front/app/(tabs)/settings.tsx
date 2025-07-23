@@ -1,242 +1,266 @@
-import { View, Text, StyleSheet, Pressable, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Alert, Switch } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { useRouter } from 'expo-router';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useState } from 'react';
 import { 
-  Settings as SettingsIcon, 
   User, 
-  Moon, 
-  Sun, 
+  Bell, 
+  Shield, 
+  HelpCircle, 
   LogOut, 
-  ChevronRight,
-  Phone,
+  Settings as SettingsIcon,
+  Moon,
+  Sun,
+  Wifi,
+  MapPin,
+  Volume2,
+  Smartphone,
   Mail,
-  HelpCircle,
-  Shield,
-  FileText,
-  Bell,
+  Phone,
   Info,
-  Bus,
-  MapPin
+  ChevronRight,
+  Globe
 } from 'lucide-react-native';
 
 export default function Settings() {
   const { theme, isDark, toggleTheme } = useTheme();
-  const { user, logout } = useAuth();
-  const router = useRouter();
+  const { logout, user } = useAuth();
+  const { language, setLanguage, t } = useLanguage();
+  const [notifications, setNotifications] = useState(true);
+  const [locationSharing, setLocationSharing] = useState(true);
+  const [soundEnabled, setSoundEnabled] = useState(true);
 
   const handleLogout = () => {
     Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
+      t('settings.logout'),
+      t('settings.logout.confirm'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('settings.logout.cancel'), style: 'cancel' },
         { 
-          text: 'Logout', 
+          text: t('settings.logout.confirm.button'), 
           style: 'destructive',
-          onPress: async () => {
-            await logout();
-            router.replace('/auth');
-          }
+          onPress: logout
         }
       ]
     );
   };
 
-  const SettingItem = ({ 
-    icon, 
-    title, 
-    subtitle, 
-    onPress, 
-    rightElement,
-    danger = false 
-  }: {
-    icon: React.ReactNode;
-    title: string;
-    subtitle?: string;
-    onPress?: () => void;
-    rightElement?: React.ReactNode;
-    danger?: boolean;
-  }) => (
-    <Pressable
-      style={[styles.settingItem, { backgroundColor: theme.surface }]}
-      onPress={onPress}
-    >
-      <View style={styles.settingLeft}>
-        <View style={[styles.iconContainer, { backgroundColor: danger ? theme.error + '20' : theme.primary + '20' }]}>
-          {icon}
-        </View>
-        <View style={styles.settingText}>
-          <Text style={[styles.settingTitle, { color: danger ? theme.error : theme.text }]}>
-            {title}
-          </Text>
-          {subtitle && (
-            <Text style={[styles.settingSubtitle, { color: theme.textSecondary }]}>
-              {subtitle}
-            </Text>
-          )}
-        </View>
-      </View>
-      <View style={styles.settingRight}>
-        {rightElement || <ChevronRight size={20} color={theme.textSecondary} />}
-      </View>
-    </Pressable>
-  );
+  const handleContactSupport = () => {
+    Alert.alert(
+      t('settings.contact.support'),
+      `${t('settings.support.info')}\n\n${t('settings.support.email')}\n${t('settings.support.phone')}`,
+      [{ text: t('common.ok') }]
+    );
+  };
+
+  const handleAbout = () => {
+    Alert.alert(
+      t('settings.about.title'),
+      `${t('settings.about.version')}\n\n${t('settings.about.description')}\n\n${t('settings.about.copyright')}`,
+      [{ text: t('common.ok') }]
+    );
+  };
+
+  const handleLanguageChange = () => {
+    Alert.alert(
+      t('settings.language'),
+      t('settings.language.select'),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        { 
+          text: t('settings.language.english'), 
+          onPress: () => setLanguage('en')
+        },
+        { 
+          text: t('settings.language.kinyarwanda'), 
+          onPress: () => setLanguage('rw')
+        }
+      ]
+    );
+  };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header Section */}
         <View style={styles.header}>
-          <Text style={[styles.title, { color: theme.text }]}>
-            Driver Settings
-          </Text>
+          <View style={styles.headerLeft}>
+            <Text style={[styles.title, { color: theme.text }]}>
+              {t('settings.title')}
+            </Text>
+            <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
+              {t('settings.subtitle')}
+            </Text>
+          </View>
         </View>
 
         {/* Profile Section */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>
-            Profile
-          </Text>
+        <View style={[styles.section, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+          <View style={styles.sectionHeader}>
+            <View style={[styles.sectionIcon, { backgroundColor: theme.primary + '15' }]}>
+              <User size={20} color={theme.primary} />
+            </View>
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>
+              {t('settings.profile')}
+            </Text>
+          </View>
           
-          <View style={[styles.profileCard, { backgroundColor: theme.surface }]}>
+          <View style={styles.profileCard}>
             <View style={[styles.profileAvatar, { backgroundColor: theme.primary }]}>
-              <User size={24} color={theme.background} />
+              <Text style={styles.profileInitial}>
+                {user?.name?.charAt(0) || 'D'}
+              </Text>
             </View>
             <View style={styles.profileInfo}>
               <Text style={[styles.profileName, { color: theme.text }]}>
-                {user?.name}
+                {user?.name || 'Driver Name'}
               </Text>
-              <View style={styles.profileDetail}>
-                <Mail size={14} color={theme.textSecondary} />
-                <Text style={[styles.profileDetailText, { color: theme.textSecondary }]}>
-                  {user?.email}
-                </Text>
-              </View>
-              <View style={styles.profileDetail}>
-                <Phone size={14} color={theme.textSecondary} />
-                <Text style={[styles.profileDetailText, { color: theme.textSecondary }]}>
-                  {user?.phone}
-                </Text>
-              </View>
-              <View style={styles.profileDetail}>
-                <Bus size={14} color={theme.primary} />
-                <Text style={[styles.profileDetailText, { color: theme.primary }]}>
-                  Driver
-                </Text>
-              </View>
+              <Text style={[styles.profileEmail, { color: theme.textSecondary }]}>
+                {user?.email || 'driver@example.com'}
+              </Text>
+              <Text style={[styles.profileRole, { color: theme.primary }]}>
+                {t('settings.profile')}
+              </Text>
             </View>
           </View>
         </View>
 
-        {/* Driver Features */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>
-            Driver Features
-          </Text>
-          
-          <SettingItem
-            icon={<Bus size={20} color={theme.primary} />}
-            title="My Bus"
-            subtitle="View and manage your assigned bus"
-            onPress={() => Alert.alert('Feature', 'Navigate to bus details')}
-          />
 
-          <SettingItem
-            icon={<MapPin size={20} color={theme.primary} />}
-            title="Location Tracking"
-            subtitle="Manage location sharing settings"
-            onPress={() => Alert.alert('Feature', 'Location tracking settings')}
-          />
-
-          <SettingItem
-            icon={<Bell size={20} color={theme.primary} />}
-            title="Notifications"
-            subtitle="Passenger alerts and trip notifications"
-            onPress={() => Alert.alert('Feature', 'Notification settings')}
-          />
-        </View>
 
         {/* Preferences */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>
-            Preferences
-          </Text>
+        <View style={[styles.section, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+          <View style={styles.sectionHeader}>
+            <View style={[styles.sectionIcon, { backgroundColor: theme.primary + '15' }]}>
+              <SettingsIcon size={20} color={theme.primary} />
+            </View>
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>
+              {t('settings.preferences')}
+            </Text>
+          </View>
           
-          <SettingItem
-            icon={isDark ? <Moon size={20} color={theme.primary} /> : <Sun size={20} color={theme.primary} />}
-            title="Dark Mode"
-            subtitle={isDark ? 'Dark theme enabled' : 'Light theme enabled'}
-            onPress={toggleTheme}
-            rightElement={
-              <View style={[
-                styles.toggle,
-                { backgroundColor: isDark ? theme.primary : theme.border }
-              ]}>
-                <View style={[
-                  styles.toggleIndicator,
-                  { 
-                    backgroundColor: theme.background,
-                    transform: [{ translateX: isDark ? 18 : 2 }]
-                  }
-                ]} />
+          <View style={styles.settingItems}>
+                        <Pressable
+              style={styles.settingItem}
+              onPress={toggleTheme}
+            >
+              <View style={styles.settingLeft}>
+                <View style={[styles.settingIcon, { backgroundColor: theme.primary + '15' }]}>
+                  {isDark ? <Moon size={18} color={theme.primary} /> : <Sun size={18} color={theme.primary} />}
+                </View>
+                <View style={styles.settingContent}>
+                  <Text style={[styles.settingLabel, { color: theme.text }]}>
+                    {t('settings.dark.mode')}
+                  </Text>
+                  <Text style={[styles.settingDescription, { color: theme.textSecondary }]}>
+                    {t('settings.dark.mode.description')}
+                  </Text>
+                </View>
               </View>
-            }
-          />
+              <ChevronRight size={18} color={theme.textSecondary} />
+            </Pressable>
+
+            <Pressable
+              style={styles.settingItem}
+              onPress={handleLanguageChange}
+            >
+              <View style={styles.settingLeft}>
+                <View style={[styles.settingIcon, { backgroundColor: theme.primary + '15' }]}>
+                  <Globe size={18} color={theme.primary} />
+                </View>
+                <View style={styles.settingContent}>
+                  <Text style={[styles.settingLabel, { color: theme.text }]}>
+                    {t('settings.language')}
+                  </Text>
+                  <Text style={[styles.settingDescription, { color: theme.textSecondary }]}>
+                    {language === 'en' ? t('settings.language.english') : t('settings.language.kinyarwanda')}
+                  </Text>
+                </View>
+              </View>
+              <ChevronRight size={18} color={theme.textSecondary} />
+            </Pressable>
+          </View>
         </View>
 
         {/* Support */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>
-            Support & Information
-          </Text>
+        <View style={[styles.section, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+          <View style={styles.sectionHeader}>
+            <View style={[styles.sectionIcon, { backgroundColor: theme.primary + '15' }]}>
+              <HelpCircle size={20} color={theme.primary} />
+            </View>
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>
+              {t('settings.support')}
+            </Text>
+          </View>
           
-          <SettingItem
-            icon={<HelpCircle size={20} color={theme.primary} />}
-            title="Help & Support"
-            subtitle="Get help with the driver app"
-            onPress={() => Alert.alert('Support', 'Contact support at driver-support@ridra.rw')}
-          />
+          <View style={styles.settingItems}>
+            <Pressable
+              style={styles.settingItem}
+              onPress={handleContactSupport}
+            >
+              <View style={styles.settingLeft}>
+                <View style={[styles.settingIcon, { backgroundColor: theme.primary + '15' }]}>
+                  <Phone size={18} color={theme.primary} />
+                </View>
+                <View style={styles.settingContent}>
+                  <Text style={[styles.settingLabel, { color: theme.text }]}>
+                    {t('settings.contact.support')}
+                  </Text>
+                  <Text style={[styles.settingDescription, { color: theme.textSecondary }]}>
+                    {t('settings.contact.support.description')}
+                  </Text>
+                </View>
+              </View>
+              <ChevronRight size={18} color={theme.textSecondary} />
+            </Pressable>
 
-          <SettingItem
-            icon={<Shield size={20} color={theme.primary} />}
-            title="Privacy Policy"
-            subtitle="Read our privacy policy"
-            onPress={() => Alert.alert('Privacy', 'Privacy policy for drivers')}
-          />
-
-          <SettingItem
-            icon={<FileText size={20} color={theme.primary} />}
-            title="Terms of Service"
-            subtitle="Driver terms and conditions"
-            onPress={() => Alert.alert('Terms', 'Driver terms of service')}
-          />
-
-          <SettingItem
-            icon={<Info size={20} color={theme.primary} />}
-            title="About Ridra Driver"
-            subtitle="Learn more about the driver app"
-            onPress={() => Alert.alert('About', 'Ridra Driver App v1.0.0\n\nDesigned for professional bus drivers in Rwanda.')}
-          />
+            <Pressable
+              style={styles.settingItem}
+              onPress={handleAbout}
+            >
+              <View style={styles.settingLeft}>
+                <View style={[styles.settingIcon, { backgroundColor: theme.primary + '15' }]}>
+                  <Info size={18} color={theme.primary} />
+                </View>
+                <View style={styles.settingContent}>
+                  <Text style={[styles.settingLabel, { color: theme.text }]}>
+                    {t('settings.about')}
+                  </Text>
+                  <Text style={[styles.settingDescription, { color: theme.textSecondary }]}>
+                    {t('settings.about.description')}
+                  </Text>
+                </View>
+              </View>
+              <ChevronRight size={18} color={theme.textSecondary} />
+            </Pressable>
+          </View>
         </View>
 
-        {/* Actions */}
-        <View style={styles.section}>
-          <SettingItem
-            icon={<LogOut size={20} color={theme.error} />}
-            title="Logout"
-            subtitle="Sign out of your driver account"
+        {/* Logout */}
+        <View style={styles.logoutSection}>
+          <Pressable
+            style={[styles.logoutButton, { backgroundColor: '#d90429' }]}
             onPress={handleLogout}
-            danger={true}
-          />
+          >
+            <LogOut size={20} color="#FFFFFF" />
+            <Text style={styles.logoutButtonText}>
+              {t('settings.logout')}
+            </Text>
+          </Pressable>
         </View>
 
+        {/* Footer */}
         <View style={styles.footer}>
           <Text style={[styles.footerText, { color: theme.textSecondary }]}>
-            Ridra Driver v1.0.0
+            {t('settings.about.title')} v1.0.0
           </Text>
           <Text style={[styles.footerSubtext, { color: theme.textSecondary }]}>
-            Professional bus tracking for Rwanda
+            {t('settings.about.copyright')}
           </Text>
         </View>
       </ScrollView>
@@ -251,32 +275,61 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
+  scrollContent: {
+    paddingBottom: 24,
+  },
   header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
     paddingHorizontal: 24,
     paddingTop: 20,
     paddingBottom: 24,
   },
+  headerLeft: {
+    flex: 1,
+  },
   title: {
     fontSize: 24,
     fontFamily: 'Inter-Bold',
+    marginBottom: 4,
+  },
+  subtitle: {
+    fontSize: 16,
+    fontFamily: 'Inter-Regular',
   },
   section: {
-    marginBottom: 32,
+    marginHorizontal: 24,
+    marginBottom: 24,
+    padding: 20,
+    borderRadius: 12,
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  sectionIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
   },
   sectionTitle: {
-    fontSize: 14,
-    fontFamily: 'Inter-SemiBold',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    paddingHorizontal: 24,
-    marginBottom: 12,
+    fontSize: 18,
+    fontFamily: 'Inter-Bold',
   },
   profileCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 20,
-    marginHorizontal: 24,
-    borderRadius: 12,
   },
   profileAvatar: {
     width: 60,
@@ -286,86 +339,96 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginRight: 16,
   },
+  profileInitial: {
+    fontSize: 24,
+    fontFamily: 'Inter-Bold',
+    color: '#FFFFFF',
+  },
   profileInfo: {
     flex: 1,
   },
   profileName: {
     fontSize: 18,
     fontFamily: 'Inter-Bold',
-    marginBottom: 8,
-  },
-  profileDetail: {
-    flexDirection: 'row',
-    alignItems: 'center',
     marginBottom: 4,
   },
-  profileDetailText: {
+  profileEmail: {
     fontSize: 14,
     fontFamily: 'Inter-Regular',
-    marginLeft: 8,
+    marginBottom: 4,
+  },
+  profileRole: {
+    fontSize: 14,
+    fontFamily: 'Inter-SemiBold',
+  },
+  settingItems: {
+    gap: 16,
   },
   settingItem: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-    marginBottom: 2,
+    paddingVertical: 12,
   },
   settingLeft: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
   },
-  iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+  settingIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
   },
-  settingText: {
+  settingContent: {
     flex: 1,
   },
-  settingTitle: {
+  settingLabel: {
     fontSize: 16,
     fontFamily: 'Inter-SemiBold',
+    marginBottom: 2,
   },
-  settingSubtitle: {
+  settingDescription: {
     fontSize: 14,
     fontFamily: 'Inter-Regular',
-    marginTop: 2,
   },
-  settingRight: {
-    marginLeft: 12,
+  logoutSection: {
+    paddingHorizontal: 24,
+    marginBottom: 24,
   },
-  toggle: {
-    width: 40,
-    height: 24,
-    borderRadius: 12,
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 2,
-  },
-  toggleIndicator: {
-    width: 20,
-    height: 20,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
     borderRadius: 10,
+    gap: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  logoutButtonText: {
+    fontSize: 17,
+    fontFamily: 'Inter-SemiBold',
+    color: '#FFFFFF',
   },
   footer: {
     alignItems: 'center',
     paddingHorizontal: 24,
-    paddingVertical: 32,
   },
   footerText: {
-    fontSize: 12,
+    fontSize: 14,
     fontFamily: 'Inter-Regular',
-    textAlign: 'center',
     marginBottom: 4,
   },
   footerSubtext: {
-    fontSize: 11,
+    fontSize: 12,
     fontFamily: 'Inter-Regular',
-    textAlign: 'center',
   },
 });

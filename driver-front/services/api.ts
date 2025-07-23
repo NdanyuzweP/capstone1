@@ -242,6 +242,18 @@ class ApiService {
       }>;
     }>(`/bus-schedules${query}`);
   }
+
+  async debugDriverInfo() {
+    return this.request<{
+      debug: {
+        driverId: string;
+        userRole: string;
+        hasBus: boolean;
+        bus: any;
+        allBuses: any[];
+      };
+    }>('/buses/driver/debug');
+  }
 }
 
 export const apiService = new ApiService();

@@ -472,34 +472,43 @@ export default function Schedules() {
             </div>
           ) : (
             <div className="admin-table-container">
-              <table className="admin-table">
+              <table className="admin-table" style={{ borderSpacing: '0 8px', borderCollapse: 'separate' }}>
                 <thead>
                   <tr>
-                    <th>Bus & Route</th>
-                    <th>Departure Time</th>
-                    <th>Status</th>
-                    <th>Stops</th>
-                    <th>Created</th>
-                    <th>Actions</th>
+                    <th className="text-left" style={{ padding: '20px', fontWeight: '500', fontSize: '14px', color: '#374151' }}>Bus & Route</th>
+                    <th className="text-left" style={{ padding: '20px', fontWeight: '500', fontSize: '14px', color: '#374151' }}>Departure Time</th>
+                    <th className="text-center" style={{ padding: '20px', fontWeight: '500', fontSize: '14px', color: '#374151' }}>Status</th>
+                    <th className="text-left" style={{ padding: '20px', fontWeight: '500', fontSize: '14px', color: '#374151' }}>Stops</th>
+                    <th className="text-left" style={{ padding: '20px', fontWeight: '500', fontSize: '14px', color: '#374151' }}>Created</th>
+                    <th className="text-center" style={{ padding: '20px', fontWeight: '500', fontSize: '14px', color: '#374151' }}>Actions</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {filteredSchedules.map((schedule) => {
-                    const StatusIcon = getStatusIcon(schedule.status);
-                    const statusColor = getStatusColor(schedule.status);
-                    
-                    return (
-                      <tr key={schedule._id}>
-                        <td>
-                          <div className="flex items-center gap-3">
+                                  <tbody>
+                    {filteredSchedules.map((schedule) => {
+                      const StatusIcon = getStatusIcon(schedule.status);
+                      const statusColor = getStatusColor(schedule.status);
+                      
+                      return (
+                        <tr 
+                          key={schedule._id}
+                          className="hover:shadow-lg transition-all duration-200"
+                          style={{
+                            backgroundColor: 'white',
+                            borderRadius: '12px',
+                            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
+                            marginBottom: '8px'
+                          }}
+                        >
+                        <td style={{ padding: '16px 20px', borderTopLeftRadius: '12px', borderBottomLeftRadius: '12px' }}>
+                          <div className="flex items-center gap-4">
                             <div 
-                              className="w-12 h-12 rounded-xl flex items-center justify-center"
-                              style={{ backgroundColor: statusColor + '15' }}
+                              className="w-14 h-14 rounded-xl flex items-center justify-center shadow-sm"
+                              style={{ backgroundColor: statusColor + '12' }}
                             >
-                              <Bus size={20} style={{ color: statusColor }} />
+                              <Bus size={22} style={{ color: statusColor }} />
                             </div>
-                            <div>
-                              <p className="font-semibold" style={{ color: theme.text }}>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-base" style={{ color: theme.text }}>
                                 {getBusName(schedule.busId)}
                               </p>
                               <div className="flex items-center gap-2 mt-1">
@@ -511,11 +520,16 @@ export default function Schedules() {
                             </div>
                           </div>
                         </td>
-                        <td>
-                          <div className="flex items-center gap-2">
-                            <Clock size={16} style={{ color: theme.primary }} />
+                        <td style={{ padding: '16px 20px' }}>
+                          <div className="flex items-center gap-3">
+                            <div 
+                              className="w-10 h-10 rounded-lg flex items-center justify-center"
+                              style={{ backgroundColor: theme.primary + '15' }}
+                            >
+                              <Clock size={18} style={{ color: theme.primary }} />
+                            </div>
                             <div>
-                              <p className="font-medium" style={{ color: theme.text }}>
+                              <p className="font-medium text-base" style={{ color: theme.text }}>
                                 {new Date(schedule.departureTime).toLocaleTimeString([], {
                                   hour: '2-digit',
                                   minute: '2-digit'
@@ -527,48 +541,88 @@ export default function Schedules() {
                             </div>
                           </div>
                         </td>
-                        <td>
+                        <td style={{ padding: '16px 20px', textAlign: 'center' }}>
                           <div 
-                            className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium"
+                            className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium shadow-sm"
                             style={{ 
-                              backgroundColor: statusColor + '20',
+                              backgroundColor: statusColor + '15',
                               color: statusColor,
-                              border: `1px solid ${statusColor + '30'}`
+                              border: `1px solid ${statusColor + '25'}`,
+                              minWidth: '120px',
+                              justifyContent: 'center'
                             }}
                           >
-                            <StatusIcon size={14} className="mr-2" />
-                            {schedule.status.charAt(0).toUpperCase() + schedule.status.slice(1)}
+                            <StatusIcon size={14} className="mr-2 flex-shrink-0" />
+                            <span className="capitalize">{schedule.status.replace('-', ' ')}</span>
                           </div>
                         </td>
-                        <td>
-                          <div className="flex items-center gap-2">
-                            <MapPin size={16} style={{ color: theme.warning }} />
-                            <span className="font-medium" style={{ color: theme.text }}>
-                              {schedule.estimatedArrivalTimes.length} stops
-                            </span>
-                          </div>
-                        </td>
-                        <td>
-                          <span className="text-sm" style={{ color: theme.textSecondary }}>
-                            {new Date(schedule.createdAt).toLocaleDateString()}
-                          </span>
-                        </td>
-                        <td>
-                          <div className="flex items-center gap-2">
-                            <button 
-                              className="admin-btn admin-btn-secondary p-2"
-                              title="Edit Schedule"
-                              style={{ minWidth: 36, minHeight: 36, borderRadius: 8 }}
+                        <td style={{ padding: '16px 20px' }}>
+                          <div className="flex items-center gap-3">
+                            <div 
+                              className="w-10 h-10 rounded-lg flex items-center justify-center"
+                              style={{ backgroundColor: theme.warning + '15' }}
                             >
-                              <Edit size={14} />
+                              <MapPin size={18} style={{ color: theme.warning }} />
+                            </div>
+                            <div>
+                              <p className="font-medium text-base" style={{ color: theme.text }}>
+                                {schedule.estimatedArrivalTimes.length} stops
+                              </p>
+                              <p className="text-sm" style={{ color: theme.textSecondary }}>
+                                {schedule.estimatedArrivalTimes.length > 1 ? 'Multiple pickup points' : 'Single pickup point'}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+                        <td style={{ padding: '16px 20px' }}>
+                          <div className="flex items-center gap-3">
+                            <div 
+                              className="w-10 h-10 rounded-lg flex items-center justify-center"
+                              style={{ backgroundColor: theme.secondary + '15' }}
+                            >
+                              <Calendar size={18} style={{ color: theme.secondary }} />
+                            </div>
+                            <div>
+                              <p className="font-medium text-base" style={{ color: theme.text }}>
+                                {new Date(schedule.createdAt).toLocaleDateString()}
+                              </p>
+                              <p className="text-sm" style={{ color: theme.textSecondary }}>
+                                {new Date(schedule.createdAt).toLocaleTimeString([], {
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+                        <td style={{ padding: '16px 20px', textAlign: 'center', borderTopRightRadius: '12px', borderBottomRightRadius: '12px' }}>
+                          <div className="flex items-center justify-center gap-3">
+                            <button 
+                              className="admin-btn admin-btn-secondary p-3 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
+                              title="Edit Schedule"
+                              style={{ 
+                                minWidth: 44, 
+                                minHeight: 44, 
+                                backgroundColor: theme.secondary + '15',
+                                color: theme.secondary,
+                                border: `1px solid ${theme.secondary + '25'}`
+                              }}
+                            >
+                              <Edit size={16} />
                             </button>
                             <button 
                               onClick={() => handleDeleteSchedule(schedule)}
-                              className="admin-btn admin-btn-danger p-2"
+                              className="admin-btn p-3 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
                               title="Delete Schedule"
-                              style={{ minWidth: 36, minHeight: 36, borderRadius: 8 }}
+                              style={{ 
+                                minWidth: 44, 
+                                minHeight: 44,
+                                backgroundColor: theme.error + '15',
+                                color: theme.error,
+                                border: `1px solid ${theme.error + '25'}`
+                              }}
                             >
-                              <Trash2 size={14} />
+                              <Trash2 size={16} />
                             </button>
                           </div>
                         </td>

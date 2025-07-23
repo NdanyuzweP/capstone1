@@ -553,20 +553,34 @@ export default function Users() {
                           </div>
                         </td>
                         <td>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center justify-center gap-3">
                             <button
                               onClick={() => handleStatusToggle(user)}
-                              className="admin-btn admin-btn-secondary p-2"
+                              className="admin-btn p-3 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
                               title={user.isActive ? 'Deactivate' : 'Activate'}
+                              style={{ 
+                                minWidth: 44, 
+                                minHeight: 44,
+                                backgroundColor: theme.secondary + '15',
+                                color: theme.secondary,
+                                border: `1px solid ${theme.secondary + '25'}`
+                              }}
                             >
-                              {user.isActive ? <UserX size={14} /> : <UserCheck size={14} />}
+                              {user.isActive ? <UserX size={16} /> : <UserCheck size={16} />}
                             </button>
                             <button
                               onClick={() => handleDeleteUser(user)}
-                              className="admin-btn admin-btn-danger p-2"
+                              className="admin-btn p-3 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
                               title="Delete User"
+                              style={{ 
+                                minWidth: 44, 
+                                minHeight: 44,
+                                backgroundColor: theme.error + '15',
+                                color: theme.error,
+                                border: `1px solid ${theme.error + '25'}`
+                              }}
                             >
-                              <Trash2 size={14} />
+                              <Trash2 size={16} />
                             </button>
                           </div>
                         </td>

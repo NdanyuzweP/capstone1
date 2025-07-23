@@ -72,18 +72,14 @@ export default function Analytics() {
   };
 
   // Calculate real metrics from backend data
-  const calculateRevenue = () => {
-    if (!routes || !stats) return 0;
-    // Estimate revenue: average fare * estimated trips per day * days
-    const avgFare = routes.reduce((sum, route) => sum + route.fare, 0) / routes.length;
-    const estimatedTripsPerDay = stats.schedules * 2; // Assuming 2 trips per schedule per day
-    const estimatedDailyRevenue = avgFare * estimatedTripsPerDay;
-    return Math.round(estimatedDailyRevenue * 30); // Monthly estimate
+  const calculateTotalSchedules = () => {
+    if (!stats) return 0;
+    return stats.schedules || 0; // Real schedule count from backend
   };
 
-  const calculateTotalTrips = () => {
-    if (!stats) return 0;
-    return stats.schedules * 60; // Estimate based on schedules over time
+  const calculateActiveRoutes = () => {
+    if (!routes) return 0;
+    return routes.filter(route => route.isActive).length;
   };
 
   const calculateAvgTripDuration = () => {
@@ -97,17 +93,17 @@ export default function Analytics() {
     return months.map((month, index) => ({
       month,
       users: Math.round((userStats?.activeUsers || 50) * (0.8 + index * 0.1)),
-      trips: Math.round((stats?.schedules || 20) * (8 + index * 2)),
-      revenue: Math.round(calculateRevenue() * (0.6 + index * 0.15)),
+      schedules: Math.round((stats?.schedules || 20) * (0.8 + index * 0.2)),
+      routes: Math.round((routes.length || 10) * (0.9 + index * 0.1)),
     }));
   };
 
   const generateRoutePerformance = () => {
     return routes.slice(0, 5).map((route) => ({
       route: route.name,
-      trips: Math.round(Math.random() * 100 + 50),
-      passengers: Math.round(Math.random() * 2000 + 1000),
-      revenue: Math.round(route.fare * (Math.random() * 100 + 50) * 30), // Monthly estimate
+      duration: route.estimatedDuration,
+      fare: route.fare,
+      status: route.isActive ? 'Active' : 'Inactive',
     }));
   };
 
@@ -163,15 +159,15 @@ export default function Analytics() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium" style={{ color: theme.textSecondary }}>
-                  Total Revenue (Monthly)
+                  Active Routes
                 </p>
                 <p className="text-2xl font-bold mt-1" style={{ color: theme.text }}>
-                  {(calculateRevenue()).toLocaleString()} RWF
+                  {calculateActiveRoutes()}
                 </p>
                 <div className="flex items-center mt-2">
                   <TrendingUp size={14} style={{ color: theme.success }} />
                   <span className="text-xs ml-1" style={{ color: theme.success }}>
-                    +12.5%
+                    {routes.length} total routes
                   </span>
                 </div>
               </div>
@@ -179,9 +175,7 @@ export default function Analytics() {
                 className="w-12 h-12 rounded-lg flex items-center justify-center"
                 style={{ backgroundColor: theme.success + '20' }}
               >
-                <span className="text-lg font-bold" style={{ color: theme.success }}>
-                  RWF
-                </span>
+                <RouteIcon size={24} style={{ color: theme.success }} />
               </div>
             </div>
           </div>
@@ -192,15 +186,15 @@ export default function Analytics() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium" style={{ color: theme.textSecondary }}>
-                  Total Trips
+                  Total Schedules
                 </p>
                 <p className="text-2xl font-bold mt-1" style={{ color: theme.text }}>
-                  {calculateTotalTrips().toLocaleString()}
+                  {calculateTotalSchedules().toLocaleString()}
                 </p>
                 <div className="flex items-center mt-2">
                   <TrendingUp size={14} style={{ color: theme.success }} />
                   <span className="text-xs ml-1" style={{ color: theme.success }}>
-                    +8.2%
+                    Active schedules
                   </span>
                 </div>
               </div>
@@ -208,7 +202,7 @@ export default function Analytics() {
                 className="w-12 h-12 rounded-lg flex items-center justify-center"
                 style={{ backgroundColor: theme.primary + '20' }}
               >
-                <Activity size={24} style={{ color: theme.primary }} />
+                <Calendar size={24} style={{ color: theme.primary }} />
               </div>
             </div>
           </div>
@@ -274,7 +268,7 @@ export default function Analytics() {
         <div className="admin-card">
           <div className="admin-card-header">
             <h3 className="admin-card-title">Monthly Growth</h3>
-            <p className="admin-card-subtitle">Users, trips, and revenue trends</p>
+            <p className="admin-card-subtitle">Users, schedules, and routes trends</p>
           </div>
           <div className="admin-card-body">
             <ResponsiveContainer width="100%" height={300}>
@@ -300,11 +294,11 @@ export default function Analytics() {
                 />
                 <Area 
                   type="monotone" 
-                  dataKey="trips" 
+                  dataKey="schedules" 
                   stackId="2"
                   stroke={theme.success} 
                   fill={theme.success + '40'} 
-                  name="Trips"
+                  name="Schedules"
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -366,7 +360,7 @@ export default function Analytics() {
         <div className="admin-card">
           <div className="admin-card-header">
             <h3 className="admin-card-title">Route Performance</h3>
-            <p className="admin-card-subtitle">Top performing routes by revenue (RWF)</p>
+            <p className="admin-card-subtitle">Route duration and fare comparison</p>
           </div>
           <div className="admin-card-body">
             <ResponsiveContainer width="100%" height={300}>
@@ -381,9 +375,9 @@ export default function Analytics() {
                     borderRadius: '8px',
                     color: theme.text,
                   }}
-                  formatter={(value, name) => [`${value} RWF`, 'Revenue']}
+                  formatter={(value, name) => [`${value} min`, 'Duration']}
                 />
-                <Bar dataKey="revenue" fill={theme.primary} radius={[0, 4, 4, 0]} />
+                <Bar dataKey="duration" fill={theme.primary} radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -392,7 +386,7 @@ export default function Analytics() {
         {/* Time Distribution */}
         <div className="admin-card">
           <div className="admin-card-header">
-            <h3 className="admin-card-title">Trip Time Distribution</h3>
+            <h3 className="admin-card-title">Schedule Time Distribution</h3>
             <p className="admin-card-subtitle">Peak hours analysis</p>
           </div>
           <div className="admin-card-body">
@@ -416,6 +410,7 @@ export default function Analytics() {
                   strokeWidth={3}
                   dot={{ fill: theme.warning, strokeWidth: 2, r: 4 }}
                   activeDot={{ r: 6, stroke: theme.warning, strokeWidth: 2 }}
+                  name="Schedules"
                 />
               </LineChart>
             </ResponsiveContainer>
