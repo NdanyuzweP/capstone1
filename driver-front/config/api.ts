@@ -2,12 +2,12 @@ import { Platform } from 'react-native';
 
 // API Configuration for Driver App
 export const API_CONFIG = {
-  // Backend API URL - using localhost for local development
+  // Backend API URL - using hosted backend
   BASE_URL: Platform.select({
-    ios: 'http://localhost:3001/api',
-    android: 'http://10.0.2.2:3001/api', // Android emulator uses 10.0.2.2 for localhost
-    web: 'http://localhost:3001/api',
-    default: 'http://localhost:3001/api',
+    ios: 'https://capstone1-60ax.onrender.com/api',
+    android: 'https://capstone1-60ax.onrender.com/api',
+    web: 'https://capstone1-60ax.onrender.com/api',
+    default: 'https://capstone1-60ax.onrender.com/api',
   }),
   
   // Request timeout in milliseconds
@@ -20,16 +20,17 @@ export const API_CONFIG = {
 
 // Environment-specific configurations
 export const getApiUrl = () => {
-  // Use localhost for development
-  if (__DEV__) {
-    return Platform.select({
-      ios: 'http://localhost:3001/api',
-      android: 'http://10.0.2.2:3001/api', // Android emulator uses 10.0.2.2 for localhost
-      web: 'http://localhost:3001/api',
-      default: 'http://localhost:3001/api',
-    });
-  }
-  
-  // Use production URL for production builds
+  // Always use production URL since backend is deployed
   return 'https://capstone1-60ax.onrender.com/api';
+  
+  // Original logic (commented out):
+  // if (__DEV__) {
+  //   return Platform.select({
+  //     ios: 'http://localhost:3001/api',
+  //     android: 'http://10.0.2.2:3001/api',
+  //     web: 'http://localhost:3001/api',
+  //     default: 'http://localhost:3001/api',
+  //   });
+  // }
+  // return 'https://capstone1-60ax.onrender.com/api';
 };

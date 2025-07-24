@@ -9,7 +9,6 @@ import {
   deleteBus,
   checkDriverBusAssignment,
   reassignBusToDriver,
-  debugDriverInfo,
 } from '../controllers/busController';
 import { authenticate, authorize } from '../middleware/auth';
 import { validateBus } from '../middleware/validation';
@@ -104,7 +103,7 @@ router.get('/driver/my-bus', authenticate, authorize('driver'), getDriverBus);
  *         description: No bus assigned
  */
 router.get('/driver/check-assignment', authenticate, authorize('driver'), checkDriverBusAssignment);
-router.get('/driver/debug', authenticate, debugDriverInfo);
+
 
 /**
  * @swagger

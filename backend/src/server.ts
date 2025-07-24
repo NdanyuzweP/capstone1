@@ -23,6 +23,7 @@ import busScheduleRoutes from './routes/busSchedules';
 import userInterestRoutes from './routes/userInterests';
 import userRoutes from './routes/users';
 import busLocationRoutes from './routes/busLocations';
+import predictionRoutes from './routes/predictions';
 
 // Load environment variables
 dotenv.config();
@@ -110,6 +111,7 @@ app.use('/api/bus-schedules', busScheduleRoutes);
 app.use('/api/user-interests', userInterestRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/bus-locations', busLocationRoutes);
+app.use('/api', predictionRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

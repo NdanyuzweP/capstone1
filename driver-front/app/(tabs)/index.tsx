@@ -91,16 +91,7 @@ export default function Dashboard() {
     }
   };
 
-  const handleDebugAuth = async () => {
-    try {
-      const result = await apiService.debugDriverInfo();
-      console.log('Debug result:', result);
-      Alert.alert('Debug Info', JSON.stringify(result.debug, null, 2));
-    } catch (error: any) {
-      console.error('Debug error:', error);
-      Alert.alert('Debug Error', error.message);
-    }
-  };
+
 
   const handleStartTrip = async () => {
     if (!schedules.length) {
@@ -227,12 +218,7 @@ export default function Dashboard() {
               </Text>
             </Pressable>
             
-            <Pressable
-              style={[styles.debugButton, { backgroundColor: theme.primary }]}
-              onPress={handleDebugAuth}
-            >
-              <Text style={styles.debugButtonText}>Debug</Text>
-            </Pressable>
+
           </View>
         </View>
 
@@ -567,16 +553,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 12,
   },
-  debugButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  debugButtonText: {
-    fontSize: 12,
-    fontFamily: 'Inter-SemiBold',
-    color: '#FFFFFF',
-  },
+
   tripStatusText: {
     fontSize: 14,
     fontFamily: 'Inter-Regular',
