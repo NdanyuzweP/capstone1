@@ -275,3 +275,126 @@ export const deleteBusSchedule = async (req: Request, res: Response): Promise<an
   }
 };
 
+export const startTrip = async (req: Request, res: Response): Promise<any> => {
+  try {
+    const driverId = (req as any).user.id;
+    const { scheduleId } = req.body;
+
+    console.log('startTrip called with:', { scheduleId, driverId });
+
+    // Find the schedule and verify the driver owns the bus
+    const schedule = await BusSchedule.findById(scheduleId)
+      .populate({
+        path: 'busId',
+        select: 'driverId plateNumber'
+      });
+
+    if (!schedule) {
+      return res.status(404).json({ error: 'Bus schedule not found' });
+    }
+
+    const bus = schedule.busId as any;
+    if (!bus || bus.driverId.toString() !== driverId) {
+      return res.status(403).json({ error: 'Not authorized to manage this schedule' });
+    }
+
+    // Check if trip is already started
+    if (schedule.status === 'in-transit') {
+      return res.status(400).json({ error: 'Trip is already in progress' });
+    }
+
+    // Clean up ALL leftover interests from previous trips for this schedule
+    const cleanedInterests = await UserInterest.deleteMany({
+      busScheduleId: scheduleId
+    });
+
+    console.log('Cleaned up ALL leftover interests:', {
+      scheduleId,
+      cleanedCount: cleanedInterests.deletedCount
+    });
+
+    // Update schedule status to in-transit
+    const updatedSchedule = await BusSchedule.findByIdAndUpdate(
+      scheduleId,
+      { status: 'in-transit', actualDepartureTime: new Date() },
+      { new: true }
+    ).populate('busId', 'plateNumber capacity')
+     .populate('routeId', 'name description');
+
+    console.log('Trip started successfully:', {
+      scheduleId,
+      busPlate: bus.plateNumber,
+      driverId,
+      cleanedInterestsCount: cleanedInterests.deletedCount
+    });
+
+    res.json({
+      message: 'Trip started successfully',
+      schedule: updatedSchedule,
+      cleanedInterests: cleanedInterests.deletedCount,
+    });
+  } catch (error) {
+    console.error('Error starting trip:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+export const endTrip = async (req: Request, res: Response): Promise<any> => {
+  try {
+    const driverId = (req as any).user.id;
+    const { scheduleId } = req.body;
+
+    console.log('endTrip called with:', { scheduleId, driverId });
+
+    // Find the schedule and verify the driver owns the bus
+    const schedule = await BusSchedule.findById(scheduleId)
+      .populate({
+        path: 'busId',
+        select: 'driverId plateNumber'
+      });
+
+    if (!schedule) {
+      return res.status(404).json({ error: 'Bus schedule not found' });
+    }
+
+    const bus = schedule.busId as any;
+    if (!bus || bus.driverId.toString() !== driverId) {
+      return res.status(403).json({ error: 'Not authorized to manage this schedule' });
+    }
+
+    // Check if trip is in progress
+    if (schedule.status !== 'in-transit') {
+      return res.status(400).json({ error: 'Trip is not in progress' });
+    }
+
+    // Update schedule status to completed
+    const updatedSchedule = await BusSchedule.findByIdAndUpdate(
+      scheduleId,
+      { status: 'completed', actualArrivalTime: new Date() },
+      { new: true }
+    ).populate('busId', 'plateNumber capacity')
+     .populate('routeId', 'name description');
+
+    // Clean up ALL passenger interests for this schedule (interested, confirmed, cancelled)
+    const deletedInterests = await UserInterest.deleteMany({
+      busScheduleId: scheduleId
+    });
+
+    console.log('Trip ended successfully - ALL interests removed:', {
+      scheduleId,
+      busPlate: bus.plateNumber,
+      driverId,
+      deletedInterestsCount: deletedInterests.deletedCount
+    });
+
+    res.json({
+      message: 'Trip ended successfully',
+      schedule: updatedSchedule,
+      deletedInterests: deletedInterests.deletedCount,
+    });
+  } catch (error) {
+    console.error('Error ending trip:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+

@@ -91,11 +91,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
+      console.log('Logout initiated');
+      
+      // Call backend logout endpoint
+      try {
+        await apiService.logout();
+        console.log('Backend logout completed');
+      } catch (error) {
+        console.log('Backend logout failed (this is okay):', error);
+      }
+      
+      // Clear user state first
       setUser(null);
+      
+      // Clear all stored data
       await AsyncStorage.removeItem('driver_user');
       await AsyncStorage.removeItem('driver_authToken');
+      
+      // Clear any other potential stored data
+      await AsyncStorage.removeItem('user');
+      await AsyncStorage.removeItem('authToken');
+      await AsyncStorage.removeItem('token');
+      
+      console.log('Logout completed - all data cleared');
+      
+      // Force a small delay to ensure state updates
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
     } catch (error) {
       console.error('Logout error:', error);
+      // Even if there's an error, clear the user state
+      setUser(null);
     }
   };
 

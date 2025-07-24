@@ -99,12 +99,35 @@ export const getProfile = async (req: AuthRequest, res: Response): Promise<any> 
     }
     
     const user = await User.findById(userId).select('-password');
-    
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    res.json({ user });
+    res.json({
+      user: {
+        id: String(user._id),
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+export const logout = async (req: AuthRequest, res: Response): Promise<any> => {
+  try {
+    // Since we're using JWT tokens, we don't need to invalidate them server-side
+    // The client will remove the token from storage
+    // However, we can log the logout for audit purposes
+    const userId = req.user?.id;
+    console.log('User logout:', { userId, timestamp: new Date().toISOString() });
+    
+    res.json({
+      message: 'Logout successful',
+    });
   } catch (error) {
     res.status(500).json({ error: 'Server error' });
   }

@@ -79,6 +79,19 @@ class ApiService {
     }>('/auth/profile');
   }
 
+  async logout() {
+    try {
+      // Call backend logout endpoint if it exists
+      await this.request<{ message: string }>('/auth/logout', {
+        method: 'POST',
+      });
+    } catch (error) {
+      // If logout endpoint doesn't exist or fails, that's okay
+      // The main logout happens client-side
+      console.log('Backend logout endpoint not available or failed:', error);
+    }
+  }
+
   // Driver-specific endpoints
   async getDriverBus() {
     return this.request<{
@@ -171,6 +184,27 @@ class ApiService {
     });
   }
 
+  async startTrip(scheduleId: string) {
+    return this.request<{
+      message: string;
+      schedule: any;
+      cleanedInterests: number;
+    }>('/bus-schedules/start-trip', {
+      method: 'POST',
+      body: JSON.stringify({ scheduleId }),
+    });
+  }
+
+  async endTrip(scheduleId: string) {
+    return this.request<{
+      message: string;
+      schedule: any;
+      deletedInterests: number;
+    }>('/bus-schedules/end-trip', {
+      method: 'POST',
+      body: JSON.stringify({ scheduleId }),
+    });
+  }
 
 
   async updateArrivalTime(scheduleId: string, pickupPointId: string, actualTime: Date) {

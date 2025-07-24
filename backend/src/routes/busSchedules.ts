@@ -8,6 +8,8 @@ import {
   getInterestedUsers,
   updateUserInterestStatus,
   deleteBusSchedule,
+  startTrip,
+  endTrip,
 } from '../controllers/busScheduleController';
 import { authenticate, authorize } from '../middleware/auth';
 import { validateBusSchedule } from '../middleware/validation';
@@ -108,6 +110,52 @@ router.get('/', getAllBusSchedules);
  *         description: Interest status updated successfully
  */
 router.put('/interests/:interestId', authenticate, authorize('driver'), updateUserInterestStatus);
+
+/**
+ * @swagger
+ * /api/bus-schedules/start-trip:
+ *   post:
+ *     summary: Start a bus trip
+ *     tags: [Bus Schedules]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               scheduleId:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Trip started successfully
+ */
+router.post('/start-trip', authenticate, authorize('driver'), startTrip);
+
+/**
+ * @swagger
+ * /api/bus-schedules/end-trip:
+ *   post:
+ *     summary: End a bus trip and cleanup passenger interests
+ *     tags: [Bus Schedules]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               scheduleId:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Trip ended successfully
+ */
+router.post('/end-trip', authenticate, authorize('driver'), endTrip);
 
 router.get('/:id', getBusScheduleById);
 router.put('/:id', authenticate, authorize('admin', 'driver'), updateBusSchedule);
