@@ -1,5 +1,5 @@
 import express from 'express';
-import { signup, login, getProfile } from '../controllers/authController';
+import { signup, login, getProfile, logout } from '../controllers/authController';
 import { authenticate } from '../middleware/auth';
 import { validateSignup, validateLogin } from '../middleware/validation';
 
@@ -71,5 +71,19 @@ router.post('/login', validateLogin, login);
  *         description: User profile retrieved successfully
  */
 router.get('/profile', authenticate, getProfile);
+
+/**
+ * @swagger
+ * /api/auth/logout:
+ *   post:
+ *     summary: Logout user
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Logout successful
+ */
+router.post('/logout', authenticate, logout);
 
 export default router;

@@ -32,7 +32,7 @@ export default function Settings() {
   const [locationSharing, setLocationSharing] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(true);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     Alert.alert(
       t('settings.logout'),
       t('settings.logout.confirm'),
@@ -41,7 +41,16 @@ export default function Settings() {
         { 
           text: t('settings.logout.confirm.button'), 
           style: 'destructive',
-          onPress: logout
+          onPress: async () => {
+            try {
+              console.log('Settings: Logout button pressed');
+              await logout();
+              console.log('Settings: Logout completed successfully');
+            } catch (error) {
+              console.error('Settings: Logout error:', error);
+              Alert.alert('Error', 'Failed to logout. Please try again.');
+            }
+          }
         }
       ]
     );

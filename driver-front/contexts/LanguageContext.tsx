@@ -139,6 +139,19 @@ const translations = {
     'common.edit': 'Edit',
     'common.view': 'View',
     'common.close': 'Close',
+
+      // Trip Management
+  tripInProgress: { en: 'Trip in Progress', rw: 'Urugendo rurakora' },
+  noSchedules: { en: 'No Schedules', rw: 'Nta gihe giteganyijwe' },
+  noUpcomingTrips: { en: 'No Upcoming Trips', rw: 'Nta rugendo rukurikira' },
+  noActiveTrip: { en: 'No Active Trip', rw: 'Nta rugendo rurakora' },
+  tripStarted: { en: 'Trip Started', rw: 'Urugendo rwatangiye' },
+  tripEnded: { en: 'Trip Ended', rw: 'Urugendo rwarangiye' },
+  tripStartedMessage: { en: 'Your trip has been started successfully!', rw: 'Urugendo rwawe rwatangiye neza!' },
+  tripEndedMessage: { en: 'Trip ended successfully!', rw: 'Urugendo rwarangiye neza!' },
+  endTripConfirm: { en: 'Are you sure you want to end this trip? This will remove all passenger interests.', rw: 'Uzi neza ko ushaka guhera uru rugendo? Ibi bizasiba ibyifuzo by\'abagenzi bose.' },
+  removedInterests: { en: 'Removed', rw: 'Byasibwe' },
+  passengerInterests: { en: 'passenger interests', rw: 'ibyifuzo by\'abagenzi' },
   },
   rw: {
     // Dashboard
@@ -271,6 +284,23 @@ const translations = {
     'common.edit': 'Hindura',
     'common.view': 'Reba',
     'common.close': 'Funga',
+
+    // Bus related
+    busRoute: { en: 'Bus Route', rw: 'Inzira ya Busi' },
+    destination: { en: 'Destination', rw: 'Icyerekezo' },
+    departure: { en: 'Departure', rw: 'Kugenda' },
+    arrival: { en: 'Arrival', rw: 'Kugeza' },
+    tripInProgress: { en: 'Trip in Progress', rw: 'Urugendo rurakora' },
+    noSchedules: { en: 'No Schedules', rw: 'Nta gihe giteganyijwe' },
+    noUpcomingTrips: { en: 'No Upcoming Trips', rw: 'Nta rugendo rukurikira' },
+    noActiveTrip: { en: 'No Active Trip', rw: 'Nta rugendo rurakora' },
+    tripStarted: { en: 'Trip Started', rw: 'Urugendo rwatangiye' },
+    tripEnded: { en: 'Trip Ended', rw: 'Urugendo rwarangiye' },
+    tripStartedMessage: { en: 'Your trip has been started successfully!', rw: 'Urugendo rwawe rwatangiye neza!' },
+    tripEndedMessage: { en: 'Trip ended successfully!', rw: 'Urugendo rwarangiye neza!' },
+    endTripConfirm: { en: 'Are you sure you want to end this trip? This will remove all passenger interests.', rw: 'Uzi neza ko ushaka guhera uru rugendo? Ibi bizasiba ibyifuzo by\'abagenzi bose.' },
+    removedInterests: { en: 'Removed', rw: 'Byasibwe' },
+    passengerInterests: { en: 'passenger interests', rw: 'ibyifuzo by\'abagenzi' },
   }
 };
 

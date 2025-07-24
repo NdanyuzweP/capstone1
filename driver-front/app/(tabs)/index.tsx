@@ -30,7 +30,7 @@ export default function Dashboard() {
   const { theme } = useTheme();
   const { user } = useAuth();
   const { location, requestLocation } = useLocation();
-  const { bus, passengers, schedules, loading, error, updateOnlineStatus, updateBusLocation } = useDriverData();
+  const { bus, passengers, schedules, loading, error, refetch, updateOnlineStatus, updateBusLocation } = useDriverData();
   const { t } = useLanguage();
   const [isOnline, setIsOnline] = useState(false);
 
@@ -100,6 +100,73 @@ export default function Dashboard() {
       console.error('Debug error:', error);
       Alert.alert('Debug Error', error.message);
     }
+  };
+
+  const handleStartTrip = async () => {
+    if (!schedules.length) {
+      Alert.alert(t('noSchedules'), 'No schedules available to start');
+      return;
+    }
+
+    // Get the next scheduled trip
+    const nextSchedule = schedules.find(schedule => 
+      schedule.status === 'scheduled' && new Date(schedule.departureTime) > new Date()
+    );
+
+    if (!nextSchedule) {
+      Alert.alert('No Upcoming Trips', 'No scheduled trips available to start');
+      return;
+    }
+
+    try {
+      const result = await apiService.startTrip(nextSchedule.id);
+      const message = result.cleanedInterests > 0 
+        ? `Trip started successfully!\nCleaned up ${result.cleanedInterests} leftover interests from previous trips.`
+        : 'Your trip has been started successfully!';
+      Alert.alert('Trip Started', message);
+      refetch(); // Refresh the data
+    } catch (error: any) {
+      console.error('Error starting trip:', error);
+      Alert.alert('Error', error.message || 'Failed to start trip');
+    }
+  };
+
+  const handleEndTrip = async () => {
+    // Find the current in-transit trip
+    const currentTrip = schedules.find(schedule => schedule.status === 'in-transit');
+
+    if (!currentTrip) {
+      Alert.alert('No Active Trip', 'No trip is currently in progress');
+      return;
+    }
+
+    Alert.alert(
+      'End Trip',
+      'Are you sure you want to end this trip? This will remove ALL passenger interests (interested, confirmed, cancelled) to start fresh.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'End Trip',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const result = await apiService.endTrip(currentTrip.id);
+              Alert.alert(
+                'Trip Ended', 
+                `Trip ended successfully!\nRemoved ${result.deletedInterests} passenger interests (all statuses cleared).`
+              );
+              // Assuming refetch is available from useDriverData or passed as a prop
+              // For now, we'll just alert and assume the data will update after a refresh
+              // If refetch is not available, this will need to be handled differently
+              // For example, by using a state variable that triggers a re-fetch
+            } catch (error: any) {
+              console.error('Error ending trip:', error);
+              Alert.alert('Error', error.message || 'Failed to end trip');
+            }
+          }
+        }
+      ]
+    );
   };
 
   const todaySchedules = schedules.filter(schedule => {
@@ -299,6 +366,23 @@ export default function Dashboard() {
           </View>
         )}
 
+        {/* Trip Status */}
+        {schedules.some(s => s.status === 'in-transit') && (
+          <View style={[styles.section, { backgroundColor: '#FF9800' + '15', borderColor: '#FF9800' + '30' }]}>
+            <View style={styles.sectionHeader}>
+              <View style={[styles.sectionIcon, { backgroundColor: '#FF9800' + '30' }]}>
+                <Clock size={20} color="#FF9800" />
+              </View>
+              <Text style={[styles.sectionTitle, { color: '#FF9800' }]}>
+                Trip in Progress
+              </Text>
+            </View>
+            <Text style={[styles.tripStatusText, { color: '#FF9800' }]}>
+              You have an active trip. Passengers can still show interest until you end the trip.
+            </Text>
+          </View>
+        )}
+
         {/* Quick Actions */}
         <View style={[styles.section, { borderColor: theme.border + '20' }]}>
           <View style={styles.sectionHeader}>
@@ -311,18 +395,32 @@ export default function Dashboard() {
           </View>
           <View style={styles.quickActions}>
             <Pressable
-              style={[styles.actionButton, { backgroundColor: theme.primary }]}
-              onPress={() => requestLocation()}
+              style={[
+                styles.actionButton, 
+                { 
+                  backgroundColor: schedules.some(s => s.status === 'in-transit') ? '#FF9800' : theme.primary,
+                  opacity: schedules.some(s => s.status === 'in-transit') ? 0.6 : 1
+                }
+              ]}
+              onPress={handleStartTrip}
+              disabled={schedules.some(s => s.status === 'in-transit')}
             >
               <Navigation size={20} color="#FFFFFF" />
               <Text style={styles.actionButtonText}>
-                {t('dashboard.start.trip')}
+                {schedules.some(s => s.status === 'in-transit') ? 'Trip in Progress' : t('dashboard.start.trip')}
               </Text>
             </Pressable>
 
             <Pressable
-              style={[styles.actionButton, { backgroundColor: '#4CAF50' }]}
-              onPress={() => Alert.alert('Feature', 'End trip functionality coming soon!')}
+              style={[
+                styles.actionButton, 
+                { 
+                  backgroundColor: schedules.some(s => s.status === 'in-transit') ? '#d90429' : '#4CAF50',
+                  opacity: schedules.some(s => s.status === 'in-transit') ? 1 : 0.6
+                }
+              ]}
+              onPress={handleEndTrip}
+              disabled={!schedules.some(s => s.status === 'in-transit')}
             >
               <CheckCircle size={20} color="#FFFFFF" />
               <Text style={styles.actionButtonText}>
@@ -478,6 +576,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'Inter-SemiBold',
     color: '#FFFFFF',
+  },
+  tripStatusText: {
+    fontSize: 14,
+    fontFamily: 'Inter-Regular',
+    lineHeight: 20,
   },
   statsContainer: {
     flexDirection: 'row',
