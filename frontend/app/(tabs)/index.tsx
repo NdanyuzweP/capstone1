@@ -13,41 +13,13 @@ import { MapPin, Clock, Users, Heart, Navigation, CircleAlert as AlertCircle, Bu
 import { LocationPermissionModal } from '@/components/LocationPermissionModal';
 
 export default function Home() {
-  // Wrap all context hooks in a try-catch to handle initialization errors
-  let theme, t, user, location, locationLoading, requestLocation, hasPermission, buses, busesLoading, busesError, refetch, interests, showInterest, removeInterest;
-  
-  try {
-    const themeContext = useTheme();
-    const languageContext = useLanguage();
-    const authContext = useAuth();
-    const locationContext = useLocation();
-    const busesContext = useBuses(locationContext.location || undefined, true);
-    const interestsContext = useUserInterests();
-    
-    theme = themeContext.theme;
-    t = languageContext.t;
-    user = authContext.user;
-    location = locationContext.location;
-    locationLoading = locationContext.loading;
-    requestLocation = locationContext.requestLocation;
-    hasPermission = locationContext.hasPermission;
-    buses = busesContext.buses;
-    busesLoading = busesContext.loading;
-    busesError = busesContext.error;
-    refetch = busesContext.refetch;
-    interests = interestsContext.interests;
-    showInterest = interestsContext.showInterest;
-    removeInterest = interestsContext.removeInterest;
-  } catch (error) {
-    console.error('Error initializing contexts:', error);
-    return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: '#ffffff' }}>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <Text>Loading...</Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
+  // All hooks must be called at the top level
+  const { theme } = useTheme();
+  const { t } = useLanguage();
+  const { user } = useAuth();
+  const { location, loading: locationLoading, requestLocation, hasPermission } = useLocation();
+  const { buses, loading: busesLoading, error: busesError, refetch } = useBuses(location || undefined, true);
+  const { interests, showInterest, removeInterest } = useUserInterests();
   
   const [showLocationModal, setShowLocationModal] = useState(false);
 
