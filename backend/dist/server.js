@@ -58,6 +58,7 @@ const busSchedules_1 = __importDefault(require("./routes/busSchedules"));
 const userInterests_1 = __importDefault(require("./routes/userInterests"));
 const users_1 = __importDefault(require("./routes/users"));
 const busLocations_1 = __importDefault(require("./routes/busLocations"));
+const predictions_1 = __importDefault(require("./routes/predictions"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const server = (0, http_1.createServer)(app);
@@ -125,6 +126,7 @@ app.use('/api/bus-schedules', busSchedules_1.default);
 app.use('/api/user-interests', userInterests_1.default);
 app.use('/api/users', users_1.default);
 app.use('/api/bus-locations', busLocations_1.default);
+app.use('/api', predictions_1.default);
 app.get('/health', (req, res) => {
     res.json({
         status: 'OK',

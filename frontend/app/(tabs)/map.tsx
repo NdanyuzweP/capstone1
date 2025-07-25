@@ -9,6 +9,7 @@ import { Bus as BusType } from '@/types/bus';
 import { Navigation, MapPin, CircleAlert as AlertCircle, BarChart3, Clock, Cloud, Calendar, Map as MapIcon, Users, Zap, ChevronDown } from 'lucide-react-native';
 import { GoogleMapView } from '@/components/GoogleMapView';
 import { LocationPermissionModal } from '@/components/LocationPermissionModal';
+import { apiService } from '@/services/api';
 
 export default function Map() {
   const { theme } = useTheme();
@@ -76,52 +77,20 @@ export default function Map() {
     setPredictionLoading(true);
     
     try {
-      // Mock prediction API call - replace with actual API endpoint
-      const response = await fetch('https://capstone1-60ax.onrender.com/api/predict-traffic', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          Hour: predictionForm.hour,
-          Day_of_Week: predictionForm.dayOfWeek,
-          Road_Name: predictionForm.roadName,
-          Population_Density: predictionForm.populationDensity,
-          Rainfall: predictionForm.rainfall,
-          Public_Holiday: predictionForm.publicHoliday
-        })
+      // Use the API service to call the prediction endpoint
+      const result = await apiService.predictTraffic({
+        Hour: predictionForm.hour,
+        Day_of_Week: predictionForm.dayOfWeek,
+        Road_Name: predictionForm.roadName,
+        Population_Density: predictionForm.populationDensity,
+        Rainfall: predictionForm.rainfall,
+        Public_Holiday: predictionForm.publicHoliday
       });
-
-      if (response.ok) {
-        const result = await response.json();
-        setPredictionResult(result);
-      } else {
-        // Mock result for demo purposes
-        const mockResult = {
-          prediction: 'Medium',
-          confidence: 85,
-          description: 'Moderate traffic expected',
-          recommendations: [
-            'Consider alternative routes',
-            'Allow extra travel time',
-            'Check real-time updates'
-          ]
-        };
-        setPredictionResult(mockResult);
-      }
+      
+      setPredictionResult(result);
     } catch (error) {
-      // Mock result for demo purposes
-      const mockResult = {
-        prediction: 'Medium',
-        confidence: 85,
-        description: 'Moderate traffic expected',
-        recommendations: [
-          'Consider alternative routes',
-          'Allow extra travel time',
-          'Check real-time updates'
-        ]
-      };
-      setPredictionResult(mockResult);
+      console.error('Prediction error:', error);
+      Alert.alert('Error', 'Failed to get traffic prediction. Please try again.');
     } finally {
       setPredictionLoading(false);
     }

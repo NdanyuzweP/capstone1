@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteBusSchedule = exports.updateUserInterestStatus = exports.getInterestedUsers = exports.updateArrivalTime = exports.updateBusSchedule = exports.getBusScheduleById = exports.getAllBusSchedules = exports.createBusSchedule = void 0;
+exports.endTrip = exports.startTrip = exports.deleteBusSchedule = exports.updateUserInterestStatus = exports.getInterestedUsers = exports.updateArrivalTime = exports.updateBusSchedule = exports.getBusScheduleById = exports.getAllBusSchedules = exports.createBusSchedule = void 0;
 const BusSchedule_1 = __importDefault(require("../models/BusSchedule"));
 const Bus_1 = __importDefault(require("../models/Bus"));
 const Route_1 = __importDefault(require("../models/Route"));
@@ -142,25 +142,30 @@ const getInterestedUsers = async (req, res) => {
 exports.getInterestedUsers = getInterestedUsers;
 const updateUserInterestStatus = async (req, res) => {
     try {
-        const { interestId } = req.params;
         const { status } = req.body;
-        if (!['confirmed', 'cancelled'].includes(status)) {
-            return res.status(400).json({ error: 'Invalid status. Must be "confirmed" or "cancelled"' });
-        }
+        const { interestId } = req.params;
+        const driverId = req.user.id;
+        console.log('updateUserInterestStatus called with:', {
+            interestId,
+            status,
+            driverId,
+            userRole: req.user.role,
+            headers: req.headers
+        });
         const interest = await UserInterest_1.default.findById(interestId)
             .populate({
             path: 'busScheduleId',
             populate: {
                 path: 'busId',
-                select: 'driverId'
+                select: 'driverId plateNumber'
             }
         });
         if (!interest) {
+            console.log('Interest not found for ID:', interestId);
             return res.status(404).json({ error: 'Interest not found' });
         }
         const busSchedule = interest.busScheduleId;
         const bus = busSchedule?.busId;
-        const driverId = req.user.id;
         console.log('Authorization check:', {
             interestId,
             driverId,
@@ -201,6 +206,11 @@ const updateUserInterestStatus = async (req, res) => {
         if (!updatedInterest) {
             return res.status(404).json({ error: 'Interest not found' });
         }
+        console.log('Interest updated successfully:', {
+            interestId,
+            newStatus: status,
+            driverId
+        });
         res.json({
             message: `Interest ${status} successfully`,
             interest: updatedInterest,
@@ -225,3 +235,93 @@ const deleteBusSchedule = async (req, res) => {
     }
 };
 exports.deleteBusSchedule = deleteBusSchedule;
+const startTrip = async (req, res) => {
+    try {
+        const driverId = req.user.id;
+        const { scheduleId } = req.body;
+        console.log('startTrip called with:', { scheduleId, driverId });
+        const schedule = await BusSchedule_1.default.findById(scheduleId)
+            .populate({
+            path: 'busId',
+            select: 'driverId plateNumber'
+        });
+        if (!schedule) {
+            return res.status(404).json({ error: 'Bus schedule not found' });
+        }
+        const bus = schedule.busId;
+        if (!bus || bus.driverId.toString() !== driverId) {
+            return res.status(403).json({ error: 'Not authorized to manage this schedule' });
+        }
+        if (schedule.status === 'in-transit') {
+            return res.status(400).json({ error: 'Trip is already in progress' });
+        }
+        const cleanedInterests = await UserInterest_1.default.deleteMany({
+            busScheduleId: scheduleId
+        });
+        console.log('Cleaned up ALL leftover interests:', {
+            scheduleId,
+            cleanedCount: cleanedInterests.deletedCount
+        });
+        const updatedSchedule = await BusSchedule_1.default.findByIdAndUpdate(scheduleId, { status: 'in-transit', actualDepartureTime: new Date() }, { new: true }).populate('busId', 'plateNumber capacity')
+            .populate('routeId', 'name description');
+        console.log('Trip started successfully:', {
+            scheduleId,
+            busPlate: bus.plateNumber,
+            driverId,
+            cleanedInterestsCount: cleanedInterests.deletedCount
+        });
+        res.json({
+            message: 'Trip started successfully',
+            schedule: updatedSchedule,
+            cleanedInterests: cleanedInterests.deletedCount,
+        });
+    }
+    catch (error) {
+        console.error('Error starting trip:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+exports.startTrip = startTrip;
+const endTrip = async (req, res) => {
+    try {
+        const driverId = req.user.id;
+        const { scheduleId } = req.body;
+        console.log('endTrip called with:', { scheduleId, driverId });
+        const schedule = await BusSchedule_1.default.findById(scheduleId)
+            .populate({
+            path: 'busId',
+            select: 'driverId plateNumber'
+        });
+        if (!schedule) {
+            return res.status(404).json({ error: 'Bus schedule not found' });
+        }
+        const bus = schedule.busId;
+        if (!bus || bus.driverId.toString() !== driverId) {
+            return res.status(403).json({ error: 'Not authorized to manage this schedule' });
+        }
+        if (schedule.status !== 'in-transit') {
+            return res.status(400).json({ error: 'Trip is not in progress' });
+        }
+        const updatedSchedule = await BusSchedule_1.default.findByIdAndUpdate(scheduleId, { status: 'completed', actualArrivalTime: new Date() }, { new: true }).populate('busId', 'plateNumber capacity')
+            .populate('routeId', 'name description');
+        const deletedInterests = await UserInterest_1.default.deleteMany({
+            busScheduleId: scheduleId
+        });
+        console.log('Trip ended successfully - ALL interests removed:', {
+            scheduleId,
+            busPlate: bus.plateNumber,
+            driverId,
+            deletedInterestsCount: deletedInterests.deletedCount
+        });
+        res.json({
+            message: 'Trip ended successfully',
+            schedule: updatedSchedule,
+            deletedInterests: deletedInterests.deletedCount,
+        });
+    }
+    catch (error) {
+        console.error('Error ending trip:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+exports.endTrip = endTrip;

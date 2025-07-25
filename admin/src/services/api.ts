@@ -520,6 +520,33 @@ class ApiService {
       body: JSON.stringify(data),
     });
   }
+
+  // Traffic Prediction
+  async predictTraffic(data: {
+    Hour: number;
+    Day_of_Week: string;
+    Road_Name: string;
+    Population_Density: string;
+    Rainfall: string;
+    Public_Holiday: string;
+  }) {
+    return this.request<{
+      prediction: string;
+      confidence: number;
+      description: string;
+      recommendations: string[];
+      analysis: {
+        time: string;
+        road: string;
+        conditions: string;
+        timestamp: string;
+      };
+      probabilities?: Record<string, number>;
+    }>('/predict-traffic', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
 }
 
 export const apiService = new ApiService();

@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getProfile = exports.login = exports.signup = void 0;
+exports.logout = exports.getProfile = exports.login = exports.signup = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const User_1 = __importDefault(require("../models/User"));
 const generateToken = (id) => {
@@ -85,10 +85,31 @@ const getProfile = async (req, res) => {
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
-        res.json({ user });
+        res.json({
+            user: {
+                id: String(user._id),
+                name: user.name,
+                email: user.email,
+                phone: user.phone,
+                role: user.role,
+            },
+        });
     }
     catch (error) {
         res.status(500).json({ error: 'Server error' });
     }
 };
 exports.getProfile = getProfile;
+const logout = async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        console.log('User logout:', { userId, timestamp: new Date().toISOString() });
+        res.json({
+            message: 'Logout successful',
+        });
+    }
+    catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+exports.logout = logout;
