@@ -1,6 +1,4 @@
 import { Request, Response } from 'express';
-import { PythonShell } from 'python-shell';
-import path from 'path';
 
 interface PredictionRequest {
   Hour: number;
@@ -48,8 +46,8 @@ export const predictTraffic = async (req: Request, res: Response): Promise<any> 
       Public_Holiday
     };
 
-    // Call Python script for ML prediction
-    const modelResult = await callMLModel(inputData);
+    // Call deployed ML model
+    const modelResult = await callDeployedModel(inputData);
     
     if (modelResult.error) {
       console.error('ML Model Error:', modelResult.error);
@@ -88,39 +86,69 @@ export const predictTraffic = async (req: Request, res: Response): Promise<any> 
   }
 };
 
-async function callMLModel(inputData: any): Promise<ModelPrediction> {
-  return new Promise((resolve, reject) => {
-    const options = {
-      mode: 'json' as const,
-      pythonPath: path.join(__dirname, '../../models/venv/bin/python'),
-      scriptPath: path.join(__dirname, '../../models'),
-      args: []
-    };
-
-    console.log('Calling ML model with options:', options);
-    console.log('Input data:', inputData);
-
-    const pyshell = new PythonShell('predict.py', options);
-    
-    // Send input data to Python script
-    pyshell.send(JSON.stringify(inputData));
-    
-    // Handle response from Python script
-    pyshell.on('message', (message: ModelPrediction) => {
-      console.log('ML model response:', message);
-      resolve(message);
+async function callDeployedModel(inputData: any): Promise<ModelPrediction> {
+  try {
+    // Call the deployed model at https://model-1-jqxr.onrender.com
+    const response = await fetch('https://model-1-jqxr.onrender.com/predict', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(inputData),
     });
-    
-    // Handle errors
-    pyshell.on('error', (err) => {
-      console.error('Python script error:', err);
-      resolve({ 
-        error: 'Failed to execute ML model',
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Deployed model error:', response.status, errorText);
+      return {
+        error: `Model API error: ${response.status} - ${errorText}`,
         prediction: 'Medium',
         confidence: 50
-      });
-    });
-  });
+      };
+    }
+
+    const result = await response.json();
+    console.log('Deployed model response:', result);
+
+    // Handle different response formats from the deployed model
+    if (result.prediction) {
+      return {
+        prediction: result.prediction,
+        confidence: result.confidence || 75,
+        probabilities: result.probabilities || {},
+        success: true
+      };
+    } else if (result.traffic_level) {
+      // Handle alternative response format
+      return {
+        prediction: result.traffic_level,
+        confidence: result.confidence || 75,
+        probabilities: result.probabilities || {},
+        success: true
+      };
+    } else if (result.Congestion_Level) {
+      // Handle the actual deployed model response format
+      return {
+        prediction: result.Congestion_Level,
+        confidence: result.confidence_score ? result.confidence_score * 100 : 75,
+        probabilities: result.probabilities || {},
+        success: true
+      };
+    } else {
+      return {
+        error: 'Invalid response format from deployed model',
+        prediction: 'Medium',
+        confidence: 50
+      };
+    }
+  } catch (error) {
+    console.error('Error calling deployed model:', error);
+    return {
+      error: `Failed to call deployed model: ${error}`,
+      prediction: 'Medium',
+      confidence: 50
+    };
+  }
 }
 
 function generateRecommendations(prediction: string, rainfall: string): string[] {
