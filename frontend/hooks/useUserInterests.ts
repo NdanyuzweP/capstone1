@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
+import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { apiService } from '@/services/api';
+import { socketService } from '@/services/socketService';
 
 interface UserInterest {
   id: string;
@@ -109,6 +111,37 @@ export function useUserInterests() {
     };
     
     checkAuthAndFetch();
+
+    // Listen for real-time interest status updates
+    socketService.onInterestStatusUpdated((data) => {
+      console.log('Received interest status update:', data);
+      
+      // Show notification to user
+      if (data.status === 'confirmed') {
+        Alert.alert(
+          'Interest Confirmed! 🎉',
+          'The driver has confirmed your interest. Your seat is reserved!',
+          [{ text: 'OK' }]
+        );
+      } else if (data.status === 'cancelled') {
+        Alert.alert(
+          'Interest Cancelled',
+          'The driver has cancelled your interest. You can try another bus.',
+          [{ text: 'OK' }]
+        );
+      }
+      
+      setInterests(prev => prev.map(interest => 
+        interest.id === data.interestId 
+          ? { ...interest, status: data.status }
+          : interest
+      ));
+    });
+
+    // Cleanup socket listener on unmount
+    return () => {
+      socketService.off('interestStatusUpdated');
+    };
   }, []);
 
   const refetch = () => {

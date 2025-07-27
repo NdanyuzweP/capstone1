@@ -3,6 +3,7 @@ import BusSchedule from '../models/BusSchedule';
 import Bus from '../models/Bus';
 import Route from '../models/Route';
 import UserInterest from '../models/UserInterest';
+import socketService from '../services/socketService';
 
 export const createBusSchedule = async (req: Request, res: Response): Promise<any> => {
   try {
@@ -241,6 +242,16 @@ export const updateUserInterestStatus = async (req: Request, res: Response): Pro
       return res.status(404).json({ error: 'Interest not found' });
     }
 
+    // Emit socket event to notify the user about the status change
+    socketService.emitInterestStatusUpdateToUser({
+      interestId: updatedInterest._id.toString(),
+      userId: updatedInterest.userId.toString(),
+      status: status as 'confirmed' | 'cancelled',
+      busId: bus._id.toString(),
+      busScheduleId: busSchedule._id.toString(),
+      pickupPointId: updatedInterest.pickupPointId.toString(),
+    });
+
     console.log('Interest updated successfully:', {
       interestId,
       newStatus: status,
@@ -367,30 +378,26 @@ export const endTrip = async (req: Request, res: Response): Promise<any> => {
       return res.status(400).json({ error: 'Trip is not in progress' });
     }
 
-    // Update schedule status to completed
-    const updatedSchedule = await BusSchedule.findByIdAndUpdate(
-      scheduleId,
-      { status: 'completed', actualArrivalTime: new Date() },
-      { new: true }
-    ).populate('busId', 'plateNumber capacity')
-     .populate('routeId', 'name description');
-
     // Clean up ALL passenger interests for this schedule (interested, confirmed, cancelled)
     const deletedInterests = await UserInterest.deleteMany({
       busScheduleId: scheduleId
     });
 
-    console.log('Trip ended successfully - ALL interests removed:', {
+    // Delete the completed schedule so driver waits for new schedule
+    const deletedSchedule = await BusSchedule.findByIdAndDelete(scheduleId);
+
+    console.log('Trip ended successfully - ALL interests and schedule removed:', {
       scheduleId,
       busPlate: bus.plateNumber,
       driverId,
-      deletedInterestsCount: deletedInterests.deletedCount
+      deletedInterestsCount: deletedInterests.deletedCount,
+      scheduleDeleted: !!deletedSchedule
     });
 
     res.json({
-      message: 'Trip ended successfully',
-      schedule: updatedSchedule,
+      message: 'Trip ended successfully. All interests cleared and schedule removed. Driver now waits for new schedule.',
       deletedInterests: deletedInterests.deletedCount,
+      scheduleDeleted: true,
     });
   } catch (error) {
     console.error('Error ending trip:', error);

@@ -95,7 +95,7 @@ export default function Dashboard() {
 
   const handleStartTrip = async () => {
     if (!schedules.length) {
-      Alert.alert(t('noSchedules'), 'No schedules available to start');
+      Alert.alert(t('no.schedules'), 'No schedules available to start');
       return;
     }
 
@@ -105,16 +105,16 @@ export default function Dashboard() {
     );
 
     if (!nextSchedule) {
-      Alert.alert('No Upcoming Trips', 'No scheduled trips available to start');
+      Alert.alert(t('no.upcoming.trips'), 'No scheduled trips available to start');
       return;
     }
 
     try {
       const result = await apiService.startTrip(nextSchedule.id);
       const message = result.cleanedInterests > 0 
-        ? `Trip started successfully!\nCleaned up ${result.cleanedInterests} leftover interests from previous trips.`
-        : 'Your trip has been started successfully!';
-      Alert.alert('Trip Started', message);
+        ? `${t('trip.started.message')}\nCleaned up ${result.cleanedInterests} leftover interests from previous trips.`
+        : t('trip.started.message');
+      Alert.alert(t('trip.started'), message);
       refetch(); // Refresh the data
     } catch (error: any) {
       console.error('Error starting trip:', error);
@@ -127,29 +127,26 @@ export default function Dashboard() {
     const currentTrip = schedules.find(schedule => schedule.status === 'in-transit');
 
     if (!currentTrip) {
-      Alert.alert('No Active Trip', 'No trip is currently in progress');
+      Alert.alert(t('no.active.trip'), 'No trip is currently in progress');
       return;
     }
 
     Alert.alert(
-      'End Trip',
-      'Are you sure you want to end this trip? This will remove ALL passenger interests (interested, confirmed, cancelled) to start fresh.',
+      t('trip.ended'),
+      t('end.trip.confirm'),
       [
         { text: 'Cancel', style: 'cancel' },
         {
-          text: 'End Trip',
+          text: t('trip.ended'),
           style: 'destructive',
           onPress: async () => {
             try {
               const result = await apiService.endTrip(currentTrip.id);
               Alert.alert(
-                'Trip Ended', 
-                `Trip ended successfully!\nRemoved ${result.deletedInterests} passenger interests (all statuses cleared).`
+                t('trip.ended'), 
+                `${t('trip.ended.message')}\n${t('removed.interests')} ${result.deletedInterests} ${t('passenger.interests')}.\n${t('schedule.deleted')}`
               );
-              // Assuming refetch is available from useDriverData or passed as a prop
-              // For now, we'll just alert and assume the data will update after a refresh
-              // If refetch is not available, this will need to be handled differently
-              // For example, by using a state variable that triggers a re-fetch
+              refetch(); // Refresh the data to show updated schedules
             } catch (error: any) {
               console.error('Error ending trip:', error);
               Alert.alert('Error', error.message || 'Failed to end trip');
@@ -393,7 +390,7 @@ export default function Dashboard() {
             >
               <Navigation size={20} color="#FFFFFF" />
               <Text style={styles.actionButtonText}>
-                {schedules.some(s => s.status === 'in-transit') ? 'Trip in Progress' : t('dashboard.start.trip')}
+                {schedules.some(s => s.status === 'in-transit') ? t('trip.in.progress') : t('dashboard.start.trip')}
               </Text>
             </Pressable>
 

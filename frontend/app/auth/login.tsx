@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, Pressable, TextInput, Alert, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, Pressable, TextInput, Alert, ScrollView, KeyboardAvoidingView, Platform, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { ArrowLeft, Eye, EyeOff } from 'lucide-react-native';
+import { ArrowLeft, Eye, EyeOff, Mail, Lock } from 'lucide-react-native';
 
 export default function Login() {
   const { theme } = useTheme();
@@ -16,6 +16,8 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [emailFocused, setEmailFocused] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -39,10 +41,10 @@ export default function Login() {
       >
         <View style={styles.header}>
           <Pressable
-            style={styles.backButton}
+            style={[styles.backButton, { backgroundColor: theme.surface }]}
             onPress={() => router.back()}
           >
-            <ArrowLeft color={theme.text} size={24} />
+            <ArrowLeft color={theme.text} size={20} />
           </Pressable>
           <Text style={[styles.title, { color: theme.text }]}>
             {t('login')}
@@ -56,33 +58,64 @@ export default function Login() {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.form}>
+            <View style={styles.welcomeContainer}>
+              <Text style={[styles.welcomeTitle, { color: theme.text }]}>
+                Welcome Back
+              </Text>
+              <Text style={[styles.welcomeSubtitle, { color: theme.textSecondary }]}>
+                Sign in to continue tracking buses
+              </Text>
+            </View>
+
             <View style={styles.inputContainer}>
               <Text style={[styles.label, { color: theme.text }]}>
                 {t('email')}
               </Text>
-              <TextInput
-                style={[styles.input, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
-                value={email}
-                onChangeText={setEmail}
-                placeholder="Enter your email"
-                placeholderTextColor={theme.textSecondary}
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
+              <View style={[
+                styles.inputWrapper, 
+                { 
+                  backgroundColor: theme.surface, 
+                  borderColor: emailFocused ? theme.primary : theme.border,
+                  shadowColor: theme.text,
+                }
+              ]}>
+                <Mail color={theme.textSecondary} size={18} style={styles.inputIcon} />
+                <TextInput
+                  style={[styles.input, { color: theme.text }]}
+                  value={email}
+                  onChangeText={setEmail}
+                  placeholder="Enter your email"
+                  placeholderTextColor={theme.textSecondary}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  onFocus={() => setEmailFocused(true)}
+                  onBlur={() => setEmailFocused(false)}
+                />
+              </View>
             </View>
 
             <View style={styles.inputContainer}>
               <Text style={[styles.label, { color: theme.text }]}>
                 {t('password')}
               </Text>
-              <View style={styles.passwordContainer}>
+              <View style={[
+                styles.inputWrapper, 
+                { 
+                  backgroundColor: theme.surface, 
+                  borderColor: passwordFocused ? theme.primary : theme.border,
+                  shadowColor: theme.text,
+                }
+              ]}>
+                <Lock color={theme.textSecondary} size={18} style={styles.inputIcon} />
                 <TextInput
-                  style={[styles.passwordInput, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
+                  style={[styles.input, { color: theme.text }]}
                   value={password}
                   onChangeText={setPassword}
                   placeholder="Enter your password"
                   placeholderTextColor={theme.textSecondary}
                   secureTextEntry={!showPassword}
+                  onFocus={() => setPasswordFocused(true)}
+                  onBlur={() => setPasswordFocused(false)}
                 />
                 <Pressable
                   style={styles.eyeButton}
@@ -98,12 +131,18 @@ export default function Login() {
             </View>
 
             <Pressable
-              style={[styles.loginButton, { backgroundColor: theme.primary }]}
+              style={[
+                styles.loginButton, 
+                { 
+                  backgroundColor: loading ? theme.textSecondary : theme.primary,
+                  opacity: loading ? 0.7 : 1,
+                }
+              ]}
               onPress={handleLogin}
               disabled={loading}
             >
               <Text style={[styles.loginButtonText, { color: theme.background }]}>
-                {t('login')}
+                {loading ? 'Signing in...' : t('login')}
               </Text>
             </Pressable>
 
@@ -137,71 +176,116 @@ const styles = StyleSheet.create({
   },
   backButton: {
     marginRight: 16,
+    padding: 12,
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontFamily: 'Inter-Bold',
+    letterSpacing: -0.5,
   },
   form: {
     flex: 1,
   },
+  welcomeContainer: {
+    alignItems: 'center',
+    marginBottom: 40,
+    paddingHorizontal: 20,
+  },
+  welcomeTitle: {
+    fontSize: 32,
+    fontFamily: 'Inter-Bold',
+    marginBottom: 8,
+    textAlign: 'center',
+    letterSpacing: -0.5,
+  },
+  welcomeSubtitle: {
+    fontSize: 16,
+    fontFamily: 'Inter-Regular',
+    textAlign: 'center',
+    opacity: 0.8,
+    lineHeight: 24,
+  },
   inputContainer: {
-    marginBottom: 20,
+    marginBottom: 24,
   },
   label: {
     fontSize: 16,
     fontFamily: 'Inter-SemiBold',
-    marginBottom: 8,
+    marginBottom: 12,
+    letterSpacing: -0.2,
+  },
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    borderRadius: 16,
+    borderWidth: 2,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  inputIcon: {
+    marginRight: 12,
   },
   input: {
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderRadius: 12,
-    borderWidth: 1,
+    flex: 1,
     fontSize: 16,
     fontFamily: 'Inter-Regular',
-  },
-  passwordContainer: {
-    position: 'relative',
-  },
-  passwordInput: {
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    paddingRight: 50,
-    borderRadius: 12,
-    borderWidth: 1,
-    fontSize: 16,
-    fontFamily: 'Inter-Regular',
+    paddingVertical: 0,
   },
   eyeButton: {
-    position: 'absolute',
-    right: 16,
-    top: 14,
-    padding: 4,
+    padding: 8,
+    borderRadius: 8,
   },
   loginButton: {
-    paddingVertical: 16,
-    borderRadius: 12,
+    paddingVertical: 18,
+    borderRadius: 16,
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 32,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 4,
   },
   loginButtonText: {
-    fontSize: 16,
-    fontFamily: 'Inter-SemiBold',
+    fontSize: 18,
+    fontFamily: 'Inter-Bold',
+    letterSpacing: -0.3,
   },
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 30,
+    marginTop: 40,
+    paddingVertical: 20,
   },
   footerText: {
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: 'Inter-Regular',
   },
   linkText: {
-    fontSize: 14,
-    fontFamily: 'Inter-SemiBold',
+    fontSize: 15,
+    fontFamily: 'Inter-Bold',
+    textDecorationLine: 'underline',
   },
   keyboardAvoidingView: {
     flex: 1,

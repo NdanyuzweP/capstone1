@@ -100,6 +100,15 @@ class SocketService {
         });
         console.log(`Broadcasted interest update: ${data.action} for bus ${data.busId}`);
     }
+    emitInterestStatusUpdate(data) {
+        if (!this.io)
+            return;
+        this.emitToUser(data.userId, 'interest_status_updated', {
+            ...data,
+            timestamp: new Date()
+        });
+        console.log(`Emitted interest status update: ${data.status} for user ${data.userId}`);
+    }
     emitBusStatusChange(busId, isOnline) {
         this.broadcastBusStatusUpdate(busId, isOnline);
     }
@@ -108,6 +117,9 @@ class SocketService {
     }
     emitUserInterestUpdate(data) {
         this.broadcastUserInterestUpdate(data);
+    }
+    emitInterestStatusUpdateToUser(data) {
+        this.emitInterestStatusUpdate(data);
     }
     emitToUser(userId, event, data) {
         if (!this.io)

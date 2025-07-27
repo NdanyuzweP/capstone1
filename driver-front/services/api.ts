@@ -198,8 +198,8 @@ class ApiService {
   async endTrip(scheduleId: string) {
     return this.request<{
       message: string;
-      schedule: any;
       deletedInterests: number;
+      scheduleDeleted: boolean;
     }>('/bus-schedules/end-trip', {
       method: 'POST',
       body: JSON.stringify({ scheduleId }),

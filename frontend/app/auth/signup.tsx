@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, Pressable, TextInput, Alert, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, Pressable, TextInput, Alert, ScrollView, KeyboardAvoidingView, Platform, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { ArrowLeft, Eye, EyeOff } from 'lucide-react-native';
+import { ArrowLeft, Eye, EyeOff, Mail, Lock, User, Phone } from 'lucide-react-native';
 
 export default function Signup() {
   const { theme } = useTheme();
@@ -20,6 +20,11 @@ export default function Signup() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [nameFocused, setNameFocused] = useState(false);
+  const [emailFocused, setEmailFocused] = useState(false);
+  const [phoneFocused, setPhoneFocused] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
+  const [confirmPasswordFocused, setConfirmPasswordFocused] = useState(false);
 
   const handleSignup = async () => {
     if (!name || !email || !phone || !password || !confirmPassword) {
@@ -48,10 +53,10 @@ export default function Signup() {
       >
         <View style={styles.header}>
           <Pressable
-            style={[styles.backButton, { backgroundColor: 'rgba(255, 255, 255, 0.1)' }]}
+            style={[styles.backButton, { backgroundColor: theme.surface }]}
             onPress={() => router.back()}
           >
-            <ArrowLeft color={theme.text} size={24} />
+            <ArrowLeft color={theme.text} size={20} />
           </Pressable>
           <Text style={[styles.title, { color: theme.text }]}>
             {t('signup')}
@@ -78,58 +83,103 @@ export default function Signup() {
               <Text style={[styles.label, { color: theme.text }]}>
                 {t('name')}
               </Text>
-              <TextInput
-                style={[styles.input, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
-                value={name}
-                onChangeText={setName}
-                placeholder="Enter your full name"
-                placeholderTextColor={theme.textSecondary}
-              />
+              <View style={[
+                styles.inputWrapper, 
+                { 
+                  backgroundColor: theme.surface, 
+                  borderColor: nameFocused ? theme.primary : theme.border,
+                  shadowColor: theme.text,
+                }
+              ]}>
+                <User color={theme.textSecondary} size={18} style={styles.inputIcon} />
+                <TextInput
+                  style={[styles.input, { color: theme.text }]}
+                  value={name}
+                  onChangeText={setName}
+                  placeholder="Enter your full name"
+                  placeholderTextColor={theme.textSecondary}
+                  onFocus={() => setNameFocused(true)}
+                  onBlur={() => setNameFocused(false)}
+                />
+              </View>
             </View>
 
             <View style={styles.inputContainer}>
               <Text style={[styles.label, { color: theme.text }]}>
                 {t('email')}
               </Text>
-              <TextInput
-                style={[styles.input, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
-                value={email}
-                onChangeText={setEmail}
-                placeholder="Enter your email"
-                placeholderTextColor={theme.textSecondary}
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
+              <View style={[
+                styles.inputWrapper, 
+                { 
+                  backgroundColor: theme.surface, 
+                  borderColor: emailFocused ? theme.primary : theme.border,
+                  shadowColor: theme.text,
+                }
+              ]}>
+                <Mail color={theme.textSecondary} size={18} style={styles.inputIcon} />
+                <TextInput
+                  style={[styles.input, { color: theme.text }]}
+                  value={email}
+                  onChangeText={setEmail}
+                  placeholder="Enter your email"
+                  placeholderTextColor={theme.textSecondary}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  onFocus={() => setEmailFocused(true)}
+                  onBlur={() => setEmailFocused(false)}
+                />
+              </View>
             </View>
 
             <View style={styles.inputContainer}>
               <Text style={[styles.label, { color: theme.text }]}>
                 {t('phone')}
               </Text>
-              <TextInput
-                style={[styles.input, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
-                value={phone}
-                onChangeText={setPhone}
-                placeholder="+250 7XX XXX XXX"
-                placeholderTextColor={theme.textSecondary}
-                keyboardType="phone-pad"
-              />
+              <View style={[
+                styles.inputWrapper, 
+                { 
+                  backgroundColor: theme.surface, 
+                  borderColor: phoneFocused ? theme.primary : theme.border,
+                  shadowColor: theme.text,
+                }
+              ]}>
+                <Phone color={theme.textSecondary} size={18} style={styles.inputIcon} />
+                <TextInput
+                  style={[styles.input, { color: theme.text }]}
+                  value={phone}
+                  onChangeText={setPhone}
+                  placeholder="+250 7XX XXX XXX"
+                  placeholderTextColor={theme.textSecondary}
+                  keyboardType="phone-pad"
+                  onFocus={() => setPhoneFocused(true)}
+                  onBlur={() => setPhoneFocused(false)}
+                />
+              </View>
             </View>
 
             <View style={styles.inputContainer}>
               <Text style={[styles.label, { color: theme.text }]}>
                 {t('password')}
               </Text>
-              <View style={styles.passwordContainer}>
+              <View style={[
+                styles.inputWrapper, 
+                { 
+                  backgroundColor: theme.surface, 
+                  borderColor: passwordFocused ? theme.primary : theme.border,
+                  shadowColor: theme.text,
+                }
+              ]}>
+                <Lock color={theme.textSecondary} size={18} style={styles.inputIcon} />
                 <TextInput
-                  style={[styles.passwordInput, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
+                  style={[styles.input, { color: theme.text }]}
                   value={password}
                   onChangeText={setPassword}
                   placeholder="Enter your password"
                   placeholderTextColor={theme.textSecondary}
                   secureTextEntry={!showPassword}
+                  onFocus={() => setPasswordFocused(true)}
+                  onBlur={() => setPasswordFocused(false)}
                 />
-                
                 <Pressable
                   style={styles.eyeButton}
                   onPress={() => setShowPassword(!showPassword)}
@@ -147,16 +197,25 @@ export default function Signup() {
               <Text style={[styles.label, { color: theme.text }]}>
                 Confirm Password
               </Text>
-              <View style={styles.passwordContainer}>
+              <View style={[
+                styles.inputWrapper, 
+                { 
+                  backgroundColor: theme.surface, 
+                  borderColor: confirmPasswordFocused ? theme.primary : theme.border,
+                  shadowColor: theme.text,
+                }
+              ]}>
+                <Lock color={theme.textSecondary} size={18} style={styles.inputIcon} />
                 <TextInput
-                  style={[styles.passwordInput, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
+                  style={[styles.input, { color: theme.text }]}
                   value={confirmPassword}
                   onChangeText={setConfirmPassword}
                   placeholder="Confirm your password"
                   placeholderTextColor={theme.textSecondary}
                   secureTextEntry={!showConfirmPassword}
+                  onFocus={() => setConfirmPasswordFocused(true)}
+                  onBlur={() => setConfirmPasswordFocused(false)}
                 />
-                
                 <Pressable
                   style={styles.eyeButton}
                   onPress={() => setShowConfirmPassword(!showConfirmPassword)}
@@ -169,15 +228,20 @@ export default function Signup() {
                 </Pressable>
               </View>
             </View>
-            
 
             <Pressable
-              style={[styles.signupButton, { backgroundColor: theme.primary }]}
+              style={[
+                styles.signupButton, 
+                { 
+                  backgroundColor: loading ? theme.textSecondary : theme.primary,
+                  opacity: loading ? 0.7 : 1,
+                }
+              ]}
               onPress={handleSignup}
               disabled={loading}
             >
               <Text style={[styles.signupButtonText, { color: theme.background }]}>
-                {loading ? t('loading') : t('signup')}
+                {loading ? 'Creating account...' : t('signup')}
               </Text>
             </Pressable>
 
@@ -206,13 +270,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 24,
-    paddingTop: 12,
-    paddingBottom: 32,
+    paddingTop: 20,
+    paddingBottom: 40,
   },
   backButton: {
     marginRight: 16,
-    padding: 8,
-    borderRadius: 20,
+    padding: 12,
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   title: {
     fontSize: 28,
@@ -224,23 +296,25 @@ const styles = StyleSheet.create({
   },
   welcomeContainer: {
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: 40,
     paddingHorizontal: 20,
   },
   welcomeTitle: {
-    fontSize: 24,
+    fontSize: 32,
     fontFamily: 'Inter-Bold',
     marginBottom: 8,
     textAlign: 'center',
+    letterSpacing: -0.5,
   },
   welcomeSubtitle: {
     fontSize: 16,
     fontFamily: 'Inter-Regular',
     textAlign: 'center',
-    opacity: 0.7,
+    opacity: 0.8,
+    lineHeight: 24,
   },
   inputContainer: {
-    marginBottom: 20,
+    marginBottom: 24,
   },
   label: {
     fontSize: 16,
@@ -248,48 +322,34 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     letterSpacing: -0.2,
   },
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    borderRadius: 16,
+    borderWidth: 2,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  inputIcon: {
+    marginRight: 12,
+  },
   input: {
-    paddingHorizontal: 20,
-    paddingVertical: 18,
-    borderRadius: 16,
-    borderWidth: 2,
+    flex: 1,
     fontSize: 16,
     fontFamily: 'Inter-Regular',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  passwordContainer: {
-    position: 'relative',
-  },
-  passwordInput: {
-    paddingHorizontal: 20,
-    paddingVertical: 18,
-    paddingRight: 55,
-    borderRadius: 16,
-    borderWidth: 2,
-    fontSize: 16,
-    fontFamily: 'Inter-Regular',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    paddingVertical: 0,
   },
   eyeButton: {
-    position: 'absolute',
-    right: 18,
-    top: 18,
-    padding: 6,
-    borderRadius: 12,
+    padding: 8,
+    borderRadius: 8,
   },
   signupButton: {
     paddingVertical: 18,
@@ -314,7 +374,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 32,
+    marginTop: 40,
     paddingVertical: 20,
   },
   footerText: {
