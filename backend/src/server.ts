@@ -10,6 +10,7 @@ import connectDB from './config/database';
 import { specs, swaggerUi } from './config/swagger';
 import { createAdminUser } from './utils/createAdmin';
 import { seedDatabase } from './utils/seedData';
+import { migrateDirectionData } from './utils/migrateDirectionData';
 import { updateBusLocations } from './utils/updateBusLocations';
 import { startLocationScheduler, startLocationHistoryCleanup } from './utils/locationScheduler';
 import socketService from './services/socketService';
@@ -200,6 +201,9 @@ const startServer = async () => {
     
     // Enable database seeding to ensure we have test data
     await seedDatabase();
+    
+    // Migrate existing data to include direction information
+    await migrateDirectionData();
     
     // Update bus locations to be recent and in Rwanda
     await updateBusLocations();

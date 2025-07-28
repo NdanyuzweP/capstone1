@@ -26,6 +26,15 @@ interface UserInterestUpdate {
   action: 'added' | 'removed';
 }
 
+interface InterestStatusUpdate {
+  interestId: string;
+  userId: string;
+  status: 'confirmed' | 'cancelled';
+  busId: string;
+  busScheduleId: string;
+  pickupPointId: string;
+}
+
 class SocketService {
   private io: SocketIOServer | null = null;
   private connectedUsers: Map<string, SocketUser> = new Map();
@@ -143,6 +152,18 @@ class SocketService {
     console.log(`Broadcasted interest update: ${data.action} for bus ${data.busId}`);
   }
 
+  // Emit interest status update to specific user
+  private emitInterestStatusUpdate(data: InterestStatusUpdate) {
+    if (!this.io) return;
+    
+    this.emitToUser(data.userId, 'interest_status_updated', {
+      ...data,
+      timestamp: new Date()
+    });
+
+    console.log(`Emitted interest status update: ${data.status} for user ${data.userId}`);
+  }
+
   // Public methods to be called from controllers
   public emitBusStatusChange(busId: string, isOnline: boolean) {
     this.broadcastBusStatusUpdate(busId, isOnline);
@@ -154,6 +175,10 @@ class SocketService {
 
   public emitUserInterestUpdate(data: UserInterestUpdate) {
     this.broadcastUserInterestUpdate(data);
+  }
+
+  public emitInterestStatusUpdateToUser(data: InterestStatusUpdate) {
+    this.emitInterestStatusUpdate(data);
   }
 
   public emitToUser(userId: string, event: string, data: any) {

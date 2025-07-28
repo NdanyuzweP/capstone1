@@ -296,6 +296,17 @@ export const getNearbyBuses = async (req: Request, res: Response): Promise<any> 
         (new Date().getTime() - bus.currentLocation.lastUpdated.getTime()) < 10 * 60 * 1000;
       const isOnline = bus.isOnline && isLocationRecent;
 
+      // Get route information for direction display
+      const route = bus.routeId as any;
+      let directionDisplay = '';
+      if (route && bus.currentDirection) {
+        if (bus.currentDirection === 'outbound') {
+          directionDisplay = `To ${route.destination || 'Destination'}`;
+        } else {
+          directionDisplay = `To ${route.origin || 'Origin'}`;
+        }
+      }
+
       return {
         id: bus._id,
         plateNumber: bus.plateNumber,
@@ -305,6 +316,11 @@ export const getNearbyBuses = async (req: Request, res: Response): Promise<any> 
         distance: Math.round(distance * 100) / 100, // Round to 2 decimal places
         isOnline: isOnline,
         lastSeen: bus.currentLocation.lastUpdated,
+        // Direction information
+        currentDirection: bus.currentDirection,
+        routeOrigin: route?.origin,
+        routeDestination: route?.destination,
+        directionDisplay,
       };
     }).filter(bus => bus.distance <= Number(radius))
       .sort((a, b) => a.distance - b.distance);

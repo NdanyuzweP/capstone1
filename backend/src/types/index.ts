@@ -52,6 +52,10 @@ export interface IRoute extends Document {
   estimatedDuration: number; // in minutes
   fare: number; // Added fare field for route-based pricing
   isActive: boolean;
+  // Direction fields for bidirectional routes
+  origin: string; // Starting point (e.g., "Kimironko")
+  destination: string; // End point (e.g., "Kabuga")
+  isBidirectional: boolean; // Whether this route operates in both directions
   createdAt: Date;
   updatedAt: Date;
 }
@@ -78,6 +82,7 @@ export interface IBusSchedule extends Document {
     actualTime?: Date;
   }[];
   status: 'scheduled' | 'in-transit' | 'completed' | 'cancelled';
+  direction: 'outbound' | 'inbound'; // Direction for this specific schedule
   createdAt: Date;
   updatedAt: Date;
 }

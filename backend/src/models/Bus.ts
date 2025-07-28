@@ -54,6 +54,7 @@ const busSchema = new Schema<IBus>(
       type: Boolean,
       default: false,
     },
+
   },
   {
     timestamps: true,

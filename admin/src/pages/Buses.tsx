@@ -14,6 +14,7 @@ import {
   AlertCircle,
   UserCheck,
   Navigation as RouteIcon,
+  Navigation,
   User,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -467,6 +468,7 @@ export default function Buses() {
                           <span className="text-sm" style={{ color: theme.text }}>{bus.capacity}</span>
                         </div>
                       </td>
+
                       <td>
                         <div className="flex items-center gap-1">
                           <span className="text-sm" style={{ color: theme.text }}>
@@ -617,6 +619,8 @@ export default function Buses() {
                   ))}
                 </select>
               </div>
+
+
 
               <div className="flex items-center gap-3 pt-4">
                 <button type="submit" className="admin-btn admin-btn-primary flex-1">

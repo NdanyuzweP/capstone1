@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, FlatList } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, FlatList, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -46,13 +46,18 @@ export default function Home() {
     const bus = buses.find(b => b.id === busId);
     if (!bus || !bus.scheduleId || !bus.pickupPointId || !interests) {
       console.error('Missing real schedule or pickup point ID:', bus);
-      alert('This bus is missing schedule or pickup point information. Please try another bus.');
+      Alert.alert('Error', 'This bus is missing schedule or pickup point information. Please try another bus.');
       return;
     }
     const existingInterest = interests.find(interest => 
       interest.busScheduleId === bus.scheduleId
     );
+    
     if (existingInterest) {
+      if (existingInterest.status === 'confirmed') {
+        Alert.alert('Info', 'Your interest has been confirmed by the driver. You cannot remove it now.');
+        return;
+      }
       await removeInterest(existingInterest.id);
     } else {
       await showInterest(bus.scheduleId, bus.pickupPointId);
@@ -64,14 +69,14 @@ export default function Home() {
     await requestLocation();
   };
 
-  const isInterestedInBus = (busId: string) => {
+  const getInterestStatus = (busId: string): 'none' | 'interested' | 'confirmed' => {
     const bus = buses.find(b => b.id === busId);
     if (!bus || !bus.scheduleId || !interests) {
-      return false;
+      return 'none';
     }
-    return interests.some(interest => interest.busScheduleId === bus.scheduleId);
+    const interest = interests.find(interest => interest.busScheduleId === bus.scheduleId);
+    return interest ? (interest.status as 'interested' | 'confirmed') : 'none';
   };
-
 
 
   const renderBusCard = ({ item: bus }: { item: Bus }) => (
@@ -89,6 +94,15 @@ export default function Home() {
               {bus.destination}
             </Text>
           </View>
+          {/* Direction display */}
+          {bus.directionDisplay && (
+            <View style={styles.directionContainer}>
+              <Navigation size={12} color={theme.primary} />
+              <Text style={[styles.directionText, { color: theme.primary, marginLeft: 4 }]}>
+                {bus.directionDisplay}
+              </Text>
+            </View>
+          )}
           {bus.distance && (
             <Text style={[styles.distanceText, { color: theme.primary }]}>
               {(bus.distance || 0).toFixed(1)} km away
@@ -105,7 +119,7 @@ export default function Home() {
           <View style={styles.statItem}>
             <Users size={16} color={theme.textSecondary} />
             <Text style={[styles.passengersText, { color: theme.textSecondary }]}>
-              {bus.currentPassengers}/{bus.capacity}
+              {bus.capacity}
             </Text>
           </View>
         </View>
@@ -113,9 +127,6 @@ export default function Home() {
       
       <View style={styles.busActions}>
         <View style={styles.busMetadata}>
-          <Text style={[styles.nextStop, { color: theme.textSecondary }]}>
-            Next: {bus.nextStop}
-          </Text>
           {bus.fare && (
             <Text style={[styles.fareText, { color: theme.primary }]}>
               {bus.fare} RWF
@@ -125,20 +136,23 @@ export default function Home() {
         <Pressable
           style={[
             styles.interestButton,
-            isInterestedInBus(bus.id) && { backgroundColor: theme.primary }
+            getInterestStatus(bus.id) !== 'none' && { 
+              backgroundColor: getInterestStatus(bus.id) === 'confirmed' ? '#4CAF50' : theme.primary 
+            }
           ]}
           onPress={() => handleShowInterest(bus.id)}
         >
           <Heart
             size={16}
-            color={isInterestedInBus(bus.id) ? theme.background : theme.primary}
-            fill={isInterestedInBus(bus.id) ? theme.background : 'none'}
+            color={getInterestStatus(bus.id) !== 'none' ? theme.background : theme.primary}
+            fill={getInterestStatus(bus.id) !== 'none' ? theme.background : 'none'}
           />
           <Text style={[
             styles.interestText,
-            { color: isInterestedInBus(bus.id) ? theme.background : theme.primary }
+            { color: getInterestStatus(bus.id) !== 'none' ? theme.background : theme.primary }
           ]}>
-            {isInterestedInBus(bus.id) ? 'Interested' : 'Show Interest'}
+            {getInterestStatus(bus.id) === 'confirmed' ? 'Confirmed' : 
+             getInterestStatus(bus.id) === 'interested' ? 'Interested' : 'Show Interest'}
           </Text>
         </Pressable>
       </View>
@@ -434,6 +448,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Inter-Regular',
     textAlign: 'center',
+  },
+  directionContainer: {
+    backgroundColor: 'rgba(59, 130, 246, 0.1)', // Light blue background
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    marginTop: 4,
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  directionText: {
+    fontSize: 12,
+    fontFamily: 'Inter-SemiBold',
   },
 
   errorContainer: {

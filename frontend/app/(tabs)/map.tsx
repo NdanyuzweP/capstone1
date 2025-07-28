@@ -250,6 +250,15 @@ export default function Map() {
               <Text style={[styles.busDetailsDestination, { color: theme.textSecondary }]}>
                 {selectedBus.destination}
               </Text>
+              {/* Direction display */}
+              {selectedBus.directionDisplay && (
+                <View style={styles.directionContainer}>
+                  <Navigation size={12} color={theme.primary} />
+                  <Text style={[styles.busDetailsDirection, { color: theme.primary, marginLeft: 4 }]}>
+                    {selectedBus.directionDisplay}
+                  </Text>
+                </View>
+              )}
             </View>
             <Pressable
               style={styles.closeButton}
@@ -262,15 +271,7 @@ export default function Map() {
           </View>
           
           <View style={styles.busDetailsContent}>
-            <View style={styles.busDetailItem}>
-              <MapPin size={16} color={theme.primary} />
-              <Text style={[styles.busDetailLabel, { color: theme.textSecondary }]}>
-                Next Stop:
-              </Text>
-              <Text style={[styles.busDetailValue, { color: theme.text }]}>
-                {selectedBus.nextStop}
-              </Text>
-            </View>
+
             
             <View style={styles.busDetailItem}>
               <Navigation size={16} color={theme.primary} />
@@ -1014,6 +1015,11 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
     marginTop: 2,
   },
+  busDetailsDirection: {
+    fontSize: 14,
+    fontFamily: 'Inter-Regular',
+    marginTop: 4,
+  },
   closeButton: {
     padding: 4,
   },
@@ -1483,5 +1489,15 @@ const styles = StyleSheet.create({
   selectionItemText: {
     fontSize: 16,
     fontFamily: 'Inter-Regular',
+  },
+  directionContainer: {
+    backgroundColor: 'rgba(59, 130, 246, 0.1)', // Light blue background
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    marginTop: 4,
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
   },
 });

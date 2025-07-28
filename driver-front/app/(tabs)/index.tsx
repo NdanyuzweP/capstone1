@@ -30,7 +30,7 @@ export default function Dashboard() {
   const { theme } = useTheme();
   const { user } = useAuth();
   const { location, requestLocation } = useLocation();
-  const { bus, passengers, schedules, loading, error, refetch, updateOnlineStatus, updateBusLocation } = useDriverData();
+  const { bus, passengers, schedules, completedTripsCount, loading, error, refetch, updateOnlineStatus, updateBusLocation } = useDriverData();
   const { t } = useLanguage();
   const [isOnline, setIsOnline] = useState(false);
 
@@ -95,7 +95,7 @@ export default function Dashboard() {
 
   const handleStartTrip = async () => {
     if (!schedules.length) {
-      Alert.alert(t('noSchedules'), 'No schedules available to start');
+      Alert.alert(t('no.schedules'), 'No schedules available to start');
       return;
     }
 
@@ -105,21 +105,50 @@ export default function Dashboard() {
     );
 
     if (!nextSchedule) {
-      Alert.alert('No Upcoming Trips', 'No scheduled trips available to start');
+      Alert.alert(t('no.upcoming.trips'), 'No scheduled trips available to start');
       return;
     }
 
-    try {
-      const result = await apiService.startTrip(nextSchedule.id);
-      const message = result.cleanedInterests > 0 
-        ? `Trip started successfully!\nCleaned up ${result.cleanedInterests} leftover interests from previous trips.`
-        : 'Your trip has been started successfully!';
-      Alert.alert('Trip Started', message);
-      refetch(); // Refresh the data
-    } catch (error: any) {
-      console.error('Error starting trip:', error);
-      Alert.alert('Error', error.message || 'Failed to start trip');
-    }
+    // Show direction selection dialog
+    Alert.alert(
+      'Select Direction',
+      'Choose the direction for this trip:',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Outbound (To Destination)',
+          onPress: async () => {
+            try {
+              const result = await apiService.startTrip(nextSchedule.id, 'outbound');
+              const message = result.cleanedInterests > 0 
+                ? `${t('trip.started.message')}\nCleaned up ${result.cleanedInterests} leftover interests from previous trips.`
+                : t('trip.started.message');
+              Alert.alert(t('trip.started'), message);
+              refetch(); // Refresh the data
+            } catch (error: any) {
+              console.error('Error starting trip:', error);
+              Alert.alert('Error', error.message || 'Failed to start trip');
+            }
+          }
+        },
+        {
+          text: 'Inbound (To Origin)',
+          onPress: async () => {
+            try {
+              const result = await apiService.startTrip(nextSchedule.id, 'inbound');
+              const message = result.cleanedInterests > 0 
+                ? `${t('trip.started.message')}\nCleaned up ${result.cleanedInterests} leftover interests from previous trips.`
+                : t('trip.started.message');
+              Alert.alert(t('trip.started'), message);
+              refetch(); // Refresh the data
+            } catch (error: any) {
+              console.error('Error starting trip:', error);
+              Alert.alert('Error', error.message || 'Failed to start trip');
+            }
+          }
+        }
+      ]
+    );
   };
 
   const handleEndTrip = async () => {
@@ -127,29 +156,26 @@ export default function Dashboard() {
     const currentTrip = schedules.find(schedule => schedule.status === 'in-transit');
 
     if (!currentTrip) {
-      Alert.alert('No Active Trip', 'No trip is currently in progress');
+      Alert.alert(t('no.active.trip'), 'No trip is currently in progress');
       return;
     }
 
     Alert.alert(
-      'End Trip',
-      'Are you sure you want to end this trip? This will remove ALL passenger interests (interested, confirmed, cancelled) to start fresh.',
+      t('trip.ended'),
+      t('end.trip.confirm'),
       [
         { text: 'Cancel', style: 'cancel' },
         {
-          text: 'End Trip',
+          text: t('trip.ended'),
           style: 'destructive',
           onPress: async () => {
             try {
               const result = await apiService.endTrip(currentTrip.id);
               Alert.alert(
-                'Trip Ended', 
-                `Trip ended successfully!\nRemoved ${result.deletedInterests} passenger interests (all statuses cleared).`
+                t('trip.ended'), 
+                `${t('trip.ended.message')}\n${t('removed.interests')} ${result.deletedInterests} ${t('passenger.interests')}.\n${t('schedule.deleted')}`
               );
-              // Assuming refetch is available from useDriverData or passed as a prop
-              // For now, we'll just alert and assume the data will update after a refresh
-              // If refetch is not available, this will need to be handled differently
-              // For example, by using a state variable that triggers a re-fetch
+              refetch(); // Refresh the data to show updated schedules
             } catch (error: any) {
               console.error('Error ending trip:', error);
               Alert.alert('Error', error.message || 'Failed to end trip');
@@ -303,6 +329,17 @@ export default function Dashboard() {
                 {bus.route?.name || t('dashboard.no.route')}
               </Text>
               </View>
+              {/* Direction display from current schedule */}
+              {schedules.find(s => s.status === 'in-transit')?.directionDisplay && (
+                <View style={styles.busDetail}>
+                  <Text style={[styles.busDetailLabel, { color: theme.textSecondary }]}>
+                    Direction
+                  </Text>
+                  <Text style={[styles.busDetailValue, { color: theme.primary }]}>
+                    {schedules.find(s => s.status === 'in-transit')?.directionDisplay}
+                  </Text>
+                </View>
+              )}
               <View style={styles.busDetail}>
                               <Text style={[styles.busDetailLabel, { color: theme.textSecondary }]}>
                 {t('dashboard.fare')}
@@ -352,6 +389,47 @@ export default function Dashboard() {
           </View>
         )}
 
+        {/* All Upcoming Schedules */}
+        {schedules.filter(s => s.status === 'scheduled' && new Date(s.departureTime) > new Date()).length > 0 && (
+          <View style={[styles.section, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+            <View style={styles.sectionHeader}>
+              <View style={[styles.sectionIcon, { backgroundColor: '#2196F3' + '15' }]}>
+                <Clock size={20} color="#2196F3" />
+              </View>
+              <Text style={[styles.sectionTitle, { color: theme.text }]}>
+                Upcoming Trips
+              </Text>
+            </View>
+            <View style={styles.schedulesList}>
+              {schedules
+                .filter(s => s.status === 'scheduled' && new Date(s.departureTime) > new Date())
+                .sort((a, b) => new Date(a.departureTime).getTime() - new Date(b.departureTime).getTime())
+                .map((schedule, index) => (
+                  <View key={schedule.id} style={[styles.scheduleItem, { borderColor: theme.border }]}>
+                    <View style={styles.scheduleItemHeader}>
+                      <Text style={[styles.scheduleItemTime, { color: theme.text }]}>
+                        {new Date(schedule.departureTime).toLocaleTimeString([], {
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </Text>
+                      {schedule.directionDisplay && (
+                        <View style={[styles.scheduleDirection, { backgroundColor: theme.primary + '15' }]}>
+                          <Text style={[styles.scheduleDirectionText, { color: theme.primary }]}>
+                            {schedule.directionDisplay}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                    <Text style={[styles.scheduleItemRoute, { color: theme.textSecondary }]}>
+                      {bus?.route?.name || 'Unknown Route'}
+                    </Text>
+                  </View>
+                ))}
+            </View>
+          </View>
+        )}
+
         {/* Trip Status */}
         {schedules.some(s => s.status === 'in-transit') && (
           <View style={[styles.section, { backgroundColor: '#FF9800' + '15', borderColor: '#FF9800' + '30' }]}>
@@ -393,7 +471,7 @@ export default function Dashboard() {
             >
               <Navigation size={20} color="#FFFFFF" />
               <Text style={styles.actionButtonText}>
-                {schedules.some(s => s.status === 'in-transit') ? 'Trip in Progress' : t('dashboard.start.trip')}
+                {schedules.some(s => s.status === 'in-transit') ? t('trip.in.progress') : t('dashboard.start.trip')}
               </Text>
             </Pressable>
 
@@ -435,7 +513,7 @@ export default function Dashboard() {
                 {t('dashboard.trips.completed')}
               </Text>
               <Text style={[styles.performanceValue, { color: theme.text }]}>
-                {todaySchedules.filter(s => s.status === 'completed').length}
+                {completedTripsCount}
               </Text>
             </View>
             
@@ -729,5 +807,37 @@ const styles = StyleSheet.create({
   performanceValue: {
     fontSize: 16,
     fontFamily: 'Inter-Bold',
+  },
+  schedulesList: {
+    gap: 12,
+  },
+  scheduleItem: {
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  scheduleItemHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  scheduleItemTime: {
+    fontSize: 18,
+    fontFamily: 'Inter-Bold',
+  },
+  scheduleDirection: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  scheduleDirectionText: {
+    fontSize: 12,
+    fontFamily: 'Inter-Medium',
+  },
+  scheduleItemRoute: {
+    fontSize: 14,
+    fontFamily: 'Inter-Regular',
   },
 });

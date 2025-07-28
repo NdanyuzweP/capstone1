@@ -38,6 +38,12 @@ const busScheduleSchema = new Schema(
       enum: ['scheduled', 'in-transit', 'completed', 'cancelled'],
       default: 'scheduled',
     },
+    // Direction for this specific schedule
+    direction: {
+      type: String,
+      enum: ['outbound', 'inbound'],
+      default: 'outbound', // Default to outbound (origin to destination)
+    },
   },
   {
     timestamps: true,

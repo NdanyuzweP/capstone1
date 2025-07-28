@@ -49,9 +49,21 @@ export const getAllBuses = async (req: Request, res: Response): Promise<any> => 
     // Return all active buses for users (both online and offline)
     const buses = await Bus.find({ isActive: true })
       .populate('driverId', 'name email phone')
-      .populate('routeId', 'name description fare');
+      .populate('routeId', 'name description fare origin destination isBidirectional');
 
-    res.json({ buses });
+    // Note: Direction is now schedule-specific, not bus-specific
+    const busesWithInfo = buses.map(bus => {
+      const busObj = bus.toObject();
+      const route = busObj.routeId as any; // Type assertion for populated route
+
+      return {
+        ...busObj,
+        routeOrigin: route?.origin,
+        routeDestination: route?.destination,
+      };
+    });
+
+    res.json({ buses: busesWithInfo });
   } catch (error) {
     console.error('Error in getAllBuses:', error);
     res.status(500).json({ error: 'Server error' });
@@ -63,9 +75,21 @@ export const getAllBusesForAdmin = async (req: Request, res: Response): Promise<
     // Admin endpoint to get all buses including offline ones
     const buses = await Bus.find({ isActive: true })
       .populate('driverId', 'name email phone')
-      .populate('routeId', 'name description fare');
+      .populate('routeId', 'name description fare origin destination isBidirectional');
 
-    res.json({ buses });
+    // Note: Direction is now schedule-specific, not bus-specific
+    const busesWithInfo = buses.map(bus => {
+      const busObj = bus.toObject();
+      const route = busObj.routeId as any; // Type assertion for populated route
+
+      return {
+        ...busObj,
+        routeOrigin: route?.origin,
+        routeDestination: route?.destination,
+      };
+    });
+
+    res.json({ buses: busesWithInfo });
   } catch (error) {
     console.error('Error in getAllBusesForAdmin:', error);
     res.status(500).json({ error: 'Server error' });

@@ -3,6 +3,7 @@ import BusSchedule from '../models/BusSchedule';
 import Bus from '../models/Bus';
 import Route from '../models/Route';
 import UserInterest from '../models/UserInterest';
+import socketService from '../services/socketService';
 
 export const createBusSchedule = async (req: Request, res: Response): Promise<any> => {
   try {
@@ -59,11 +60,35 @@ export const getAllBusSchedules = async (req: Request, res: Response): Promise<a
 
     const schedules = await BusSchedule.find(query)
       .populate('busId', 'plateNumber capacity')
-      .populate('routeId', 'name description')
+      .populate('routeId', 'name description origin destination isBidirectional')
       .populate('estimatedArrivalTimes.pickupPointId', 'name description')
       .sort({ departureTime: 1 });
 
-    res.json({ schedules });
+    // Add direction display information to each schedule
+    const schedulesWithDirection = schedules.map(schedule => {
+      const scheduleObj = schedule.toObject();
+      const route = scheduleObj.routeId as any;
+      let directionDisplay = '';
+      
+      if (route && route.isBidirectional) {
+        if (scheduleObj.direction === 'outbound') {
+          directionDisplay = `To ${route.destination}`;
+        } else {
+          directionDisplay = `To ${route.origin}`;
+        }
+      } else {
+        directionDisplay = route?.name || 'Unknown Route';
+      }
+
+      return {
+        ...scheduleObj,
+        directionDisplay,
+        routeOrigin: route?.origin,
+        routeDestination: route?.destination,
+      };
+    });
+
+    res.json({ schedules: schedulesWithDirection });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: 'Server error: ' + error.message });
@@ -241,6 +266,16 @@ export const updateUserInterestStatus = async (req: Request, res: Response): Pro
       return res.status(404).json({ error: 'Interest not found' });
     }
 
+    // Emit socket event to notify the user about the status change
+    socketService.emitInterestStatusUpdateToUser({
+      interestId: updatedInterest._id.toString(),
+      userId: updatedInterest.userId.toString(),
+      status: status as 'confirmed' | 'cancelled',
+      busId: bus._id.toString(),
+      busScheduleId: busSchedule._id.toString(),
+      pickupPointId: updatedInterest.pickupPointId.toString(),
+    });
+
     console.log('Interest updated successfully:', {
       interestId,
       newStatus: status,
@@ -278,9 +313,9 @@ export const deleteBusSchedule = async (req: Request, res: Response): Promise<an
 export const startTrip = async (req: Request, res: Response): Promise<any> => {
   try {
     const driverId = (req as any).user.id;
-    const { scheduleId } = req.body;
+    const { scheduleId, direction } = req.body;
 
-    console.log('startTrip called with:', { scheduleId, driverId });
+    console.log('startTrip called with:', { scheduleId, driverId, direction });
 
     // Find the schedule and verify the driver owns the bus
     const schedule = await BusSchedule.findById(scheduleId)
@@ -312,6 +347,15 @@ export const startTrip = async (req: Request, res: Response): Promise<any> => {
       scheduleId,
       cleanedCount: cleanedInterests.deletedCount
     });
+
+    // Update schedule direction if provided
+    if (direction && (direction === 'outbound' || direction === 'inbound')) {
+      await BusSchedule.findByIdAndUpdate(
+        scheduleId,
+        { direction: direction }
+      );
+      console.log('Updated schedule direction to:', direction);
+    }
 
     // Update schedule status to in-transit
     const updatedSchedule = await BusSchedule.findByIdAndUpdate(
@@ -367,30 +411,26 @@ export const endTrip = async (req: Request, res: Response): Promise<any> => {
       return res.status(400).json({ error: 'Trip is not in progress' });
     }
 
-    // Update schedule status to completed
-    const updatedSchedule = await BusSchedule.findByIdAndUpdate(
-      scheduleId,
-      { status: 'completed', actualArrivalTime: new Date() },
-      { new: true }
-    ).populate('busId', 'plateNumber capacity')
-     .populate('routeId', 'name description');
-
     // Clean up ALL passenger interests for this schedule (interested, confirmed, cancelled)
     const deletedInterests = await UserInterest.deleteMany({
       busScheduleId: scheduleId
     });
 
-    console.log('Trip ended successfully - ALL interests removed:', {
+    // Delete the completed schedule so driver waits for new schedule
+    const deletedSchedule = await BusSchedule.findByIdAndDelete(scheduleId);
+
+    console.log('Trip ended successfully - ALL interests and schedule removed:', {
       scheduleId,
       busPlate: bus.plateNumber,
       driverId,
-      deletedInterestsCount: deletedInterests.deletedCount
+      deletedInterestsCount: deletedInterests.deletedCount,
+      scheduleDeleted: !!deletedSchedule
     });
 
     res.json({
-      message: 'Trip ended successfully',
-      schedule: updatedSchedule,
+      message: 'Trip ended successfully. All interests cleared and schedule removed. Driver now waits for new schedule.',
       deletedInterests: deletedInterests.deletedCount,
+      scheduleDeleted: true,
     });
   } catch (error) {
     console.error('Error ending trip:', error);

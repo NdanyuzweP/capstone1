@@ -33,6 +33,21 @@ const routeSchema = new Schema<IRoute>(
       type: Boolean,
       default: true,
     },
+    // Direction fields for bidirectional routes
+    origin: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    destination: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    isBidirectional: {
+      type: Boolean,
+      default: true, // Most routes are bidirectional
+    },
   },
   {
     timestamps: true,

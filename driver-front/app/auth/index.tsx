@@ -1,20 +1,20 @@
 import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@/contexts/ThemeContext';
-import { Bus, Shield } from 'lucide-react-native';
+import { Bus, Shield, FileText } from 'lucide-react-native';
+import LegalAgreements from '@/components/LegalAgreements';
 
 export default function AuthIndex() {
   const { theme } = useTheme();
   const router = useRouter();
+  const [showTermsPreview, setShowTermsPreview] = useState(false);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={styles.content}>
         <View style={styles.header}>
-          <View style={[styles.logoContainer, { backgroundColor: theme.primary }]}>
-            <Bus color={theme.background} size={40} />
-          </View>
           <Text style={[styles.title, { color: theme.text }]}>Ridra Driver</Text>
           <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
             Professional Bus Tracking
@@ -45,6 +45,16 @@ export default function AuthIndex() {
               Driver Login
             </Text>
           </Pressable>
+
+          <Pressable
+            style={[styles.termsButton]}
+            onPress={() => setShowTermsPreview(true)}
+          >
+            <FileText color={theme.primary} size={16} />
+            <Text style={[styles.termsButtonText, { color: theme.primary }]}>
+              View Driver Terms & Privacy Policy
+            </Text>
+          </Pressable>
         </View>
 
         <View style={styles.disclaimer}>
@@ -53,6 +63,12 @@ export default function AuthIndex() {
           </Text>
         </View>
       </View>
+
+      <LegalAgreements
+        visible={showTermsPreview}
+        readOnly={true}
+        onDecline={() => setShowTermsPreview(false)}
+      />
     </SafeAreaView>
   );
 }
@@ -69,22 +85,6 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
     marginBottom: 80,
-  },
-  logoContainer: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 24,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 8,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 16,
-    elevation: 8,
   },
   title: {
     fontSize: 36,
@@ -150,5 +150,17 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
     textAlign: 'center',
     lineHeight: 18,
+  },
+  termsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    gap: 8,
+  },
+  termsButtonText: {
+    fontSize: 14,
+    fontFamily: 'Inter-Medium',
+    textDecorationLine: 'underline',
   },
 });

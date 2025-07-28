@@ -184,22 +184,22 @@ class ApiService {
     });
   }
 
-  async startTrip(scheduleId: string) {
+  async startTrip(scheduleId: string, direction?: 'outbound' | 'inbound') {
     return this.request<{
       message: string;
       schedule: any;
       cleanedInterests: number;
     }>('/bus-schedules/start-trip', {
       method: 'POST',
-      body: JSON.stringify({ scheduleId }),
+      body: JSON.stringify({ scheduleId, direction }),
     });
   }
 
   async endTrip(scheduleId: string) {
     return this.request<{
       message: string;
-      schedule: any;
       deletedInterests: number;
+      scheduleDeleted: boolean;
     }>('/bus-schedules/end-trip', {
       method: 'POST',
       body: JSON.stringify({ scheduleId }),

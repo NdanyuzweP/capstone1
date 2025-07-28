@@ -19,6 +19,11 @@ export interface Bus {
   distance?: number; // distance from user in km
   scheduleId?: string; // real schedule ObjectId
   pickupPointId?: string; // real pickup point ObjectId
+  // Direction information
+  currentDirection?: 'outbound' | 'inbound'; // outbound = origin to destination, inbound = destination to origin
+  routeOrigin?: string; // Route origin (e.g., "Kimironko")
+  routeDestination?: string; // Route destination (e.g., "Kabuga")
+  directionDisplay?: string; // Human-readable direction (e.g., "To Kabuga" or "To Kimironko")
 }
 
 export interface BusStop {

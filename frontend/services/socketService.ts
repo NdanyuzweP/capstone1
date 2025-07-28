@@ -27,6 +27,16 @@ interface UserInterestUpdate {
   timestamp: Date;
 }
 
+interface InterestStatusUpdate {
+  interestId: string;
+  userId: string;
+  status: 'confirmed' | 'cancelled';
+  busId: string;
+  busScheduleId: string;
+  pickupPointId: string;
+  timestamp: Date;
+}
+
 class SocketService {
   private socket: Socket | null = null;
   private isConnected = false;
@@ -38,6 +48,7 @@ class SocketService {
     busStatusChanged?: (data: BusStatusUpdate) => void;
     busLocationUpdated?: (data: BusLocationUpdate) => void;
     userInterestUpdated?: (data: UserInterestUpdate) => void;
+    interestStatusUpdated?: (data: InterestStatusUpdate) => void;
     connected?: () => void;
     disconnected?: () => void;
     error?: (error: any) => void;
@@ -95,6 +106,11 @@ class SocketService {
       console.log('User interest updated:', data);
       this.listeners.userInterestUpdated?.(data);
     });
+
+    this.socket.on('interest_status_updated', (data: InterestStatusUpdate) => {
+      console.log('Interest status updated:', data);
+      this.listeners.interestStatusUpdated?.(data);
+    });
   }
 
   disconnect() {
@@ -116,6 +132,10 @@ class SocketService {
 
   onUserInterestUpdated(callback: (data: UserInterestUpdate) => void) {
     this.listeners.userInterestUpdated = callback;
+  }
+
+  onInterestStatusUpdated(callback: (data: InterestStatusUpdate) => void) {
+    this.listeners.interestStatusUpdated = callback;
   }
 
   onConnected(callback: () => void) {
