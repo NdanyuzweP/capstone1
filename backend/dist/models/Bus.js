@@ -86,6 +86,11 @@ const busSchema = new mongoose_1.Schema({
         type: Boolean,
         default: false,
     },
+    currentDirection: {
+        type: String,
+        enum: ['outbound', 'inbound'],
+        default: null,
+    },
 }, {
     timestamps: true,
 });

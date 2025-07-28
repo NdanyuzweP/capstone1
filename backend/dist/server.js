@@ -47,6 +47,7 @@ const database_1 = __importDefault(require("./config/database"));
 const swagger_1 = require("./config/swagger");
 const createAdmin_1 = require("./utils/createAdmin");
 const seedData_1 = require("./utils/seedData");
+const migrateDirectionData_1 = require("./utils/migrateDirectionData");
 const updateBusLocations_1 = require("./utils/updateBusLocations");
 const locationScheduler_1 = require("./utils/locationScheduler");
 const socketService_1 = __importDefault(require("./services/socketService"));
@@ -195,6 +196,7 @@ const startServer = async () => {
         await (0, database_1.default)();
         await (0, createAdmin_1.createAdminUser)();
         await (0, seedData_1.seedDatabase)();
+        await (0, migrateDirectionData_1.migrateDirectionData)();
         await (0, updateBusLocations_1.updateBusLocations)();
         const Bus = (await Promise.resolve().then(() => __importStar(require('./models/Bus')))).default;
         const Route = (await Promise.resolve().then(() => __importStar(require('./models/Route')))).default;

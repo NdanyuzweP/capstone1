@@ -25,6 +25,7 @@ export interface IBus extends Document {
     speed: number;
     heading: number;
   };
+  currentDirection?: 'outbound' | 'inbound'; // Direction the bus is currently traveling
   isActive: boolean;
   isOnline: boolean;
   createdAt: Date;

@@ -65,6 +65,20 @@ const routeSchema = new mongoose_1.Schema({
         type: Boolean,
         default: true,
     },
+    origin: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+    destination: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+    isBidirectional: {
+        type: Boolean,
+        default: true,
+    },
 }, {
     timestamps: true,
 });

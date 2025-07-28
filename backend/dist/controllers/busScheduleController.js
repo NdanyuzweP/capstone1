@@ -57,10 +57,32 @@ const getAllBusSchedules = async (req, res) => {
         }
         const schedules = await BusSchedule_1.default.find(query)
             .populate('busId', 'plateNumber capacity')
-            .populate('routeId', 'name description')
+            .populate('routeId', 'name description origin destination isBidirectional')
             .populate('estimatedArrivalTimes.pickupPointId', 'name description')
             .sort({ departureTime: 1 });
-        res.json({ schedules });
+        const schedulesWithDirection = schedules.map(schedule => {
+            const scheduleObj = schedule.toObject();
+            const route = scheduleObj.routeId;
+            let directionDisplay = '';
+            if (route && route.isBidirectional) {
+                if (scheduleObj.direction === 'outbound') {
+                    directionDisplay = `To ${route.destination}`;
+                }
+                else {
+                    directionDisplay = `To ${route.origin}`;
+                }
+            }
+            else {
+                directionDisplay = route?.name || 'Unknown Route';
+            }
+            return {
+                ...scheduleObj,
+                directionDisplay,
+                routeOrigin: route?.origin,
+                routeDestination: route?.destination,
+            };
+        });
+        res.json({ schedules: schedulesWithDirection });
     }
     catch (error) {
         console.log(error);
@@ -247,8 +269,8 @@ exports.deleteBusSchedule = deleteBusSchedule;
 const startTrip = async (req, res) => {
     try {
         const driverId = req.user.id;
-        const { scheduleId } = req.body;
-        console.log('startTrip called with:', { scheduleId, driverId });
+        const { scheduleId, direction } = req.body;
+        console.log('startTrip called with:', { scheduleId, driverId, direction });
         const schedule = await BusSchedule_1.default.findById(scheduleId)
             .populate({
             path: 'busId',
@@ -271,6 +293,10 @@ const startTrip = async (req, res) => {
             scheduleId,
             cleanedCount: cleanedInterests.deletedCount
         });
+        if (direction && (direction === 'outbound' || direction === 'inbound')) {
+            await BusSchedule_1.default.findByIdAndUpdate(scheduleId, { direction: direction });
+            console.log('Updated schedule direction to:', direction);
+        }
         const updatedSchedule = await BusSchedule_1.default.findByIdAndUpdate(scheduleId, { status: 'in-transit', actualDepartureTime: new Date() }, { new: true }).populate('busId', 'plateNumber capacity')
             .populate('routeId', 'name description');
         console.log('Trip started successfully:', {
