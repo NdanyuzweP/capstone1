@@ -5,7 +5,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { ArrowLeft, Eye, EyeOff, Mail, Lock, User, Phone } from 'lucide-react-native';
+import { ArrowLeft, Eye, EyeOff, Mail, Lock, User, Phone, Shield } from 'lucide-react-native';
+import LegalAgreements from '@/components/LegalAgreements';
 
 export default function Signup() {
   const { theme } = useTheme();
@@ -25,6 +26,7 @@ export default function Signup() {
   const [phoneFocused, setPhoneFocused] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
   const [confirmPasswordFocused, setConfirmPasswordFocused] = useState(false);
+  const [agreementsAccepted, setAgreementsAccepted] = useState(false);
 
   const handleSignup = async () => {
     if (!name || !email || !phone || !password || !confirmPassword) {
@@ -245,6 +247,13 @@ export default function Signup() {
               </Text>
             </Pressable>
 
+            <View style={styles.agreementNotice}>
+              <Shield color={theme.primary} size={16} />
+              <Text style={[styles.agreementText, { color: theme.textSecondary }]}>
+                By creating an account, you agree to our Terms of Service and Privacy Policy
+              </Text>
+            </View>
+
             <View style={styles.footer}>
               <Text style={[styles.footerText, { color: theme.textSecondary }]}>
                 Already have an account?{' '}
@@ -394,5 +403,23 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 24,
+  },
+  agreementNotice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 16,
+    paddingHorizontal: 20,
+    gap: 8,
+  },
+  agreementText: {
+    fontSize: 13,
+    fontFamily: 'Inter-Regular',
+    flex: 1,
+    lineHeight: 18,
+  },
+  agreementLink: {
+    fontSize: 13,
+    fontFamily: 'Inter-Bold',
+    textDecorationLine: 'underline',
   },
 });

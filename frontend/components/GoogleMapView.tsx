@@ -72,7 +72,7 @@ export function GoogleMapView({ buses, userLocation, onBusPress }: GoogleMapView
             key={bus.id}
             coordinate={bus.currentLocation}
             title={`${bus.route}`}
-            description={`${bus.destination} - ${bus.eta}min ETA`}
+            description={`${bus.destination}${bus.directionDisplay ? ` - ${bus.directionDisplay}` : ''} - ${bus.eta}min ETA`}
             onPress={() => onBusPress?.(bus)}
           >
             <View style={[

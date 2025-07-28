@@ -16,6 +16,11 @@ interface ApiBus {
   };
   distance?: number;
   isOnline: boolean;
+  // Direction information
+  currentDirection?: 'outbound' | 'inbound';
+  routeOrigin?: string;
+  routeDestination?: string;
+  directionDisplay?: string;
 }
 
 interface BackendBus {
@@ -94,6 +99,11 @@ export function useBuses(userLocation?: { latitude: number; longitude: number },
       fare: backendBus.routeId?.fare || 400, // Get fare from route only
       schedule: '05:00–23:00', // You can enhance this with actual schedule data
       distance: distance,
+      // Direction information from backend
+      currentDirection: (backendBus as any).currentDirection,
+      routeOrigin: (backendBus as any).routeOrigin,
+      routeDestination: (backendBus as any).routeDestination,
+      directionDisplay: (backendBus as any).directionDisplay,
     };
   };
 
@@ -117,6 +127,11 @@ export function useBuses(userLocation?: { latitude: number; longitude: number },
       fare: apiBus.route?.fare || 400, // Get fare from route
       schedule: '05:00–23:00',
       distance: apiBus.distance,
+      // Direction information
+      currentDirection: apiBus.currentDirection,
+      routeOrigin: apiBus.routeOrigin,
+      routeDestination: apiBus.routeDestination,
+      directionDisplay: apiBus.directionDisplay,
       // Note: Nearby buses from getNearbyBuses don't have scheduleId/pickupPointId
       // These will be undefined, which means interest functionality won't work for nearby buses
     };

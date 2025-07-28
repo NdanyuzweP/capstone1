@@ -21,8 +21,10 @@ import {
   Phone,
   Info,
   ChevronRight,
-  Globe
+  Globe,
+  FileText
 } from 'lucide-react-native';
+import LegalAgreements from '@/components/LegalAgreements';
 
 export default function Settings() {
   const { theme, isDark, toggleTheme } = useTheme();
@@ -31,6 +33,7 @@ export default function Settings() {
   const [notifications, setNotifications] = useState(true);
   const [locationSharing, setLocationSharing] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [showLegalAgreements, setShowLegalAgreements] = useState(false);
 
   const handleLogout = async () => {
     Alert.alert(
@@ -88,6 +91,10 @@ export default function Settings() {
         }
       ]
     );
+  };
+
+  const handleLegalAgreements = () => {
+    setShowLegalAgreements(true);
   };
 
   return (
@@ -247,6 +254,26 @@ export default function Settings() {
               </View>
               <ChevronRight size={18} color={theme.textSecondary} />
             </Pressable>
+
+            <Pressable
+              style={styles.settingItem}
+              onPress={handleLegalAgreements}
+            >
+              <View style={styles.settingLeft}>
+                <View style={[styles.settingIcon, { backgroundColor: theme.primary + '15' }]}>
+                  <FileText size={18} color={theme.primary} />
+                </View>
+                <View style={styles.settingContent}>
+                  <Text style={[styles.settingLabel, { color: theme.text }]}>
+                    Legal Agreements
+                  </Text>
+                  <Text style={[styles.settingDescription, { color: theme.textSecondary }]}>
+                    Driver Terms, Privacy Policy & Copyright
+                  </Text>
+                </View>
+              </View>
+              <ChevronRight size={18} color={theme.textSecondary} />
+            </Pressable>
           </View>
         </View>
 
@@ -273,6 +300,12 @@ export default function Settings() {
           </Text>
         </View>
       </ScrollView>
+
+      <LegalAgreements
+        visible={showLegalAgreements}
+        readOnly={true}
+        onDecline={() => setShowLegalAgreements(false)}
+      />
     </SafeAreaView>
   );
 }

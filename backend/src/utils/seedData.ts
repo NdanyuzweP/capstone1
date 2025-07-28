@@ -10,42 +10,63 @@ const RWANDA_ROUTES = [
   {
     name: 'Route 302',
     description: 'Kimironko - Downtown/CBD',
+    origin: 'Kimironko',
+    destination: 'Downtown/CBD',
+    isBidirectional: true,
     estimatedDuration: 45,
     fare: 426,
   },
   {
     name: 'Route 305',
     description: 'Kimironko - Nyabugogo Bus Park',
+    origin: 'Kimironko',
+    destination: 'Nyabugogo Bus Park',
+    isBidirectional: true,
     estimatedDuration: 60,
     fare: 543,
   },
   {
     name: 'Route 309',
     description: 'Kimironko - Kinyinya Terminal',
+    origin: 'Kimironko',
+    destination: 'Kinyinya Terminal',
+    isBidirectional: true,
     estimatedDuration: 35,
     fare: 319,
   },
   {
     name: 'Route 316',
     description: 'Kimironko - Musave via Zindiro',
+    origin: 'Kimironko',
+    destination: 'Musave',
+    isBidirectional: true,
     estimatedDuration: 40,
     fare: 274,
   },
   {
     name: 'Route 318',
     description: 'Kimironko - Batsinda Terminal',
+    origin: 'Kimironko',
+    destination: 'Batsinda Terminal',
+    isBidirectional: true,
     estimatedDuration: 50,
     fare: 369,
   },
   {
     name: 'Route 322',
     description: 'Kimironko - Masaka Terminal',
+    origin: 'Kimironko',
+    destination: 'Masaka Terminal',
+    isBidirectional: true,
     estimatedDuration: 55,
     fare: 426,
   },
   {
     name: 'Route 325',
     description: 'Kimironko - Kabuga Bus Park',
+    origin: 'Kimironko',
+    destination: 'Kabuga Bus Park',
+    isBidirectional: true,
     estimatedDuration: 65,
     fare: 504,
   },
@@ -153,6 +174,9 @@ export const seedDatabase = async () => {
         // Random capacity between 25-35
         const capacity = Math.floor(Math.random() * 11) + 25;
         
+        // Random direction (outbound or inbound)
+        const currentDirection = Math.random() > 0.5 ? 'outbound' : 'inbound';
+        
         const bus = new Bus({
           plateNumber,
           capacity,
@@ -167,6 +191,7 @@ export const seedDatabase = async () => {
           },
           isActive: true,
           isOnline: Math.random() > 0.2, // 80% online
+          currentDirection, // Add direction tracking
         });
         
         await bus.save();

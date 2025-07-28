@@ -5,7 +5,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { ArrowLeft, Eye, EyeOff, Mail, Lock } from 'lucide-react-native';
+import { ArrowLeft, Eye, EyeOff, Mail, Lock, Shield } from 'lucide-react-native';
+import LegalAgreements from '@/components/LegalAgreements';
 
 export default function Login() {
   const { theme } = useTheme();
@@ -18,6 +19,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [emailFocused, setEmailFocused] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
+  const [agreementsAccepted, setAgreementsAccepted] = useState(false);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -145,6 +147,13 @@ export default function Login() {
                 {loading ? 'Signing in...' : t('login')}
               </Text>
             </Pressable>
+
+            <View style={styles.agreementNotice}>
+              <Shield color={theme.primary} size={16} />
+              <Text style={[styles.agreementText, { color: theme.textSecondary }]}>
+                By signing in, you agree to our Terms of Service and Privacy Policy
+              </Text>
+            </View>
 
             <View style={styles.footer}>
               <Text style={[styles.footerText, { color: theme.textSecondary }]}>
@@ -295,5 +304,23 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 24,
+  },
+  agreementNotice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 16,
+    paddingHorizontal: 20,
+    gap: 8,
+  },
+  agreementText: {
+    fontSize: 13,
+    fontFamily: 'Inter-Regular',
+    flex: 1,
+    lineHeight: 18,
+  },
+  agreementLink: {
+    fontSize: 13,
+    fontFamily: 'Inter-Bold',
+    textDecorationLine: 'underline',
   },
 });

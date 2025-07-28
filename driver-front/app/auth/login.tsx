@@ -4,7 +4,8 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { ArrowLeft, Eye, EyeOff, Shield } from 'lucide-react-native';
+import { ArrowLeft, Eye, EyeOff, Shield, FileText } from 'lucide-react-native';
+import LegalAgreements from '@/components/LegalAgreements';
 
 export default function Login() {
   const { theme } = useTheme();
@@ -14,6 +15,7 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [agreementsAccepted, setAgreementsAccepted] = useState(false);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -101,6 +103,13 @@ export default function Login() {
             Sign In as Driver
           </Text>
         </Pressable>
+
+        <View style={styles.agreementNotice}>
+          <FileText color={theme.primary} size={16} />
+          <Text style={[styles.agreementText, { color: theme.textSecondary }]}>
+            By signing in, you agree to our Driver Terms of Service and Privacy Policy
+          </Text>
+        </View>
 
         <View style={styles.footer}>
           <Text style={[styles.footerText, { color: theme.textSecondary }]}>
@@ -245,5 +254,23 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 6,
     lineHeight: 18,
+  },
+  agreementNotice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 16,
+    paddingHorizontal: 20,
+    gap: 8,
+  },
+  agreementText: {
+    fontSize: 13,
+    fontFamily: 'Inter-Regular',
+    flex: 1,
+    lineHeight: 18,
+  },
+  agreementLink: {
+    fontSize: 13,
+    fontFamily: 'Inter-Bold',
+    textDecorationLine: 'underline',
   },
 });

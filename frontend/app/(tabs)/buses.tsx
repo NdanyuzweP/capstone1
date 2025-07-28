@@ -128,6 +128,15 @@ export default function Buses() {
               {bus.destination}
             </Text>
           </View>
+          {/* Direction display */}
+          {bus.directionDisplay && (
+            <View style={styles.directionContainer}>
+              <Navigation size={12} color={theme.primary} />
+              <Text style={[styles.directionText, { color: theme.primary, marginLeft: 4 }]}>
+                {bus.directionDisplay}
+              </Text>
+            </View>
+          )}
           {bus.distance && (
             <Text style={[styles.distanceText, { color: theme.primary }]}>
               {`${(bus.distance || 0).toFixed(1)} km away`}
@@ -159,7 +168,7 @@ export default function Buses() {
             Capacity:
           </Text>
                       <Text style={[styles.detailValue, { color: theme.text }]}>
-              {`${bus.currentPassengers || 0}/${bus.capacity || 0}`}
+              {bus.capacity || 0}
             </Text>
         </View>
 
@@ -175,21 +184,7 @@ export default function Buses() {
         )}
       </View>
 
-      <View style={styles.busFooter}>
-        <View style={styles.nextStopInfo}>
-          <Text style={[styles.nextStopLabel, { color: theme.textSecondary }]}>
-            Next stop:
-          </Text>
-          <Text style={[styles.nextStopText, { color: theme.text }]}>
-            {bus.nextStop}
-          </Text>
-          {bus.schedule && (
-            <Text style={[styles.scheduleText, { color: theme.textSecondary }]}>
-              {bus.schedule}
-            </Text>
-          )}
-        </View>
-      </View>
+
     </View>
   );
 
@@ -434,6 +429,20 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontFamily: 'Inter-Regular',
     marginTop: 2,
+  },
+  directionContainer: {
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    marginTop: 4,
+    backgroundColor: 'rgba(59, 130, 246, 0.1)', // Light blue background
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  directionText: {
+    fontSize: 12,
+    fontFamily: 'Inter-SemiBold',
   },
 
   emptyState: {

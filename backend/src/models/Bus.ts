@@ -54,6 +54,12 @@ const busSchema = new Schema<IBus>(
       type: Boolean,
       default: false,
     },
+    // Direction tracking
+    currentDirection: {
+      type: String,
+      enum: ['outbound', 'inbound'],
+      default: 'outbound', // Default to outbound (origin to destination)
+    },
   },
   {
     timestamps: true,

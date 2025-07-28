@@ -94,6 +94,15 @@ export default function Home() {
               {bus.destination}
             </Text>
           </View>
+          {/* Direction display */}
+          {bus.directionDisplay && (
+            <View style={styles.directionContainer}>
+              <Navigation size={12} color={theme.primary} />
+              <Text style={[styles.directionText, { color: theme.primary, marginLeft: 4 }]}>
+                {bus.directionDisplay}
+              </Text>
+            </View>
+          )}
           {bus.distance && (
             <Text style={[styles.distanceText, { color: theme.primary }]}>
               {(bus.distance || 0).toFixed(1)} km away
@@ -110,7 +119,7 @@ export default function Home() {
           <View style={styles.statItem}>
             <Users size={16} color={theme.textSecondary} />
             <Text style={[styles.passengersText, { color: theme.textSecondary }]}>
-              {bus.currentPassengers}/{bus.capacity}
+              {bus.capacity}
             </Text>
           </View>
         </View>
@@ -118,9 +127,6 @@ export default function Home() {
       
       <View style={styles.busActions}>
         <View style={styles.busMetadata}>
-          <Text style={[styles.nextStop, { color: theme.textSecondary }]}>
-            Next: {bus.nextStop}
-          </Text>
           {bus.fare && (
             <Text style={[styles.fareText, { color: theme.primary }]}>
               {bus.fare} RWF
@@ -442,6 +448,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Inter-Regular',
     textAlign: 'center',
+  },
+  directionContainer: {
+    backgroundColor: 'rgba(59, 130, 246, 0.1)', // Light blue background
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    marginTop: 4,
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  directionText: {
+    fontSize: 12,
+    fontFamily: 'Inter-SemiBold',
   },
 
   errorContainer: {

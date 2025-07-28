@@ -109,17 +109,46 @@ export default function Dashboard() {
       return;
     }
 
-    try {
-      const result = await apiService.startTrip(nextSchedule.id);
-      const message = result.cleanedInterests > 0 
-        ? `${t('trip.started.message')}\nCleaned up ${result.cleanedInterests} leftover interests from previous trips.`
-        : t('trip.started.message');
-      Alert.alert(t('trip.started'), message);
-      refetch(); // Refresh the data
-    } catch (error: any) {
-      console.error('Error starting trip:', error);
-      Alert.alert('Error', error.message || 'Failed to start trip');
-    }
+    // Show direction selection dialog
+    Alert.alert(
+      'Select Direction',
+      'Choose the direction for this trip:',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Outbound (To Destination)',
+          onPress: async () => {
+            try {
+              const result = await apiService.startTrip(nextSchedule.id, 'outbound');
+              const message = result.cleanedInterests > 0 
+                ? `${t('trip.started.message')}\nCleaned up ${result.cleanedInterests} leftover interests from previous trips.`
+                : t('trip.started.message');
+              Alert.alert(t('trip.started'), message);
+              refetch(); // Refresh the data
+            } catch (error: any) {
+              console.error('Error starting trip:', error);
+              Alert.alert('Error', error.message || 'Failed to start trip');
+            }
+          }
+        },
+        {
+          text: 'Inbound (To Origin)',
+          onPress: async () => {
+            try {
+              const result = await apiService.startTrip(nextSchedule.id, 'inbound');
+              const message = result.cleanedInterests > 0 
+                ? `${t('trip.started.message')}\nCleaned up ${result.cleanedInterests} leftover interests from previous trips.`
+                : t('trip.started.message');
+              Alert.alert(t('trip.started'), message);
+              refetch(); // Refresh the data
+            } catch (error: any) {
+              console.error('Error starting trip:', error);
+              Alert.alert('Error', error.message || 'Failed to start trip');
+            }
+          }
+        }
+      ]
+    );
   };
 
   const handleEndTrip = async () => {
@@ -300,6 +329,17 @@ export default function Dashboard() {
                 {bus.route?.name || t('dashboard.no.route')}
               </Text>
               </View>
+              {/* Direction display */}
+              {bus.currentDirection && (
+                <View style={styles.busDetail}>
+                  <Text style={[styles.busDetailLabel, { color: theme.textSecondary }]}>
+                    Direction
+                  </Text>
+                  <Text style={[styles.busDetailValue, { color: theme.primary }]}>
+                    {bus.currentDirection === 'outbound' ? 'To Destination' : 'To Origin'}
+                  </Text>
+                </View>
+              )}
               <View style={styles.busDetail}>
                               <Text style={[styles.busDetailLabel, { color: theme.textSecondary }]}>
                 {t('dashboard.fare')}

@@ -289,9 +289,9 @@ export const deleteBusSchedule = async (req: Request, res: Response): Promise<an
 export const startTrip = async (req: Request, res: Response): Promise<any> => {
   try {
     const driverId = (req as any).user.id;
-    const { scheduleId } = req.body;
+    const { scheduleId, direction } = req.body;
 
-    console.log('startTrip called with:', { scheduleId, driverId });
+    console.log('startTrip called with:', { scheduleId, driverId, direction });
 
     // Find the schedule and verify the driver owns the bus
     const schedule = await BusSchedule.findById(scheduleId)
@@ -323,6 +323,15 @@ export const startTrip = async (req: Request, res: Response): Promise<any> => {
       scheduleId,
       cleanedCount: cleanedInterests.deletedCount
     });
+
+    // Update bus direction if provided
+    if (direction && (direction === 'outbound' || direction === 'inbound')) {
+      await Bus.findByIdAndUpdate(
+        bus._id,
+        { currentDirection: direction }
+      );
+      console.log('Updated bus direction to:', direction);
+    }
 
     // Update schedule status to in-transit
     const updatedSchedule = await BusSchedule.findByIdAndUpdate(
