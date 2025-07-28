@@ -4,7 +4,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useDriverData } from '@/hooks/useDriverData';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useState } from 'react';
-import { Users, MapPin, Clock, Filter, CheckCircle, XCircle, UserCheck, UserX, UserPlus } from 'lucide-react-native';
+import { Users, MapPin, Clock, Filter, CheckCircle, XCircle, UserCheck, UserX, UserPlus, RefreshCw } from 'lucide-react-native';
 import { apiService } from '@/services/api';
 
 export default function Passengers() {
@@ -207,6 +207,15 @@ export default function Passengers() {
               {filteredPassengers.length} {t('passengers.found')}
             </Text>
           </View>
+          <View style={styles.headerRight}>
+            <Pressable
+              style={[styles.refreshButton, { backgroundColor: theme.primary }]}
+              onPress={refetch}
+              disabled={loading}
+            >
+              <RefreshCw size={16} color="#FFFFFF" />
+            </Pressable>
+          </View>
         </View>
 
         {/* Summary Cards */}
@@ -311,6 +320,19 @@ const styles = StyleSheet.create({
   },
   headerLeft: {
     flex: 1,
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+
+  refreshButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   title: {
     fontSize: 24,
@@ -511,4 +533,5 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
     textAlign: 'center',
   },
+
 });

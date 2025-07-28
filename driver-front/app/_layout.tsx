@@ -7,6 +7,7 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { LocationProvider } from '@/contexts/LocationContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
+import { SocketProvider } from '@/contexts/SocketContext';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -32,12 +33,14 @@ export default function RootLayout() {
       <ThemeProvider>
         <LocationProvider>
           <AuthProvider>
-            <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="+not-found" />
-              <Stack.Screen name="auth" />
-              <Stack.Screen name="(tabs)" />
-            </Stack>
-            <StatusBar style="auto" />
+            <SocketProvider>
+              <Stack screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="+not-found" />
+                <Stack.Screen name="(tabs)" />
+                <Stack.Screen name="auth" />
+              </Stack>
+              <StatusBar style="auto" />
+            </SocketProvider>
           </AuthProvider>
         </LocationProvider>
       </ThemeProvider>

@@ -235,8 +235,8 @@ export function useDriverData() {
   useEffect(() => {
     fetchDriverData();
     
-    // Set up polling to refresh data every 30 seconds
-    const interval = setInterval(fetchDriverData, 30000);
+    // Set up polling to refresh data every 10 seconds
+    const interval = setInterval(fetchDriverData, 10000);
     
     return () => clearInterval(interval);
   }, [user]);
