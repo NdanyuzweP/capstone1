@@ -45,8 +45,17 @@ const getAllBuses = async (req, res) => {
     try {
         const buses = await Bus_1.default.find({ isActive: true })
             .populate('driverId', 'name email phone')
-            .populate('routeId', 'name description fare');
-        res.json({ buses });
+            .populate('routeId', 'name description fare origin destination isBidirectional');
+        const busesWithInfo = buses.map(bus => {
+            const busObj = bus.toObject();
+            const route = busObj.routeId;
+            return {
+                ...busObj,
+                routeOrigin: route?.origin,
+                routeDestination: route?.destination,
+            };
+        });
+        res.json({ buses: busesWithInfo });
     }
     catch (error) {
         console.error('Error in getAllBuses:', error);
@@ -58,8 +67,17 @@ const getAllBusesForAdmin = async (req, res) => {
     try {
         const buses = await Bus_1.default.find({ isActive: true })
             .populate('driverId', 'name email phone')
-            .populate('routeId', 'name description fare');
-        res.json({ buses });
+            .populate('routeId', 'name description fare origin destination isBidirectional');
+        const busesWithInfo = buses.map(bus => {
+            const busObj = bus.toObject();
+            const route = busObj.routeId;
+            return {
+                ...busObj,
+                routeOrigin: route?.origin,
+                routeDestination: route?.destination,
+            };
+        });
+        res.json({ buses: busesWithInfo });
     }
     catch (error) {
         console.error('Error in getAllBusesForAdmin:', error);

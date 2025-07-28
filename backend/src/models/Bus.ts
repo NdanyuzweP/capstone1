@@ -54,6 +54,11 @@ const busSchema = new Schema<IBus>(
       type: Boolean,
       default: false,
     },
+    currentDirection: {
+      type: String,
+      enum: ['outbound', 'inbound'],
+      default: null,
+    },
 
   },
   {

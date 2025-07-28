@@ -70,6 +70,11 @@ const busScheduleSchema = new mongoose_1.Schema({
         enum: ['scheduled', 'in-transit', 'completed', 'cancelled'],
         default: 'scheduled',
     },
+    direction: {
+        type: String,
+        enum: ['outbound', 'inbound'],
+        default: 'outbound',
+    },
 }, {
     timestamps: true,
 });
