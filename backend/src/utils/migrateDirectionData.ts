@@ -1,5 +1,6 @@
 import Route from '../models/Route';
 import Bus from '../models/Bus';
+import BusSchedule from '../models/BusSchedule';
 
 export const migrateDirectionData = async () => {
   try {
@@ -38,19 +39,19 @@ export const migrateDirectionData = async () => {
       }
     }
 
-    // Update buses with random direction
-    const buses = await Bus.find({});
-    console.log(`Found ${buses.length} buses to migrate`);
+    // Update schedules with random direction
+    const schedules = await BusSchedule.find({});
+    console.log(`Found ${schedules.length} schedules to migrate`);
 
-    for (const bus of buses) {
+    for (const schedule of schedules) {
       // Assign random direction if not already set
-      if (!bus.currentDirection) {
-        const currentDirection = Math.random() > 0.5 ? 'outbound' : 'inbound';
-        await Bus.findByIdAndUpdate(bus._id, {
-          currentDirection,
+      if (!schedule.direction) {
+        const direction = Math.random() > 0.5 ? 'outbound' : 'inbound';
+        await BusSchedule.findByIdAndUpdate(schedule._id, {
+          direction,
         });
         
-        console.log(`Updated bus ${bus.plateNumber} with direction: ${currentDirection}`);
+        console.log(`Updated schedule ${schedule._id} with direction: ${direction}`);
       }
     }
 

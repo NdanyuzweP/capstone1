@@ -21,6 +21,8 @@ interface Schedule {
   id: string;
   departureTime: Date;
   status: string;
+  direction?: 'outbound' | 'inbound';
+  directionDisplay?: string;
   estimatedArrivalTimes: Array<{
     pickupPointId: string;
     estimatedTime: Date;
@@ -50,6 +52,7 @@ export function useDriverData() {
   const [bus, setBus] = useState<DriverBus | null>(null);
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [passengers, setPassengers] = useState<Passenger[]>([]);
+  const [completedTripsCount, setCompletedTripsCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -99,18 +102,21 @@ export function useDriverData() {
 
       setBus(transformedBus);
 
-      // Get schedules for this bus
+      // Get schedules for this bus (only incomplete ones: scheduled and in-transit)
       const schedulesResponse = await apiService.getBusSchedules();
       const busSchedules = schedulesResponse.schedules
         .filter(schedule => {
           const scheduleBusId = schedule.busId?._id || schedule.busId?.id || schedule.busId;
           const driverBusId = driverBus._id;
-          return scheduleBusId === driverBusId;
+          const isIncomplete = schedule.status === 'scheduled' || schedule.status === 'in-transit';
+          return scheduleBusId === driverBusId && isIncomplete;
         })
         .map(schedule => ({
           id: schedule._id,
           departureTime: new Date(schedule.departureTime),
           status: schedule.status,
+          direction: (schedule as any).direction,
+          directionDisplay: (schedule as any).directionDisplay,
           estimatedArrivalTimes: (schedule.estimatedArrivalTimes || []).map(arrival => ({
             pickupPointId: typeof arrival.pickupPointId === 'string' ? arrival.pickupPointId : (arrival.pickupPointId?._id || arrival.pickupPointId?.id || 'unknown'),
             estimatedTime: new Date(arrival.estimatedTime),
@@ -148,6 +154,31 @@ export function useDriverData() {
       }
 
       setPassengers(allPassengers);
+
+      // Get completed trips count for today
+      try {
+        const today = new Date();
+        const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        const endOfDay = new Date(startOfDay);
+        endOfDay.setDate(endOfDay.getDate() + 1);
+
+        const completedSchedulesResponse = await apiService.getBusSchedules(
+          'completed',
+          undefined,
+          startOfDay.toISOString().split('T')[0]
+        );
+        
+        const completedSchedules = completedSchedulesResponse.schedules.filter(schedule => {
+          const scheduleBusId = schedule.busId?._id || schedule.busId?.id || schedule.busId;
+          const driverBusId = driverBus._id;
+          return scheduleBusId === driverBusId;
+        });
+
+        setCompletedTripsCount(completedSchedules.length);
+      } catch (completedError) {
+        console.log('Error fetching completed trips count:', completedError);
+        setCompletedTripsCount(0);
+      }
 
     } catch (err: any) {
       console.error('Error fetching driver data:', err);
@@ -218,6 +249,7 @@ export function useDriverData() {
     bus, 
     schedules, 
     passengers, 
+    completedTripsCount,
     loading, 
     error, 
     refetch, 

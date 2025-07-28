@@ -51,31 +51,19 @@ export const getAllBuses = async (req: Request, res: Response): Promise<any> => 
       .populate('driverId', 'name email phone')
       .populate('routeId', 'name description fare origin destination isBidirectional');
 
-    // Add direction display information to each bus
-    const busesWithDirection = buses.map(bus => {
+    // Note: Direction is now schedule-specific, not bus-specific
+    const busesWithInfo = buses.map(bus => {
       const busObj = bus.toObject();
       const route = busObj.routeId as any; // Type assertion for populated route
-      let directionDisplay = '';
-      
-      if (route && route.isBidirectional) {
-        if (busObj.currentDirection === 'outbound') {
-          directionDisplay = `To ${route.destination}`;
-        } else {
-          directionDisplay = `To ${route.origin}`;
-        }
-      } else {
-        directionDisplay = route?.name || 'Unknown Route';
-      }
 
       return {
         ...busObj,
-        directionDisplay,
         routeOrigin: route?.origin,
         routeDestination: route?.destination,
       };
     });
 
-    res.json({ buses: busesWithDirection });
+    res.json({ buses: busesWithInfo });
   } catch (error) {
     console.error('Error in getAllBuses:', error);
     res.status(500).json({ error: 'Server error' });
@@ -89,31 +77,19 @@ export const getAllBusesForAdmin = async (req: Request, res: Response): Promise<
       .populate('driverId', 'name email phone')
       .populate('routeId', 'name description fare origin destination isBidirectional');
 
-    // Add direction display information to each bus
-    const busesWithDirection = buses.map(bus => {
+    // Note: Direction is now schedule-specific, not bus-specific
+    const busesWithInfo = buses.map(bus => {
       const busObj = bus.toObject();
       const route = busObj.routeId as any; // Type assertion for populated route
-      let directionDisplay = '';
-      
-      if (route && route.isBidirectional) {
-        if (busObj.currentDirection === 'outbound') {
-          directionDisplay = `To ${route.destination}`;
-        } else {
-          directionDisplay = `To ${route.origin}`;
-        }
-      } else {
-        directionDisplay = route?.name || 'Unknown Route';
-      }
 
       return {
         ...busObj,
-        directionDisplay,
         routeOrigin: route?.origin,
         routeDestination: route?.destination,
       };
     });
 
-    res.json({ buses: busesWithDirection });
+    res.json({ buses: busesWithInfo });
   } catch (error) {
     console.error('Error in getAllBusesForAdmin:', error);
     res.status(500).json({ error: 'Server error' });

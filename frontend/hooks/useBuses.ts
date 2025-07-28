@@ -99,11 +99,9 @@ export function useBuses(userLocation?: { latitude: number; longitude: number },
       fare: backendBus.routeId?.fare || 400, // Get fare from route only
       schedule: '05:00–23:00', // You can enhance this with actual schedule data
       distance: distance,
-      // Direction information from backend
-      currentDirection: (backendBus as any).currentDirection,
+      // Note: Direction is now schedule-specific, not bus-specific
       routeOrigin: (backendBus as any).routeOrigin,
       routeDestination: (backendBus as any).routeDestination,
-      directionDisplay: (backendBus as any).directionDisplay,
     };
   };
 

@@ -27,8 +27,6 @@ export interface IBus extends Document {
   };
   isActive: boolean;
   isOnline: boolean;
-  // Direction tracking
-  currentDirection: 'outbound' | 'inbound'; // outbound = origin to destination, inbound = destination to origin
   createdAt: Date;
   updatedAt: Date;
 }
@@ -84,6 +82,7 @@ export interface IBusSchedule extends Document {
     actualTime?: Date;
   }[];
   status: 'scheduled' | 'in-transit' | 'completed' | 'cancelled';
+  direction: 'outbound' | 'inbound'; // Direction for this specific schedule
   createdAt: Date;
   updatedAt: Date;
 }

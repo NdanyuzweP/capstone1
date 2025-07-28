@@ -60,11 +60,35 @@ export const getAllBusSchedules = async (req: Request, res: Response): Promise<a
 
     const schedules = await BusSchedule.find(query)
       .populate('busId', 'plateNumber capacity')
-      .populate('routeId', 'name description')
+      .populate('routeId', 'name description origin destination isBidirectional')
       .populate('estimatedArrivalTimes.pickupPointId', 'name description')
       .sort({ departureTime: 1 });
 
-    res.json({ schedules });
+    // Add direction display information to each schedule
+    const schedulesWithDirection = schedules.map(schedule => {
+      const scheduleObj = schedule.toObject();
+      const route = scheduleObj.routeId as any;
+      let directionDisplay = '';
+      
+      if (route && route.isBidirectional) {
+        if (scheduleObj.direction === 'outbound') {
+          directionDisplay = `To ${route.destination}`;
+        } else {
+          directionDisplay = `To ${route.origin}`;
+        }
+      } else {
+        directionDisplay = route?.name || 'Unknown Route';
+      }
+
+      return {
+        ...scheduleObj,
+        directionDisplay,
+        routeOrigin: route?.origin,
+        routeDestination: route?.destination,
+      };
+    });
+
+    res.json({ schedules: schedulesWithDirection });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: 'Server error: ' + error.message });
@@ -324,13 +348,13 @@ export const startTrip = async (req: Request, res: Response): Promise<any> => {
       cleanedCount: cleanedInterests.deletedCount
     });
 
-    // Update bus direction if provided
+    // Update schedule direction if provided
     if (direction && (direction === 'outbound' || direction === 'inbound')) {
-      await Bus.findByIdAndUpdate(
-        bus._id,
-        { currentDirection: direction }
+      await BusSchedule.findByIdAndUpdate(
+        scheduleId,
+        { direction: direction }
       );
-      console.log('Updated bus direction to:', direction);
+      console.log('Updated schedule direction to:', direction);
     }
 
     // Update schedule status to in-transit

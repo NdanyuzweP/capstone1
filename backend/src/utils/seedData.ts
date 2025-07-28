@@ -174,9 +174,6 @@ export const seedDatabase = async () => {
         // Random capacity between 25-35
         const capacity = Math.floor(Math.random() * 11) + 25;
         
-        // Random direction (outbound or inbound)
-        const currentDirection = Math.random() > 0.5 ? 'outbound' : 'inbound';
-        
         const bus = new Bus({
           plateNumber,
           capacity,
@@ -191,7 +188,6 @@ export const seedDatabase = async () => {
           },
           isActive: true,
           isOnline: Math.random() > 0.2, // 80% online
-          currentDirection, // Add direction tracking
         });
         
         await bus.save();
@@ -222,12 +218,16 @@ export const seedDatabase = async () => {
             estimatedTime: new Date(departureTime.getTime() + (index + 1) * 15 * 60 * 1000), // 15 min intervals
           }));
           
+          // Random direction for this schedule
+          const scheduleDirection = Math.random() > 0.5 ? 'outbound' : 'inbound';
+          
           const schedule = new BusSchedule({
             busId: bus._id,
             routeId: bus.routeId,
             departureTime,
             estimatedArrivalTimes,
             status: 'scheduled',
+            direction: scheduleDirection, // Add direction to schedule
           });
           
           await schedule.save();

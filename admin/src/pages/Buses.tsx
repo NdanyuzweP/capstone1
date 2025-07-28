@@ -54,7 +54,6 @@ export default function Buses() {
     capacity: '',
     driverId: '',
     routeId: '',
-    currentDirection: 'outbound', // Add direction field
   });
 
   useEffect(() => {
@@ -111,7 +110,6 @@ export default function Buses() {
         capacity: parseInt(formData.capacity),
         driverId: formData.driverId,
         routeId: formData.routeId,
-        currentDirection: formData.currentDirection, // Include direction
       };
 
       if (selectedBus) {
@@ -129,7 +127,6 @@ export default function Buses() {
         capacity: '',
         driverId: '',
         routeId: '',
-        currentDirection: 'outbound',
       });
       fetchBuses();
     } catch (err: any) {
@@ -145,7 +142,6 @@ export default function Buses() {
       capacity: bus.capacity.toString(),
       driverId: typeof bus.driverId === 'string' ? bus.driverId : bus.driverId?._id || '',
       routeId: typeof bus.routeId === 'string' ? bus.routeId : bus.routeId?._id || '',
-      currentDirection: (bus as any).currentDirection || 'outbound',
     });
     setShowBusModal(true);
   };
@@ -392,7 +388,6 @@ export default function Buses() {
                     <th>Driver</th>
                     <th>Route</th>
                     <th>Capacity</th>
-                    <th>Direction</th>
                     <th>Fare</th>
                     <th>Status</th>
                     <th>Actions</th>
@@ -473,18 +468,7 @@ export default function Buses() {
                           <span className="text-sm" style={{ color: theme.text }}>{bus.capacity}</span>
                         </div>
                       </td>
-                      <td>
-                        <div className="flex items-center gap-2">
-                          <Navigation size={14} style={{ color: theme.primary }} />
-                          <span className={`text-sm px-2 py-1 rounded-full text-xs font-medium ${
-                            (bus as any).currentDirection === 'outbound' 
-                              ? 'bg-blue-100 text-blue-700' 
-                              : 'bg-green-100 text-green-700'
-                          }`}>
-                            {(bus as any).currentDirection === 'outbound' ? 'Outbound' : 'Inbound'}
-                          </span>
-                        </div>
-                      </td>
+
                       <td>
                         <div className="flex items-center gap-1">
                           <span className="text-sm" style={{ color: theme.text }}>
@@ -636,20 +620,7 @@ export default function Buses() {
                 </select>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: theme.text }}>
-                  Direction
-                </label>
-                <select
-                  className="admin-select"
-                  value={formData.currentDirection}
-                  onChange={(e) => setFormData({ ...formData, currentDirection: e.target.value })}
-                  required
-                >
-                  <option value="outbound">Outbound (To Destination)</option>
-                  <option value="inbound">Inbound (To Origin)</option>
-                </select>
-              </div>
+
 
               <div className="flex items-center gap-3 pt-4">
                 <button type="submit" className="admin-btn admin-btn-primary flex-1">
