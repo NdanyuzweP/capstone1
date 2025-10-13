@@ -388,7 +388,7 @@ export default function Map() {
                         }}
                       >
                         <Text style={[styles.selectButtonText, { color: predictionForm.dayOfWeek ? theme.text : theme.textSecondary }]}>
-                          {predictionForm.dayOfWeek || 'Select day...'}
+                          {predictionForm.dayOfWeek || ''}
                         </Text>
                         <ChevronDown size={16} color={theme.textSecondary} />
                       </Pressable>
@@ -422,9 +422,9 @@ export default function Map() {
                         );
                       }}
                     >
-                      <Text style={[styles.selectButtonText, { color: predictionForm.roadName ? theme.text : theme.textSecondary }]}>
-                        {predictionForm.roadName || 'Select road...'}
-                      </Text>
+                                              <Text style={[styles.selectButtonText, { color: predictionForm.roadName ? theme.text : theme.textSecondary }]}>
+                          {predictionForm.roadName || ''}
+                        </Text>
                       <ChevronDown size={16} color={theme.textSecondary} />
                     </Pressable>
                   </View>
@@ -458,7 +458,7 @@ export default function Map() {
                         }}
                       >
                         <Text style={[styles.selectButtonText, { color: predictionForm.populationDensity ? theme.text : theme.textSecondary }]}>
-                          {predictionForm.populationDensity || 'Select density...'}
+                          {predictionForm.populationDensity || ''}
                         </Text>
                         <ChevronDown size={16} color={theme.textSecondary} />
                       </Pressable>
@@ -480,7 +480,7 @@ export default function Map() {
                         }}
                       >
                         <Text style={[styles.selectButtonText, { color: predictionForm.rainfall ? theme.text : theme.textSecondary }]}>
-                          {predictionForm.rainfall || 'Select condition...'}
+                          {predictionForm.rainfall || ''}
                         </Text>
                         <ChevronDown size={16} color={theme.textSecondary} />
                       </Pressable>
@@ -514,9 +514,9 @@ export default function Map() {
                         );
                       }}
                     >
-                      <Text style={[styles.selectButtonText, { color: predictionForm.publicHoliday ? theme.text : theme.textSecondary }]}>
-                        {predictionForm.publicHoliday || 'Select...'}
-                      </Text>
+                                              <Text style={[styles.selectButtonText, { color: predictionForm.publicHoliday ? theme.text : theme.textSecondary }]}>
+                          {predictionForm.publicHoliday || ''}
+                        </Text>
                       <ChevronDown size={16} color={theme.textSecondary} />
                     </Pressable>
                   </View>

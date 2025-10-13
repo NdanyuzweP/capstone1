@@ -143,12 +143,12 @@ export function useBuses(userLocation?: { latitude: number; longitude: number },
       console.log('Fetching buses from your database...');
 
       if (userLocation && showNearbyOnly) {
-        // For nearby buses only (home page) - only online buses within 2km
+        // For nearby buses only (home page) - only online buses within 6km
         try {
           const response = await apiService.getNearbyBuses(
             userLocation.latitude,
             userLocation.longitude,
-            2 // 2km radius for nearby
+            6 // km radius for nearby
           );
           console.log('Found nearby online buses:', response.buses.length);
           
